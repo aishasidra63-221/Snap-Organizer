@@ -130,130 +130,161 @@ const OCR_RULES: OcrRule[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. OTP / SECURITY
   //
-  //  WHAT GOES HERE:
-  //    ✅ SMS with a one-time code ("Your OTP is 4521")
-  //    ✅ 2FA / two-step verification screens
-  //    ✅ Password reset / forgot password screens
-  //    ✅ Phone/email verification screens
-  //    ✅ Authenticator app (Google Auth, Authy, MS Auth)
-  //    ✅ Bank security alerts (account locked, suspicious activity)
+  //  ✅ YEH FOLDER IN SCREENSHOTS KE LIYE HAI:
+  //     • OTP SMS — "Your OTP is 4521", "Enter OTP", "Resend OTP"
+  //     • Verification codes — "Your verification code", "6-digit code"
+  //     • 2FA / Two-step — Google Auth, Authy, 2-step settings screens
+  //     • Password reset — "Forgot password", "Reset your password", "Create new password"
+  //     • Email/Phone verify — "Verify your email", "Verify your number"
+  //     • Account security — "Account locked", "Suspicious activity", "New device login"
+  //     • Security settings — "Change password", "Security settings", "Privacy & security"
   //
-  //  WHAT DOES NOT GO HERE:
-  //    ❌ Normal login screens (just username/password)
-  //    ❌ Promo/discount codes ("use this code for 10% off")
-  //    ❌ Any screenshot with just "expires in" or "valid for" (too generic)
+  //  ❌ YEH FOLDER IN KE LIYE NAHI:
+  //     • Normal login screen (sirf username/password field)
+  //     • Promo/discount codes ("Get 20% off, use code XYZ")
   //
-  //  RULE: minScore=4 means at least one weight-3 phrase is required.
-  //        A weight-2 alone can NEVER trigger this category.
+  //  SCORE RULE: minScore=3, weight-3 akele trigger karta hai.
+  //              weight-2 sirf doosre signals ke saath kaam karta hai.
   // ═══════════════════════════════════════════════════════════════════════════
   {
     category: "OTP / Security",
-    minScore: 4,
+    minScore: 3,
     keywords: [
 
-      // ── GROUP A: Definitive OTP (weight 3 = instant, any one triggers) ──
-      { text: "your otp is",              weight: 3 },
-      { text: "your otp",                 weight: 3 },
-      { text: "otp is",                   weight: 3 },
-      { text: "otp:",                     weight: 3 },
-      { text: "one-time password",        weight: 3 },
-      { text: "one time password",        weight: 3 },
-      { text: "one time passcode",        weight: 3 },
-      { text: "enter otp",                weight: 3 },
-      { text: "resend otp",               weight: 3 },
-      { text: "otp expires",              weight: 3 },
+      // ══ OTP — har ek akele trigger karta hai (weight 3) ══
+      { text: "your otp is",                    weight: 3 },
+      { text: "your otp",                       weight: 3 },
+      { text: "otp is",                         weight: 3 },
+      { text: "otp:",                           weight: 3 },
+      { text: "enter otp",                      weight: 3 },
+      { text: "resend otp",                     weight: 3 },
+      { text: "otp expires",                    weight: 3 },
+      { text: "one-time password",              weight: 3 },
+      { text: "one time password",              weight: 3 },
+      { text: "one time passcode",              weight: 3 },
 
-      // ── GROUP B: Verification codes (weight 3) ──
-      { text: "verification code is",     weight: 3 },
-      { text: "your verification code",   weight: 3 },
-      { text: "your code is",             weight: 3 },
-      { text: "6-digit code",             weight: 3 },
-      { text: "4-digit code",             weight: 3 },
-      { text: "enter the 6-digit",        weight: 3 },
-      { text: "we sent a code to",        weight: 3 },
-      { text: "sent you a code",          weight: 3 },
-      { text: "this code expires",        weight: 3 },
-      { text: "code is valid for",        weight: 3 },
-      { text: "confirmation code",        weight: 3 },
-      { text: "verification pin",         weight: 3 },
-
-      // ── GROUP C: 2FA / Two-step (weight 3) ──
-      { text: "two-factor authentication", weight: 3 },
-      { text: "two factor authentication", weight: 3 },
-      { text: "2fa code",                 weight: 3 },
-      { text: "authentication code",      weight: 3 },
-      { text: "two-step verification",    weight: 3 },
-      { text: "two step verification",    weight: 3 },
-      { text: "2-step verification",      weight: 3 },   // digit form
-      { text: "2 step verification",      weight: 3 },   // no hyphen digit
-      { text: "2-step verification is on", weight: 3 },
-      { text: "two-step verification is on", weight: 3 },
-      { text: "enable two-factor",        weight: 3 },
-      { text: "enable 2-step",            weight: 3 },
-      { text: "authenticator app",        weight: 3 },
-      { text: "google authenticator",     weight: 3 },
-      { text: "microsoft authenticator",  weight: 3 },
-      { text: "authy",                    weight: 3 },
-      { text: "duo security",             weight: 3 },
-      // ── 2FA settings screen phrases ──
-      { text: "verification methods",     weight: 2 },   // shown on 2FA settings
-      { text: "trusted devices",          weight: 2 },   // shown on 2FA settings
-      { text: "untrusted device",         weight: 3 },
-      { text: "manage trusted devices",   weight: 3 },
-      { text: "verification code via sms", weight: 3 },
+      // ══ Verification codes (weight 3) ══
+      { text: "your verification code",         weight: 3 },
+      { text: "verification code is",           weight: 3 },
+      { text: "your code is",                   weight: 3 },
+      { text: "6-digit code",                   weight: 3 },
+      { text: "4-digit code",                   weight: 3 },
+      { text: "enter the 6-digit",              weight: 3 },
+      { text: "we sent a code to",              weight: 3 },
+      { text: "sent you a code",                weight: 3 },
+      { text: "this code expires",              weight: 3 },
+      { text: "code is valid for",              weight: 3 },
+      { text: "confirmation code",              weight: 3 },
+      { text: "verification pin",               weight: 3 },
+      { text: "your login code",                weight: 3 },
+      { text: "sign-in code is",                weight: 3 },
+      { text: "your activation code",           weight: 3 },
+      { text: "your pin is",                    weight: 3 },
+      { text: "sms verification",               weight: 3 },
+      { text: "verification code via sms",      weight: 3 },
+      { text: "additional verification code",   weight: 3 },
       { text: "generate your verification code", weight: 3 },
-      { text: "additional verification code", weight: 3 },
 
-      // ── GROUP D: Share warnings — only strong phrases (weight 3) ──
-      { text: "do not share this code",   weight: 3 },
-      { text: "do not share this otp",    weight: 3 },
-      { text: "don't share this otp",     weight: 3 },
-      { text: "do not disclose this",     weight: 3 },
-      { text: "never share your otp",     weight: 3 },
+      // ══ 2FA / Two-step verification (weight 3) ══
+      { text: "two-factor authentication",      weight: 3 },
+      { text: "two factor authentication",      weight: 3 },
+      { text: "2fa code",                       weight: 3 },
+      { text: "authentication code",            weight: 3 },
+      { text: "two-step verification",          weight: 3 },
+      { text: "two step verification",          weight: 3 },
+      { text: "2-step verification",            weight: 3 },
+      { text: "2 step verification",            weight: 3 },
+      { text: "2-step verification is on",      weight: 3 },
+      { text: "two-step verification is on",    weight: 3 },
+      { text: "enable two-factor",              weight: 3 },
+      { text: "enable 2-step",                  weight: 3 },
+      { text: "authenticator app",              weight: 3 },
+      { text: "google authenticator",           weight: 3 },
+      { text: "microsoft authenticator",        weight: 3 },
+      { text: "authy",                          weight: 3 },
+      { text: "duo security",                   weight: 3 },
+      { text: "untrusted device",               weight: 3 },
+      { text: "manage trusted devices",         weight: 3 },
 
-      // ── GROUP E: Phone/email verification (weight 3) ──
-      { text: "verify your phone",        weight: 3 },
-      { text: "verify your number",       weight: 3 },
-      { text: "verify your email",        weight: 3 },
-      { text: "phone verification",       weight: 3 },
-      { text: "your activation code",     weight: 3 },
-      { text: "your login code",          weight: 3 },
-      { text: "sign-in code is",          weight: 3 },
-      { text: "your pin is",              weight: 3 },
-      { text: "sms verification",         weight: 3 },
+      // ══ Password screens (weight 3) ══
+      { text: "forgot password",                weight: 3 },
+      { text: "forgot your password",           weight: 3 },
+      { text: "reset your password",            weight: 3 },
+      { text: "password reset",                 weight: 3 },
+      { text: "reset password link",            weight: 3 },
+      { text: "password reset link",            weight: 3 },
+      { text: "create a new password",          weight: 3 },
+      { text: "set your new password",          weight: 3 },
+      { text: "create new password",            weight: 3 },
+      { text: "change your password",           weight: 3 },
+      { text: "change password",                weight: 3 },
+      { text: "update your password",           weight: 3 },
+      // Supporting password signals — combine with each other (weight 2)
+      { text: "confirm password",               weight: 2 },
+      { text: "new password",                   weight: 2 },
+      { text: "enter new password",             weight: 2 },
+      { text: "re-enter password",              weight: 2 },
+      { text: "password must",                  weight: 2 },
+      { text: "password should",                weight: 2 },
+      { text: "strong password",                weight: 2 },
+      { text: "at least 8 characters",          weight: 2 },
+      { text: "at least 6 characters",          weight: 2 },
 
-      // ── GROUP F: Password reset screens (weight 3) ──
-      // Note: "reset password" alone triggers (weight 3 ≥ minScore 4? No.)
-      // So we need reset + one supporting signal to reach 4.
-      { text: "reset your password",      weight: 3 },
-      { text: "forgot password",          weight: 3 },
-      { text: "create a new password",    weight: 3 },
-      { text: "set your new password",    weight: 3 },
-      { text: "change your password",     weight: 3 },
-      // Supporting password signals (weight 2 — only useful WITH a weight-3)
-      { text: "confirm password",         weight: 2 },
-      { text: "new password",             weight: 2 },
-      { text: "password must be",         weight: 2 },
-      { text: "strong password",          weight: 2 },
+      // ══ Email / phone verification (weight 3) ══
+      { text: "verify your email",              weight: 3 },
+      { text: "verify your phone",              weight: 3 },
+      { text: "verify your number",             weight: 3 },
+      { text: "verify your account",            weight: 3 },
+      { text: "phone verification",             weight: 3 },
+      { text: "email verification",             weight: 3 },
+      { text: "confirm your email",             weight: 3 },
+      { text: "confirm your phone",             weight: 3 },
+      { text: "link sent to your email",        weight: 3 },
+      { text: "check your email",               weight: 3 },
+      { text: "check your inbox",               weight: 3 },
 
-      // ── GROUP G: Bank / account security alerts (weight 3) ──
-      { text: "suspicious activity",      weight: 3 },
-      { text: "unauthorized access",      weight: 3 },
-      { text: "account locked",           weight: 3 },
-      { text: "account blocked",          weight: 3 },
-      { text: "security alert",           weight: 3 },
-      { text: "login attempt",            weight: 3 },
-      { text: "unrecognized device",      weight: 3 },
-      { text: "new device login",         weight: 3 },
+      // ══ Account security / alerts (weight 3) ══
+      { text: "suspicious activity",            weight: 3 },
+      { text: "unauthorized access",            weight: 3 },
+      { text: "account locked",                 weight: 3 },
+      { text: "account blocked",                weight: 3 },
+      { text: "account suspended",              weight: 3 },
+      { text: "security alert",                 weight: 3 },
+      { text: "login attempt",                  weight: 3 },
+      { text: "unrecognized device",            weight: 3 },
+      { text: "new device login",               weight: 3 },
+      { text: "new sign-in",                    weight: 3 },
+      { text: "someone signed in",              weight: 3 },
 
-      // ── GROUP H: Supporting context (weight 2 — never triggers alone) ──
-      // These only add to an already strong signal.
-      { text: "security code",            weight: 2 },
-      { text: "login code",               weight: 2 },
-      { text: "sign-in code",             weight: 2 },
-      { text: "passcode:",                weight: 2 },
-      { text: "do not share",             weight: 2 },
-      { text: "do not disclose",          weight: 2 },
+      // ══ Security settings screens (weight 3) ══
+      { text: "security settings",              weight: 3 },
+      { text: "privacy & security",             weight: 3 },
+      { text: "privacy and security",           weight: 3 },
+      { text: "account security",               weight: 3 },
+      { text: "change email address",           weight: 3 },
+      { text: "connected apps",                 weight: 3 },
+      { text: "active sessions",                weight: 3 },
+      { text: "sign out of all devices",        weight: 3 },
+      { text: "log out of all devices",         weight: 3 },
+
+      // ══ Do-not-share warnings (weight 3) ══
+      { text: "do not share this code",         weight: 3 },
+      { text: "do not share this otp",          weight: 3 },
+      { text: "don't share this otp",           weight: 3 },
+      { text: "never share your otp",           weight: 3 },
+      { text: "do not disclose this",           weight: 3 },
+
+      // ══ Supporting signals — weight 2 (need combo to trigger) ══
+      { text: "security code",                  weight: 2 },
+      { text: "login code",                     weight: 2 },
+      { text: "sign-in code",                   weight: 2 },
+      { text: "passcode:",                      weight: 2 },
+      { text: "do not share",                   weight: 2 },
+      { text: "do not disclose",                weight: 2 },
+      { text: "verification methods",           weight: 2 },
+      { text: "trusted devices",                weight: 2 },
+      { text: "two-step",                       weight: 2 },
+      { text: "2-step",                         weight: 2 },
     ],
   },
 
