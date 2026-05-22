@@ -834,7 +834,7 @@ export default function Home() {
   const currentIdx = stepDefs.findIndex(s => s.key === step);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-24">
       {/* Navbar */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">

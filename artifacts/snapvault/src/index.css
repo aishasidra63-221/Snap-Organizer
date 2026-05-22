@@ -133,6 +133,13 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  --bottom-nav-bg: rgba(255, 255, 255, 0.92);
+  --bottom-nav-border: rgba(0, 0, 0, 0.07);
+  --bottom-nav-shadow: rgba(0, 0, 0, 0.08);
+  --bottom-nav-active-color: hsl(239, 84%, 63%);
+  --bottom-nav-active-bg: rgba(99, 102, 241, 0.08);
+  --bottom-nav-inactive-color: hsl(220, 12%, 45%);
 }
 
 .dark {
@@ -193,6 +200,13 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+
+  --bottom-nav-bg: rgba(18, 20, 32, 0.94);
+  --bottom-nav-border: rgba(255, 255, 255, 0.07);
+  --bottom-nav-shadow: rgba(0, 0, 0, 0.4);
+  --bottom-nav-active-color: hsl(239, 84%, 72%);
+  --bottom-nav-active-bg: rgba(99, 102, 241, 0.14);
+  --bottom-nav-inactive-color: hsl(220, 12%, 55%);
 }
 
 @layer base {

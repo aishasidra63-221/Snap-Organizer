@@ -4,6 +4,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import Files from "@/pages/Files";
+import Activity from "@/pages/Activity";
+import Settings from "@/pages/Settings";
+import { BottomNav } from "@/components/BottomNav";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,10 +20,16 @@ const queryClient = new QueryClient({
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/files" component={Files} />
+        <Route path="/activity" component={Activity} />
+        <Route path="/settings" component={Settings} />
+        <Route component={NotFound} />
+      </Switch>
+      <BottomNav />
+    </>
   );
 }
 
