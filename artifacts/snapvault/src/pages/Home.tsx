@@ -225,7 +225,7 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
               >
                 {uploading
                   ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</>
-                  : <><ArrowRight className="h-4 w-4 mr-2" /> {selectedFiles.length > 0 ? `Organize ${selectedFiles.length.toLocaleString()} images Now` : "Organize Now"}</>}
+                  : <>{selectedFiles.length > 0 ? `Organize ${selectedFiles.length.toLocaleString()} images Now` : "Organize Now"}</>}
               </Button>
             </div>
 
