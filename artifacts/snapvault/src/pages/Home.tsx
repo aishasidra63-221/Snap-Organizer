@@ -299,9 +299,9 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
 }
 
 // ─── Processing Step ─────────────────────────────────────────────────────────
-function ProcessingStep({ jobId }: { jobId: string }) {
-  const { data: job } = useGetJob(jobId, {
-    query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId), refetchInterval: 800 },
+function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void }) {
+  const { data: job, isError } = useGetJob(jobId, {
+    query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId), refetchInterval: 800, retry: 2 },
   });
 
   const processed = job?.processedFiles ?? 0;
@@ -317,6 +317,27 @@ function ProcessingStep({ jobId }: { jobId: string }) {
     { label: "OCR text scan (unmatched files)",   done: !isOcrPhase && job?.status === "awaiting_confirmation" },
     { label: "Ready for review",                  done: job?.status === "awaiting_confirmation" },
   ];
+
+  if (isError || job?.status === "error") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-60px)] px-6">
+        <div className="w-full max-w-md space-y-6 text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-destructive/10">
+            <AlertCircle className="h-10 w-10 text-destructive" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">Processing failed</h2>
+            <p className="text-muted-foreground mt-2 text-sm">
+              {job?.errorMessage ?? "The server lost track of your job — this can happen if the server restarted. Please upload again."}
+            </p>
+          </div>
+          <Button className="w-full" onClick={onReset} data-testid="button-retry">
+            <RotateCcw className="h-4 w-4 mr-2" /> Start over
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-60px)] px-6">
@@ -776,7 +797,7 @@ export default function Home() {
 
       {/* ── Page ── */}
       {step === "upload"     && <UploadStep onUploadComplete={handleUploadComplete} />}
-      {step === "processing" && jobId && <ProcessingStep jobId={jobId} />}
+      {step === "processing" && jobId && <ProcessingStep jobId={jobId} onReset={() => { setJobId(null); setUploadedFiles([]); setStep("upload"); }} />}
       {step === "review"     && jobId && (
         <ReviewStep jobId={jobId} uploadedFiles={uploadedFiles} onConfirm={() => setStep("done")} />
       )}
