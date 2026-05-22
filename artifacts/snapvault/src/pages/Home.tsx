@@ -105,13 +105,13 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
       {/* ══════════════════════════════════════════════════
           HERO — centered title + tagline
       ══════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-accent/30 via-background to-background pt-16 pb-12 px-6 text-center">
+      <section className="relative overflow-hidden bg-gradient-to-b from-accent/30 via-background to-background pt-14 pb-12 px-6 text-center">
         {/* Blurred blobs */}
         <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/10 blur-[80px]" />
         <div className="pointer-events-none absolute top-20 -right-20 w-64 h-64 rounded-full bg-violet-500/8 blur-3xl" />
         <div className="pointer-events-none absolute top-20 -left-20 w-64 h-64 rounded-full bg-pink-500/6 blur-3xl" />
 
-        <div className="relative max-w-3xl mx-auto space-y-6">
+        <div className="relative max-w-2xl mx-auto space-y-6">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
             <ShieldCheck className="h-3.5 w-3.5" />
@@ -132,127 +132,109 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
             SnapVault deduplicates via SHA-256 and sorts into <strong className="text-foreground">10 smart folders</strong> — fully offline.
           </p>
 
-          {/* CTA */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <Button size="lg" className="h-12 px-7 text-base font-semibold shadow-lg shadow-primary/25" onClick={scrollToUpload}>
-              <Upload className="h-5 w-5 mr-2" /> Upload Images
-            </Button>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5"><Zap className="h-4 w-4 text-amber-400" /> SHA-256 dedup</span>
-              <span className="flex items-center gap-1.5"><ScanSearch className="h-4 w-4 text-blue-400" /> OCR fallback</span>
-              <span className="flex items-center gap-1.5"><Download className="h-4 w-4 text-emerald-400" /> ZIP export</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
-          UPLOAD ZONE
-      ══════════════════════════════════════════════════ */}
-      <section ref={uploadRef} className="px-6 py-14">
-        <div className="max-w-2xl mx-auto space-y-5">
-          <div className="text-center space-y-1.5">
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              <Upload className="h-3.5 w-3.5" /> Upload section
-            </div>
-            <h2 className="text-2xl font-bold">Drop your images here</h2>
-            <p className="text-sm text-muted-foreground">Supports PNG · JPG · WebP · GIF · HEIC — up to 500 files per batch</p>
-          </div>
-
-          {/* Drop zone */}
-          <div
-            data-testid="dropzone"
-            onDragOver={e => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={onDrop}
-            onClick={() => !uploading && inputRef.current?.click()}
-            className={[
-              "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer select-none",
-              dragging
-                ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10"
-                : "border-border hover:border-primary/50 hover:bg-muted/20",
-              uploading ? "cursor-not-allowed opacity-60 pointer-events-none" : "",
-            ].join(" ")}
-          >
-            {/* Grid bg */}
-            <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
-              style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--foreground)) 1px,transparent 1px)", backgroundSize: "28px 28px" }}
-            />
-            <input ref={inputRef} type="file" multiple accept="image/*" className="hidden"
-              onChange={onInputChange} disabled={uploading} data-testid="file-input" />
-
-            <div className="relative flex flex-col items-center gap-5 px-8 py-14">
-              {/* Icon ring */}
-              <div className={`relative flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${dragging ? "bg-primary/15 scale-110" : "bg-muted"}`}>
-                <div className={`absolute inset-0 rounded-full border-2 border-dashed transition-all ${dragging ? "border-primary animate-spin" : "border-border/50"}`} style={{ animationDuration: "8s" }} />
-                <Upload className={`w-8 h-8 transition-colors ${dragging ? "text-primary" : "text-muted-foreground"}`} />
-              </div>
-
-              {selectedFiles.length > 0 ? (
-                <div className="text-center space-y-1 w-full">
-                  <p className="text-2xl font-bold">{selectedFiles.length.toLocaleString()} images selected</p>
-                  <p className="text-sm text-muted-foreground">{formatBytes(totalSize)} total · click to change</p>
-                  {/* Thumbnail preview strip */}
-                  <div className="flex items-center justify-center gap-1.5 mt-4 flex-wrap max-w-sm mx-auto">
-                    {selectedFiles.slice(0, 9).map((f, i) => (
-                      <div key={i} className="w-10 h-10 rounded-lg bg-muted border border-border overflow-hidden shadow-sm">
-                        <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover"
-                          onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
-                      </div>
-                    ))}
-                    {selectedFiles.length > 9 && (
-                      <div className="w-10 h-10 rounded-lg bg-muted border border-border text-[10px] font-semibold text-muted-foreground flex items-center justify-center">
-                        +{selectedFiles.length - 9}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center space-y-1">
-                  <p className="text-lg font-semibold">
-                    {dragging ? "Release to add images" : "Drag & drop images here"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">or click to browse from your device</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2.5 text-destructive text-sm bg-destructive/8 border border-destructive/20 px-4 py-3 rounded-xl" data-testid="upload-error">
-              <AlertCircle className="h-4 w-4 shrink-0" />{error}
-            </div>
-          )}
-
-          {/* Upload progress */}
-          {uploading && (
-            <div className="space-y-2" data-testid="upload-progress">
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Uploading to server...</span>
-                <span className="font-mono font-semibold">{uploadProgress}%</span>
-              </div>
-              <Progress value={uploadProgress} className="h-2" />
-            </div>
-          )}
-
-          {/* Action buttons */}
-          <div className="flex gap-2.5">
-            {selectedFiles.length > 0 && !uploading && (
-              <Button variant="outline" className="shrink-0" onClick={e => { e.stopPropagation(); setSelectedFiles([]); }} data-testid="button-clear">
-                <X className="h-4 w-4 mr-1.5" /> Clear
-              </Button>
-            )}
-            <Button
-              className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/20"
-              disabled={!selectedFiles.length || uploading}
-              onClick={handleUpload}
-              data-testid="button-upload"
+          {/* ── UPLOAD ZONE ── */}
+          <div ref={uploadRef} className="space-y-4 pt-2 text-left">
+            {/* Drop zone */}
+            <div
+              data-testid="dropzone"
+              onDragOver={e => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={onDrop}
+              onClick={() => !uploading && inputRef.current?.click()}
+              className={[
+                "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer select-none",
+                dragging
+                  ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10"
+                  : "border-border hover:border-primary/50 hover:bg-muted/20",
+                uploading ? "cursor-not-allowed opacity-60 pointer-events-none" : "",
+              ].join(" ")}
             >
-              {uploading
-                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</>
-                : <><ArrowRight className="h-4 w-4 mr-2" /> Process {selectedFiles.length > 0 ? `${selectedFiles.length.toLocaleString()} images` : "images"}</>}
-            </Button>
+              {/* Grid bg */}
+              <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
+                style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--foreground)) 1px,transparent 1px)", backgroundSize: "28px 28px" }}
+              />
+              <input ref={inputRef} type="file" multiple accept="image/*" className="hidden"
+                onChange={onInputChange} disabled={uploading} data-testid="file-input" />
+
+              <div className="relative flex flex-col items-center gap-5 px-8 py-12">
+                {/* Icon ring */}
+                <div className={`relative flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${dragging ? "bg-primary/15 scale-110" : "bg-muted"}`}>
+                  <div className={`absolute inset-0 rounded-full border-2 border-dashed transition-all ${dragging ? "border-primary animate-spin" : "border-border/50"}`} style={{ animationDuration: "8s" }} />
+                  <Upload className={`w-8 h-8 transition-colors ${dragging ? "text-primary" : "text-muted-foreground"}`} />
+                </div>
+
+                {selectedFiles.length > 0 ? (
+                  <div className="text-center space-y-1 w-full">
+                    <p className="text-2xl font-bold">{selectedFiles.length.toLocaleString()} images selected</p>
+                    <p className="text-sm text-muted-foreground">{formatBytes(totalSize)} total · click to change</p>
+                    <div className="flex items-center justify-center gap-1.5 mt-4 flex-wrap max-w-sm mx-auto">
+                      {selectedFiles.slice(0, 9).map((f, i) => (
+                        <div key={i} className="w-10 h-10 rounded-lg bg-muted border border-border overflow-hidden shadow-sm">
+                          <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover"
+                            onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                        </div>
+                      ))}
+                      {selectedFiles.length > 9 && (
+                        <div className="w-10 h-10 rounded-lg bg-muted border border-border text-[10px] font-semibold text-muted-foreground flex items-center justify-center">
+                          +{selectedFiles.length - 9}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-1">
+                    <p className="text-lg font-semibold">
+                      {dragging ? "Release to add images" : "Drag & drop images here"}
+                    </p>
+                    <p className="text-sm text-muted-foreground">or click to browse · PNG · JPG · WebP · HEIC</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="flex items-center gap-2.5 text-destructive text-sm bg-destructive/8 border border-destructive/20 px-4 py-3 rounded-xl" data-testid="upload-error">
+                <AlertCircle className="h-4 w-4 shrink-0" />{error}
+              </div>
+            )}
+
+            {/* Upload progress */}
+            {uploading && (
+              <div className="space-y-2" data-testid="upload-progress">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Uploading to server...</span>
+                  <span className="font-mono font-semibold">{uploadProgress}%</span>
+                </div>
+                <Progress value={uploadProgress} className="h-2" />
+              </div>
+            )}
+
+            {/* Action buttons */}
+            <div className="flex gap-2.5">
+              {selectedFiles.length > 0 && !uploading && (
+                <Button variant="outline" className="shrink-0" onClick={e => { e.stopPropagation(); setSelectedFiles([]); }} data-testid="button-clear">
+                  <X className="h-4 w-4 mr-1.5" /> Clear
+                </Button>
+              )}
+              <Button
+                className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/20"
+                disabled={!selectedFiles.length || uploading}
+                onClick={handleUpload}
+                data-testid="button-upload"
+              >
+                {uploading
+                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</>
+                  : <><ArrowRight className="h-4 w-4 mr-2" /> Process {selectedFiles.length > 0 ? `${selectedFiles.length.toLocaleString()} images` : "images"}</>}
+              </Button>
+            </div>
+
+            {/* Feature pills */}
+            <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-1">
+              <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-400" /> SHA-256 dedup</span>
+              <span className="flex items-center gap-1.5"><ScanSearch className="h-3.5 w-3.5 text-blue-400" /> OCR fallback</span>
+              <span className="flex items-center gap-1.5"><Download className="h-3.5 w-3.5 text-emerald-400" /> ZIP export</span>
+            </div>
           </div>
         </div>
       </section>
