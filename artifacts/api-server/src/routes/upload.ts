@@ -5,7 +5,9 @@ import fs from "fs";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 import { createJob, updateJob, getUploadDir } from "../lib/jobStore.js";
-import { categorizeByFilename } from "../lib/categorizer.js";
+import { categorizeByFilename, categorizeByText } from "../lib/categorizer.js";
+import { runOcrBatch } from "../lib/ocr.js";
+import { logger } from "../lib/logger.js";
 
 const router = Router();
 
@@ -45,11 +47,7 @@ const upload = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024, files: 600 },
   fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIME.has(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
+    cb(null, ALLOWED_MIME.has(file.mimetype));
   },
 });
 
@@ -65,10 +63,8 @@ router.post("/upload", (req, res, next) => {
   ensureDir(uploadDir);
   createJob(jobId, uploadDir);
 
-  upload.array("files", 600)(req, res, (err) => {
-    if (err) {
-      return next(err);
-    }
+  upload.array("files", 600)(req, res, async (err) => {
+    if (err) return next(err);
 
     const files = (req as { files?: Express.Multer.File[] }).files ?? [];
 
@@ -77,65 +73,120 @@ router.post("/upload", (req, res, next) => {
       return;
     }
 
-    const job = updateJob(jobId, {
-      status: "processing",
-      totalFiles: files.length,
-    });
+    updateJob(jobId, { status: "processing", totalFiles: files.length });
 
-    if (!job) {
-      res.status(500).json({ error: "Job creation failed" });
-      return;
-    }
+    // Respond immediately — processing continues in background
+    res.status(201).json({ jobId, totalFiles: files.length, status: "processing" });
 
-    setImmediate(() => {
-      try {
-        const seenHashes = new Map<string, string>();
-        const fileEntries = [];
+    // ── Background processing ──────────────────────────────────────────────
+    try {
+      // Pass 1: hash + filename categorization (sync, fast)
+      const seenHashes = new Map<string, string>();
+      const fileEntries: {
+        filename: string;
+        originalName: string;
+        category: string;
+        hash: string;
+        isDuplicate: boolean;
+        size: number;
+        tempPath: string;
+        needsOcr: boolean;
+        entryIndex: number;
+      }[] = [];
 
-        for (const file of files) {
-          const hash = hashFile(file.path);
-          const isDuplicate = seenHashes.has(hash);
+      for (const file of files) {
+        const hash = hashFile(file.path);
+        const isDuplicate = seenHashes.has(hash);
+        if (!isDuplicate) seenHashes.set(hash, file.originalname);
 
-          if (!isDuplicate) {
-            seenHashes.set(hash, file.originalname);
-          }
+        const byFilename = isDuplicate ? "Duplicates" : categorizeByFilename(file.originalname);
+        const needsOcr = !isDuplicate && byFilename === null;
 
-          const category = isDuplicate
-            ? "Duplicates"
-            : categorizeByFilename(file.originalname);
-
-          fileEntries.push({
-            filename: file.filename,
-            originalName: file.originalname,
-            category,
-            hash,
-            isDuplicate,
-            size: file.size,
-            tempPath: file.path,
-          });
-        }
-
-        const duplicateCount = fileEntries.filter((f) => f.isDuplicate).length;
-
-        updateJob(jobId, {
-          status: "awaiting_confirmation",
-          processedFiles: fileEntries.length,
-          duplicateCount,
-          files: fileEntries,
-        });
-      } catch (e) {
-        updateJob(jobId, {
-          status: "error",
-          errorMessage: e instanceof Error ? e.message : "Processing failed",
+        fileEntries.push({
+          filename: file.filename,
+          originalName: file.originalname,
+          category: byFilename ?? "Unknown / Others",
+          hash,
+          isDuplicate,
+          size: file.size,
+          tempPath: file.path,
+          needsOcr,
+          entryIndex: fileEntries.length,
         });
       }
-    });
 
-    res.status(201).json({
-      jobId,
-      totalFiles: files.length,
-      status: "processing",
-    });
+      const duplicateCount = fileEntries.filter(f => f.isDuplicate).length;
+      const ocrCandidates = fileEntries.filter(f => f.needsOcr);
+
+      // After pass 1 — store initial results and mark progress
+      updateJob(jobId, {
+        processedFiles: fileEntries.length - ocrCandidates.length,
+        duplicateCount,
+        files: fileEntries.map(f => ({
+          filename: f.filename,
+          originalName: f.originalName,
+          category: f.category,
+          hash: f.hash,
+          isDuplicate: f.isDuplicate,
+          size: f.size,
+          tempPath: f.tempPath,
+        })),
+      });
+
+      // Pass 2: OCR on unknowns (async, batched)
+      if (ocrCandidates.length > 0) {
+        logger.info({ count: ocrCandidates.length, jobId }, "Starting OCR pass");
+
+        const ocrItems = ocrCandidates.map(f => ({
+          filePath: f.tempPath,
+          index: f.entryIndex,
+        }));
+
+        let ocrDone = 0;
+        const ocrResults = await runOcrBatch(ocrItems, () => {
+          ocrDone++;
+          // Update processedFiles incrementally so the frontend progress bar moves
+          const job = updateJob(jobId, {
+            processedFiles: fileEntries.length - ocrCandidates.length + ocrDone,
+          });
+          if (!job) return;
+        });
+
+        // Apply OCR reclassification
+        for (const [entryIndex, text] of ocrResults.entries()) {
+          const entry = fileEntries[entryIndex];
+          if (!entry || !entry.needsOcr) continue;
+          const byText = categorizeByText(text);
+          if (byText) {
+            entry.category = byText;
+            logger.info({ file: entry.originalName, category: byText }, "OCR reclassified");
+          }
+        }
+
+        logger.info({ jobId, ocrRun: ocrCandidates.length }, "OCR pass complete");
+      }
+
+      updateJob(jobId, {
+        status: "awaiting_confirmation",
+        processedFiles: fileEntries.length,
+        duplicateCount,
+        files: fileEntries.map(f => ({
+          filename: f.filename,
+          originalName: f.originalName,
+          category: f.category,
+          hash: f.hash,
+          isDuplicate: f.isDuplicate,
+          size: f.size,
+          tempPath: f.tempPath,
+        })),
+      });
+    } catch (e) {
+      logger.error({ err: e, jobId }, "Processing failed");
+      updateJob(jobId, {
+        status: "error",
+        errorMessage: e instanceof Error ? e.message : "Processing failed",
+      });
+    }
   });
 });
 

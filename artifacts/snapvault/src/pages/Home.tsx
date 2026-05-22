@@ -308,11 +308,14 @@ function ProcessingStep({ jobId }: { jobId: string }) {
   const total = job?.totalFiles ?? 0;
   const progress = total > 0 ? Math.round((processed / total) * 100) : 0;
 
+  const isOcrPhase = processed > 0 && processed < total && job?.status === "processing";
   const steps = [
-    { label: "Files uploaded",          done: true },
-    { label: "Computing SHA-256 hashes", done: processed > 0 },
-    { label: "Detecting duplicates",     done: processed === total && total > 0 },
-    { label: "Categorizing images",      done: job?.status === "awaiting_confirmation" },
+    { label: "Files uploaded",                    done: true },
+    { label: "Computing SHA-256 hashes",          done: processed > 0 },
+    { label: "Detecting duplicates",              done: processed > 0 },
+    { label: "Rule-based categorization",         done: processed > 0 },
+    { label: "OCR text scan (unmatched files)",   done: !isOcrPhase && job?.status === "awaiting_confirmation" },
+    { label: "Ready for review",                  done: job?.status === "awaiting_confirmation" },
   ];
 
   return (
