@@ -122,7 +122,8 @@ const FILENAME_RULES: FilenameRule[] = [
 //
 // minScore = minimum total weight to classify into this category
 // ─────────────────────────────────────────────────────────────────────────────
-interface OcrKeyword { text: string; weight: 3 | 2 | 1; }
+// Each keyword can be a plain string (exact substring) OR a regex pattern.
+interface OcrKeyword { text: string; pattern?: RegExp; weight: 3 | 2 | 1; }
 interface OcrRule { category: Category; minScore: number; keywords: OcrKeyword[]; }
 
 const OCR_RULES: OcrRule[] = [
@@ -206,24 +207,24 @@ const OCR_RULES: OcrRule[] = [
       { text: "untrusted device",               weight: 3 },
       { text: "manage trusted devices",         weight: 3 },
 
-      // ══ Password screens (weight 3) ══
-      { text: "forgot password",                weight: 3 },
-      { text: "forgot your password",           weight: 3 },
-      { text: "reset your password",            weight: 3 },
-      { text: "password reset",                 weight: 3 },
-      { text: "reset password link",            weight: 3 },
+      // ══ Password screens — regex so variations all match ══
+      { text: "forgot password",   pattern: /forgot\s+(your\s+)?password/,            weight: 3 },
+      { text: "reset password",    pattern: /reset\s+(your\s+)?(the\s+)?password/,    weight: 3 },
+      { text: "password reset",    pattern: /password\s+reset/,                       weight: 3 },
+      { text: "create new password", pattern: /create\s+(a\s+)?(new\s+)?password/,   weight: 3 },
+      { text: "set new password",  pattern: /set\s+(your\s+)?(a\s+)?(new\s+)?password/, weight: 3 },
+      { text: "change password",   pattern: /change\s+(your\s+)?password/,            weight: 3 },
+      { text: "update password",   pattern: /update\s+(your\s+)?password/,            weight: 3 },
+      { text: "password has been reset", pattern: /password\s+(has\s+been|was)\s+reset/, weight: 3 },
+      { text: "password changed",  pattern: /password\s+(has\s+been\s+|was\s+)?changed/, weight: 3 },
       { text: "password reset link",            weight: 3 },
-      { text: "create a new password",          weight: 3 },
-      { text: "set your new password",          weight: 3 },
-      { text: "create new password",            weight: 3 },
-      { text: "change your password",           weight: 3 },
-      { text: "change password",                weight: 3 },
-      { text: "update your password",           weight: 3 },
+      { text: "reset link sent",                weight: 3 },
       // Supporting password signals — combine with each other (weight 2)
       { text: "confirm password",               weight: 2 },
       { text: "new password",                   weight: 2 },
       { text: "enter new password",             weight: 2 },
       { text: "re-enter password",              weight: 2 },
+      { text: "retype password",                weight: 2 },
       { text: "password must",                  weight: 2 },
       { text: "password should",                weight: 2 },
       { text: "strong password",                weight: 2 },
@@ -244,17 +245,24 @@ const OCR_RULES: OcrRule[] = [
       { text: "check your inbox",               weight: 3 },
 
       // ══ Account security / alerts (weight 3) ══
+      // Using regex so "account has been blocked", "account is locked" etc. all match
+      { text: "account locked",    pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?locked/,   weight: 3 },
+      { text: "account blocked",   pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?blocked/,  weight: 3 },
+      { text: "account suspended", pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?suspended/, weight: 3 },
+      { text: "account disabled",  pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?disabled/,  weight: 3 },
+      { text: "account deactivated", pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?deactivated/, weight: 3 },
+      { text: "account restricted", pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?restricted/, weight: 3 },
+      { text: "temporarily locked",  pattern: /temporarily\s+(locked|blocked|suspended)/,      weight: 3 },
       { text: "suspicious activity",            weight: 3 },
       { text: "unauthorized access",            weight: 3 },
-      { text: "account locked",                 weight: 3 },
-      { text: "account blocked",                weight: 3 },
-      { text: "account suspended",              weight: 3 },
       { text: "security alert",                 weight: 3 },
       { text: "login attempt",                  weight: 3 },
       { text: "unrecognized device",            weight: 3 },
       { text: "new device login",               weight: 3 },
       { text: "new sign-in",                    weight: 3 },
       { text: "someone signed in",              weight: 3 },
+      { text: "signed in from",                 weight: 3 },
+      { text: "access from new",                weight: 3 },
 
       // ══ Security settings screens (weight 3) ══
       { text: "security settings",              weight: 3 },
@@ -1310,9 +1318,9 @@ export function categorizeByText(rawText: string): Category | null {
   for (const rule of OCR_RULES) {
     let score = 0;
     for (const kw of rule.keywords) {
-      if (text.includes(kw.text)) {
-        score += kw.weight;
-      }
+      // Use regex pattern if provided, otherwise fall back to exact substring
+      const matched = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
+      if (matched) score += kw.weight;
     }
     if (score >= rule.minScore) {
       scores.push({ category: rule.category, score });
