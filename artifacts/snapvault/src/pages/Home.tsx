@@ -105,7 +105,7 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
       {/* ══════════════════════════════════════════════════
           HERO — centered title + tagline
       ══════════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-accent/30 via-background to-background pt-14 pb-12 px-6 text-center">
+      <section className="relative overflow-hidden bg-gradient-to-b from-accent/30 via-background to-background pt-14 pb-7 px-6 text-center">
         {/* Blurred blobs */}
         <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/10 blur-[80px]" />
         <div className="pointer-events-none absolute top-20 -right-20 w-64 h-64 rounded-full bg-violet-500/8 blur-3xl" />
@@ -242,10 +242,10 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
       {/* ══════════════════════════════════════════════════
           HOW IT WORKS — 3 steps
       ══════════════════════════════════════════════════ */}
-      <section className="px-6 py-14 border-y border-border bg-muted/20">
+      <section className="px-6 py-8 border-y border-border bg-muted/20">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">How it works</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-5">How it works</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               {
                 step: "01", Icon: Upload,
