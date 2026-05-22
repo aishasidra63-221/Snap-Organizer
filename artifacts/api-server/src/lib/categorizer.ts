@@ -184,12 +184,25 @@ const OCR_RULES: OcrRule[] = [
       { text: "authentication code",      weight: 3 },
       { text: "two-step verification",    weight: 3 },
       { text: "two step verification",    weight: 3 },
+      { text: "2-step verification",      weight: 3 },   // digit form
+      { text: "2 step verification",      weight: 3 },   // no hyphen digit
+      { text: "2-step verification is on", weight: 3 },
+      { text: "two-step verification is on", weight: 3 },
       { text: "enable two-factor",        weight: 3 },
+      { text: "enable 2-step",            weight: 3 },
       { text: "authenticator app",        weight: 3 },
       { text: "google authenticator",     weight: 3 },
       { text: "microsoft authenticator",  weight: 3 },
       { text: "authy",                    weight: 3 },
       { text: "duo security",             weight: 3 },
+      // ── 2FA settings screen phrases ──
+      { text: "verification methods",     weight: 2 },   // shown on 2FA settings
+      { text: "trusted devices",          weight: 2 },   // shown on 2FA settings
+      { text: "untrusted device",         weight: 3 },
+      { text: "manage trusted devices",   weight: 3 },
+      { text: "verification code via sms", weight: 3 },
+      { text: "generate your verification code", weight: 3 },
+      { text: "additional verification code", weight: 3 },
 
       // ── GROUP D: Share warnings — only strong phrases (weight 3) ──
       { text: "do not share this code",   weight: 3 },
