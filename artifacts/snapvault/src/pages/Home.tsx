@@ -128,8 +128,7 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
 
           {/* Subtitle */}
           <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed max-w-xl mx-auto">
-            Upload up to <strong className="text-foreground">500 images</strong> at once.
-            SnapVault deduplicates via SHA-256 and sorts into <strong className="text-foreground">10 smart folders</strong> — fully offline.
+            Drop up to <strong className="text-foreground">500 screenshots</strong> and SnapVault sorts everything into <strong className="text-foreground">smart folders</strong> — instantly.
           </p>
 
           {/* ── UPLOAD ZONE ── */}
