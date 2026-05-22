@@ -147,48 +147,6 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
       </section>
 
       {/* ══════════════════════════════════════════════════
-          HOW IT WORKS — 3 steps
-      ══════════════════════════════════════════════════ */}
-      <section className="px-6 py-14 border-y border-border bg-muted/20">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">How it works</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              {
-                step: "01", Icon: Upload,
-                color: "text-primary", bg: "bg-primary/10",
-                title: "Upload photos",
-                desc: "Drag-and-drop or pick up to 500 screenshots. Any format: PNG, JPG, WebP, HEIC.",
-              },
-              {
-                step: "02", Icon: Cpu,
-                color: "text-violet-500", bg: "bg-violet-500/10",
-                title: "Auto-process",
-                desc: "SHA-256 deduplication removes exact copies. Rule-based + OCR categorization sorts the rest.",
-              },
-              {
-                step: "03", Icon: Download,
-                color: "text-emerald-500", bg: "bg-emerald-500/10",
-                title: "Download ZIP",
-                desc: "Review folder cards, approve, and download a structured ZIP with one folder per category.",
-              },
-            ].map(({ step, Icon, color, bg, title, desc }) => (
-              <div key={step} className="relative flex flex-col items-center text-center gap-4 p-6 rounded-2xl border border-border bg-card">
-                <span className="absolute top-4 right-4 text-xs font-mono font-bold text-muted-foreground/40">{step}</span>
-                <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center`}>
-                  <Icon className={`h-6 w-6 ${color}`} />
-                </div>
-                <div>
-                  <p className="font-semibold text-base">{title}</p>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
           UPLOAD ZONE
       ══════════════════════════════════════════════════ */}
       <section ref={uploadRef} className="px-6 py-14">
@@ -295,6 +253,48 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
                 ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</>
                 : <><ArrowRight className="h-4 w-4 mr-2" /> Process {selectedFiles.length > 0 ? `${selectedFiles.length.toLocaleString()} images` : "images"}</>}
             </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════
+          HOW IT WORKS — 3 steps
+      ══════════════════════════════════════════════════ */}
+      <section className="px-6 py-14 border-y border-border bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-10">How it works</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {[
+              {
+                step: "01", Icon: Upload,
+                color: "text-primary", bg: "bg-primary/10",
+                title: "Upload photos",
+                desc: "Drag-and-drop or pick up to 500 screenshots. Any format: PNG, JPG, WebP, HEIC.",
+              },
+              {
+                step: "02", Icon: Cpu,
+                color: "text-violet-500", bg: "bg-violet-500/10",
+                title: "Auto-process",
+                desc: "SHA-256 deduplication removes exact copies. Rule-based + OCR categorization sorts the rest.",
+              },
+              {
+                step: "03", Icon: Download,
+                color: "text-emerald-500", bg: "bg-emerald-500/10",
+                title: "Download ZIP",
+                desc: "Review folder cards, approve, and download a structured ZIP with one folder per category.",
+              },
+            ].map(({ step, Icon, color, bg, title, desc }) => (
+              <div key={step} className="relative flex flex-col items-center text-center gap-4 p-6 rounded-2xl border border-border bg-card">
+                <span className="absolute top-4 right-4 text-xs font-mono font-bold text-muted-foreground/40">{step}</span>
+                <div className={`w-12 h-12 rounded-2xl ${bg} flex items-center justify-center`}>
+                  <Icon className={`h-6 w-6 ${color}`} />
+                </div>
+                <div>
+                  <p className="font-semibold text-base">{title}</p>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
