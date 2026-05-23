@@ -427,158 +427,77 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
   );
 }
 
-// ─── Folder Preview Modal ─────────────────────────────────────────────────────
-interface FolderPreviewModalProps {
-  group: { category: string; count: number; files: { filename: string; originalName: string }[] } | null;
+// ─── Folder Detail Page (full-page inline view) ───────────────────────────────
+function FolderDetailPage({
+  group,
+  getPreviewUrl,
+  onBack,
+}: {
+  group: { category: string; count: number; files: { filename: string; originalName: string }[] };
   getPreviewUrl: (name: string) => string | null;
-  onClose: () => void;
-}
-
-function FolderPreviewModal({ group, getPreviewUrl, onClose }: FolderPreviewModalProps) {
-  const [visible, setVisible] = useState(false);
-  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
-
-  // Animate in when group changes to non-null
-  useEffect(() => {
-    if (group) {
-      requestAnimationFrame(() => setVisible(true));
-      setLoadedImages(new Set());
-    } else {
-      setVisible(false);
-    }
-  }, [group]);
-
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") handleClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
-
-  // Lock body scroll while open
-  useEffect(() => {
-    if (group) document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, [group]);
-
-  const handleClose = () => {
-    setVisible(false);
-    setTimeout(onClose, 280);
-  };
-
-  if (!group) return null;
-
+  onBack: () => void;
+}) {
   const meta = CATEGORY_META[group.category] ?? CATEGORY_META["Unknown / Others"];
   const { Icon } = meta;
 
-  const markLoaded = (name: string) =>
-    setLoadedImages(prev => new Set(prev).add(name));
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col justify-end sm:justify-center sm:items-center sm:p-4"
-      onClick={handleClose}
-      style={{ willChange: "opacity" }}
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
-        style={{ opacity: visible ? 1 : 0 }}
-      />
-
-      {/* Sheet / modal */}
-      <div
-        className="relative z-10 w-full sm:max-w-lg bg-card border border-border rounded-t-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
-        style={{
-          maxHeight: "88dvh",
-          transform: visible ? "translateY(0)" : "translateY(100%)",
-          transition: "transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)",
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Drag handle (mobile) */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-muted-foreground/20" />
+    <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
+        <button
+          onClick={onBack}
+          className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0"
+          aria-label="Back to folders"
+        >
+          <X className="h-4 w-4 text-foreground" />
+        </button>
+        <div className={`w-9 h-9 rounded-xl ${meta.bg} border border-white/10 flex items-center justify-center shrink-0`}>
+          <Icon className={`h-4.5 w-4.5 ${meta.color}`} />
         </div>
-
-        {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-border shrink-0">
-          <div className={`w-10 h-10 rounded-xl ${meta.bg} border border-white/10 flex items-center justify-center shrink-0`}>
-            <Icon className={`h-5 w-5 ${meta.color}`} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-base font-semibold leading-tight truncate">{group.category}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {group.count} file{group.count !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <Badge
-            variant="secondary"
-            className="font-mono text-xs tabular-nums shrink-0"
-            style={{ color: meta.textColor }}
-          >
-            {group.count}
-          </Badge>
-          <button
-            onClick={handleClose}
-            className="w-8 h-8 rounded-xl bg-muted hover:bg-muted/80 flex items-center justify-center transition-colors shrink-0 ml-1"
-            aria-label="Close preview"
-          >
-            <X className="h-4 w-4 text-muted-foreground" />
-          </button>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold leading-tight truncate">{group.category}</p>
+          <p className="text-xs text-muted-foreground">{group.count} file{group.count !== 1 ? "s" : ""}</p>
         </div>
+        <Badge variant="secondary" className="font-mono text-xs tabular-nums shrink-0" style={{ color: meta.textColor }}>
+          {group.count}
+        </Badge>
+      </div>
 
-        {/* Scrollable thumbnail grid */}
-        <div className="overflow-y-auto overscroll-contain flex-1 px-4 py-4">
-          {group.files.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-              <PhotoIcon className="h-10 w-10 opacity-40" />
-              <p className="text-sm">No files in this folder</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {group.files.map(file => {
-                const url = getPreviewUrl(file.originalName);
-                const isLoaded = loadedImages.has(file.filename);
-
-                return (
-                  <div
-                    key={file.filename}
-                    className="flex flex-col gap-1"
-                    data-testid={`modal-thumb-${file.filename}`}
-                  >
-                    <div className="relative aspect-square rounded-xl bg-muted border border-border/60 overflow-hidden">
-                      {/* Loading shimmer */}
-                      {!isLoaded && (
-                        <div className="absolute inset-0 bg-muted animate-pulse" />
-                      )}
-                      {url ? (
-                        <img
-                          src={url}
-                          alt={file.originalName}
-                          className="w-full h-full object-cover transition-opacity duration-200"
-                          style={{ opacity: isLoaded ? 1 : 0 }}
-                          onLoad={() => markLoaded(file.filename)}
-                          onError={e => {
-                            markLoaded(file.filename);
-                            (e.target as HTMLImageElement).style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <PhotoIcon className="h-5 w-5 text-muted-foreground/40" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-[10px] text-muted-foreground truncate px-0.5 font-mono leading-tight">
-                      {file.originalName}
-                    </p>
+      {/* Grid */}
+      <div className="flex-1 px-3 py-4 overflow-y-auto">
+        {group.files.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
+            <PhotoIcon className="h-12 w-12 opacity-30" />
+            <p className="text-sm font-medium">No files in this folder</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {group.files.map(file => {
+              const url = getPreviewUrl(file.originalName);
+              return (
+                <div key={file.filename} className="flex flex-col gap-1">
+                  <div className="relative aspect-square rounded-xl bg-muted border border-border/60 overflow-hidden">
+                    {url ? (
+                      <img
+                        src={url}
+                        alt={file.originalName}
+                        className="w-full h-full object-cover"
+                        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <PhotoIcon className="h-5 w-5 text-muted-foreground/40" />
+                      </div>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                  <p className="text-[10px] text-muted-foreground truncate px-0.5 font-mono leading-tight">
+                    {file.originalName}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -615,6 +534,17 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
       { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) }); onConfirm(); } }
     );
   };
+
+  // Show folder detail page when a category is selected
+  if (previewGroup) {
+    return (
+      <FolderDetailPage
+        group={previewGroup}
+        getPreviewUrl={getPreviewUrl}
+        onBack={() => setPreviewGroup(null)}
+      />
+    );
+  }
 
   if (isLoading) {
     return (
@@ -737,13 +667,6 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
           })}
         </div>
       </div>
-
-      {/* Folder preview modal */}
-      <FolderPreviewModal
-        group={previewGroup}
-        getPreviewUrl={getPreviewUrl}
-        onClose={() => setPreviewGroup(null)}
-      />
     </div>
   );
 }
