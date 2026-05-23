@@ -130,29 +130,15 @@ const OCR_RULES: OcrRule[] = [
 
   // ═══════════════════════════════════════════════════════════════════════════
   // 1. OTP / SECURITY
-  //
-  //  ✅ YEH FOLDER IN SCREENSHOTS KE LIYE HAI:
-  //     • OTP SMS — "Your OTP is 4521", "Enter OTP", "Resend OTP"
-  //     • Verification codes — "Your verification code", "6-digit code"
-  //     • 2FA / Two-step — Google Auth, Authy, 2-step settings screens
-  //     • Password reset — "Forgot password", "Reset your password", "Create new password"
-  //     • Email/Phone verify — "Verify your email", "Verify your number"
-  //     • Account security — "Account locked", "Suspicious activity", "New device login"
-  //     • Security settings — "Change password", "Security settings", "Privacy & security"
-  //
-  //  ❌ YEH FOLDER IN KE LIYE NAHI:
-  //     • Normal login screen (sirf username/password field)
-  //     • Promo/discount codes ("Get 20% off, use code XYZ")
-  //
-  //  SCORE RULE: minScore=3, weight-3 akele trigger karta hai.
-  //              weight-2 sirf doosre signals ke saath kaam karta hai.
+  // minScore=3: any single weight-3 keyword instantly triggers this folder.
+  // weight-2 keywords only help when combined with other signals.
   // ═══════════════════════════════════════════════════════════════════════════
   {
     category: "OTP / Security",
     minScore: 3,
     keywords: [
 
-      // ══ OTP — har ek akele trigger karta hai (weight 3) ══
+      // ── OTP ──────────────────────────────────────────────────────────────
       { text: "your otp is",                    weight: 3 },
       { text: "your otp",                       weight: 3 },
       { text: "otp is",                         weight: 3 },
@@ -164,7 +150,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "one time password",              weight: 3 },
       { text: "one time passcode",              weight: 3 },
 
-      // ══ Verification codes (weight 3) ══
+      // ── Verification Codes ───────────────────────────────────────────────
       { text: "your verification code",         weight: 3 },
       { text: "verification code is",           weight: 3 },
       { text: "your code is",                   weight: 3 },
@@ -183,22 +169,14 @@ const OCR_RULES: OcrRule[] = [
       { text: "your pin is",                    weight: 3 },
       { text: "sms verification",               weight: 3 },
       { text: "verification code via sms",      weight: 3 },
-      { text: "additional verification code",   weight: 3 },
-      { text: "generate your verification code", weight: 3 },
 
-      // ══ 2FA / Two-step verification (weight 3) ══
+      // ── 2FA ─────────────────────────────────────────────────────────────
       { text: "two-factor authentication",      weight: 3 },
       { text: "two factor authentication",      weight: 3 },
       { text: "2fa code",                       weight: 3 },
       { text: "authentication code",            weight: 3 },
       { text: "two-step verification",          weight: 3 },
-      { text: "two step verification",          weight: 3 },
       { text: "2-step verification",            weight: 3 },
-      { text: "2 step verification",            weight: 3 },
-      { text: "2-step verification is on",      weight: 3 },
-      { text: "two-step verification is on",    weight: 3 },
-      { text: "enable two-factor",              weight: 3 },
-      { text: "enable 2-step",                  weight: 3 },
       { text: "authenticator app",              weight: 3 },
       { text: "google authenticator",           weight: 3 },
       { text: "microsoft authenticator",        weight: 3 },
@@ -206,32 +184,33 @@ const OCR_RULES: OcrRule[] = [
       { text: "duo security",                   weight: 3 },
       { text: "untrusted device",               weight: 3 },
       { text: "manage trusted devices",         weight: 3 },
+      { text: "totp",                           weight: 3 },
+      { text: "time-based",                     weight: 3 },
+      { text: "backup code",                    weight: 3 },
+      { text: "recovery code",                  weight: 3 },
+      { text: "save your backup codes",         weight: 3 },
 
-      // ══ Password screens — regex so variations all match ══
-      { text: "forgot password",   pattern: /forgot\s+(your\s+)?password/,            weight: 3 },
-      { text: "reset password",    pattern: /reset\s+(your\s+)?(the\s+)?password/,    weight: 3 },
-      { text: "password reset",    pattern: /password\s+reset/,                       weight: 3 },
-      { text: "create new password", pattern: /create\s+(a\s+)?(new\s+)?password/,   weight: 3 },
-      { text: "set new password",  pattern: /set\s+(your\s+)?(a\s+)?(new\s+)?password/, weight: 3 },
-      { text: "change password",   pattern: /change\s+(your\s+)?password/,            weight: 3 },
-      { text: "update password",   pattern: /update\s+(your\s+)?password/,            weight: 3 },
-      { text: "password has been reset", pattern: /password\s+(has\s+been|was)\s+reset/, weight: 3 },
-      { text: "password changed",  pattern: /password\s+(has\s+been\s+|was\s+)?changed/, weight: 3 },
-      { text: "password reset link",            weight: 3 },
-      { text: "reset link sent",                weight: 3 },
-      // Supporting password signals — combine with each other (weight 2)
+      // ── Password Reset ───────────────────────────────────────────────────
+      { text: "forgot password",   pattern: /forgot\s+(your\s+)?password/,                  weight: 3 },
+      { text: "reset password",    pattern: /reset\s+(your\s+)?(the\s+)?password/,          weight: 3 },
+      { text: "password reset",    pattern: /password\s+reset/,                             weight: 3 },
+      { text: "create new password", pattern: /create\s+(a\s+)?(new\s+)?password/,         weight: 3 },
+      { text: "set new password",  pattern: /set\s+(your\s+)?(a\s+)?(new\s+)?password/,    weight: 3 },
+      { text: "change password",   pattern: /change\s+(your\s+)?password/,                  weight: 3 },
+      { text: "update password",   pattern: /update\s+(your\s+)?password/,                  weight: 3 },
+      { text: "password has been reset", pattern: /password\s+(has\s+been|was)\s+reset/,   weight: 3 },
+      { text: "password changed",  pattern: /password\s+(has\s+been\s+|was\s+)?changed/,   weight: 3 },
+      { text: "password reset link",                                                         weight: 3 },
+      { text: "reset link sent",                                                             weight: 3 },
+      // Supporting password signals (weight 2 — combine with each other)
       { text: "confirm password",               weight: 2 },
-      { text: "new password",                   weight: 2 },
       { text: "enter new password",             weight: 2 },
-      { text: "re-enter password",              weight: 2 },
-      { text: "retype password",                weight: 2 },
+      { text: "at least 8 characters",          weight: 2 },
+      { text: "strong password",                weight: 2 },
       { text: "password must",                  weight: 2 },
       { text: "password should",                weight: 2 },
-      { text: "strong password",                weight: 2 },
-      { text: "at least 8 characters",          weight: 2 },
-      { text: "at least 6 characters",          weight: 2 },
 
-      // ══ Email / phone verification (weight 3) ══
+      // ── Email / Phone Verification ───────────────────────────────────────
       { text: "verify your email",              weight: 3 },
       { text: "verify your phone",              weight: 3 },
       { text: "verify your number",             weight: 3 },
@@ -243,16 +222,18 @@ const OCR_RULES: OcrRule[] = [
       { text: "link sent to your email",        weight: 3 },
       { text: "check your email",               weight: 3 },
       { text: "check your inbox",               weight: 3 },
+      { text: "mobile verification",            weight: 3 },
+      { text: "number verification",            weight: 3 },
+      { text: "sim swap",                       weight: 3 },
 
-      // ══ Account security / alerts (weight 3) ══
-      // Using regex so "account has been blocked", "account is locked" etc. all match
-      { text: "account locked",    pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?locked/,   weight: 3 },
-      { text: "account blocked",   pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?blocked/,  weight: 3 },
-      { text: "account suspended", pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?suspended/, weight: 3 },
-      { text: "account disabled",  pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?disabled/,  weight: 3 },
+      // ── Account Alerts (regex — catches "has been", "is", "was" forms) ──
+      { text: "account locked",      pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?locked/,      weight: 3 },
+      { text: "account blocked",     pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?blocked/,     weight: 3 },
+      { text: "account suspended",   pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?suspended/,   weight: 3 },
+      { text: "account disabled",    pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?disabled/,    weight: 3 },
       { text: "account deactivated", pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?deactivated/, weight: 3 },
-      { text: "account restricted", pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?restricted/, weight: 3 },
-      { text: "temporarily locked",  pattern: /temporarily\s+(locked|blocked|suspended)/,      weight: 3 },
+      { text: "account restricted",  pattern: /account\s+(has\s+been\s+|is\s+|was\s+)?restricted/,  weight: 3 },
+      { text: "temporarily locked",  pattern: /temporarily\s+(locked|blocked|suspended)/,            weight: 3 },
       { text: "suspicious activity",            weight: 3 },
       { text: "unauthorized access",            weight: 3 },
       { text: "security alert",                 weight: 3 },
@@ -262,37 +243,78 @@ const OCR_RULES: OcrRule[] = [
       { text: "new sign-in",                    weight: 3 },
       { text: "someone signed in",              weight: 3 },
       { text: "signed in from",                 weight: 3 },
-      { text: "access from new",                weight: 3 },
+      { text: "failed login",                   weight: 3 },
+      { text: "wrong password",                 weight: 3 },
+      { text: "incorrect password",             weight: 3 },
+      { text: "too many attempts",              weight: 3 },
+      { text: "account recovery",               weight: 3 },
+      { text: "recover your account",           weight: 3 },
+      { text: "identity verification",          weight: 3 },
+      { text: "was this you",                   weight: 3 },
+      { text: "if this wasn't you",             weight: 3 },
+      { text: "this wasn't me",                 weight: 3 },
+      { text: "we noticed",                     weight: 3 },
+      { text: "it wasn't you",                  weight: 3 },
+      { text: "secure your account",            weight: 3 },
 
-      // ══ Security settings screens (weight 3) ══
+      // ── Security Settings ─────────────────────────────────────────────────
       { text: "security settings",              weight: 3 },
-      { text: "privacy & security",             weight: 3 },
       { text: "privacy and security",           weight: 3 },
       { text: "account security",               weight: 3 },
       { text: "change email address",           weight: 3 },
-      { text: "connected apps",                 weight: 3 },
       { text: "active sessions",                weight: 3 },
       { text: "sign out of all devices",        weight: 3 },
       { text: "log out of all devices",         weight: 3 },
+      { text: "connected apps",                 weight: 3 },
+      { text: "trusted device",                 weight: 3 },
+      { text: "new browser",                    weight: 3 },
+      { text: "new location",                   weight: 3 },
 
-      // ══ Do-not-share warnings (weight 3) ══
+      // ── Session ───────────────────────────────────────────────────────────
+      { text: "session expired",                weight: 3 },
+      { text: "your session",                   weight: 2 },
+      { text: "login again",                    weight: 2 },
+      { text: "re-login",                       weight: 3 },
+      { text: "re-enter password",              weight: 3 },
+
+      // ── Voice / WhatsApp OTP ──────────────────────────────────────────────
+      { text: "voice call verification",        weight: 3 },
+      { text: "we called you",                  weight: 3 },
+      { text: "otp via whatsapp",               weight: 3 },
+      { text: "whatsapp verification",          weight: 3 },
+
+      // ── Transaction OTP ───────────────────────────────────────────────────
+      { text: "transaction otp",                weight: 3 },
+      { text: "payment otp",                    weight: 3 },
+      { text: "approve transaction",            weight: 3 },
+      { text: "authorize payment",              weight: 3 },
+      { text: "confirm transaction",            weight: 3 },
+      { text: "transaction pin",                weight: 3 },
+      { text: "enter pin",                      weight: 3 },
+      { text: "pin verification",               weight: 3 },
+      { text: "secure code",                    weight: 3 },
+      { text: "authorization code",             weight: 3 },
+
+      // ── India Specific ────────────────────────────────────────────────────
+      { text: "mpin",                           weight: 3 },
+      { text: "upi pin",                        weight: 3 },
+      { text: "enter upi",                      weight: 3 },
+      { text: "enter aadhaar otp",              weight: 3 },
+      { text: "uidai",                          weight: 3 },
+
+      // ── Countdown / Expiry (weight 2 — supporting) ────────────────────────
+      { text: "resend in",                      weight: 2 },
+      { text: "resend after",                   weight: 2 },
+      { text: "expires in",                     weight: 2 },
+      { text: "valid for",                      weight: 2 },
+      { text: "use within",                     weight: 2 },
+
+      // ── Do Not Share ──────────────────────────────────────────────────────
       { text: "do not share this code",         weight: 3 },
       { text: "do not share this otp",          weight: 3 },
-      { text: "don't share this otp",           weight: 3 },
       { text: "never share your otp",           weight: 3 },
       { text: "do not disclose this",           weight: 3 },
-
-      // ══ Supporting signals — weight 2 (need combo to trigger) ══
-      { text: "security code",                  weight: 2 },
-      { text: "login code",                     weight: 2 },
-      { text: "sign-in code",                   weight: 2 },
-      { text: "passcode:",                      weight: 2 },
-      { text: "do not share",                   weight: 2 },
-      { text: "do not disclose",                weight: 2 },
-      { text: "verification methods",           weight: 2 },
-      { text: "trusted devices",                weight: 2 },
-      { text: "two-step",                       weight: 2 },
-      { text: "2-step",                         weight: 2 },
+      { text: "never share your password",      weight: 3 },
     ],
   },
 
