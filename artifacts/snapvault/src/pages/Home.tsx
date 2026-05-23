@@ -1159,11 +1159,37 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
 // ─── Main ─────────────────────────────────────────────────────────────────────
 type StepDef = { key: Step; label: string; Icon: React.ElementType };
 
+// ─── Session helpers (survive SPA navigation; cleared on tab/refresh) ─────────
+const SS_STEP  = "sv_step";
+const SS_JOB   = "sv_jobId";
+
+function ssGet<T>(key: string, fallback: T): T {
+  try { const v = sessionStorage.getItem(key); return v !== null ? JSON.parse(v) as T : fallback; } catch { return fallback; }
+}
+function ssSet(key: string, value: unknown) {
+  try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore */ }
+}
+function ssClear(...keys: string[]) {
+  keys.forEach(k => { try { sessionStorage.removeItem(k); } catch { /* ignore */ } });
+}
+
 export default function Home() {
-  const [step, setStep] = useState<Step>("upload");
-  const [jobId, setJobId] = useState<string | null>(null);
+  const [step,    setStepRaw]  = useState<Step>(() => ssGet<Step>(SS_STEP, "upload"));
+  const [jobId,   setJobIdRaw] = useState<string | null>(() => ssGet<string | null>(SS_JOB, null));
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const { theme, toggleTheme } = useTheme();
+
+  // Keep sessionStorage in sync whenever state changes
+  const setStep = (s: Step) => { setStepRaw(s); ssSet(SS_STEP, s); };
+  const setJobId = (id: string | null) => { setJobIdRaw(id); ssSet(SS_JOB, id); };
+
+  // Helper: full reset — clears session storage too
+  const resetSession = () => {
+    ssClear(SS_STEP, SS_JOB);
+    setStepRaw("upload");
+    setJobIdRaw(null);
+    setUploadedFiles([]);
+  };
 
   const { data: job } = useGetJob(jobId ?? "", {
     query: {
@@ -1243,13 +1269,13 @@ export default function Home() {
 
       {step === "upload" && <UploadStep onUploadComplete={handleUploadComplete} />}
       {step === "processing" && jobId && (
-        <ProcessingStep jobId={jobId} onReset={() => { setJobId(null); setUploadedFiles([]); setStep("upload"); }} />
+        <ProcessingStep jobId={jobId} onReset={resetSession} />
       )}
       {step === "review" && jobId && (
         <ReviewStep jobId={jobId} uploadedFiles={uploadedFiles} onConfirm={() => setStep("done")} />
       )}
       {step === "done" && jobId && (
-        <DoneStep jobId={jobId} onStartOver={() => { setJobId(null); setUploadedFiles([]); setStep("upload"); }} />
+        <DoneStep jobId={jobId} onStartOver={resetSession} />
       )}
     </div>
   );
