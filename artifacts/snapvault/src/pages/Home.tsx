@@ -11,6 +11,11 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogDescription, DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Moon, Sun, Download, CheckCircle, RotateCcw,
   AlertCircle, Loader2, X,
@@ -1002,9 +1007,28 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
 
   const zipReady = job?.zipReady ?? false;
 
-  const handleDownload = () => {
+  const defaultZipName = `SnapVault_Export_${new Date().toISOString().slice(0, 10)}`;
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [zipName, setZipName] = useState(defaultZipName);
+
+  const handleDownload = async () => {
     const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-    window.open(`${base}/api/jobs/${jobId}/download`, "_blank");
+    const url = `${base}/api/jobs/${jobId}/download`;
+    const filename = (zipName.trim() || defaultZipName).replace(/\.zip$/i, "") + ".zip";
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    } catch {
+      window.open(url, "_blank");
+    }
+    setShowNameDialog(false);
   };
 
   const handleStartOver = () => {
@@ -1086,7 +1110,7 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
 
         <div className="space-y-2.5">
           <Button size="lg" className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
-            disabled={!zipReady} onClick={handleDownload} data-testid="button-download">
+            disabled={!zipReady} onClick={() => { setZipName(defaultZipName); setShowNameDialog(true); }} data-testid="button-download">
             {zipReady
               ? <><Download className="h-5 w-5 mr-2" /> Download ZIP{stats?.zipSizeBytes ? ` · ${formatBytes(stats.zipSizeBytes)}` : ""}</>
               : <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Preparing download...</>}
@@ -1097,6 +1121,37 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
           </Button>
         </div>
       </div>
+
+      {/* ZIP naming dialog */}
+      <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Name your ZIP file</DialogTitle>
+            <DialogDescription>
+              Choose a name for your download. The <span className="font-mono text-xs">.zip</span> extension will be added automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-1">
+            <Input
+              value={zipName}
+              onChange={e => setZipName(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && zipName.trim()) handleDownload(); }}
+              placeholder={defaultZipName}
+              className="font-mono text-sm"
+              autoFocus
+            />
+            <p className="text-xs text-muted-foreground mt-2 truncate">
+              File: <span className="text-foreground">{(zipName.trim() || defaultZipName).replace(/\.zip$/i, "")}.zip</span>
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowNameDialog(false)}>Cancel</Button>
+            <Button onClick={handleDownload} disabled={!zipName.trim()}>
+              <Download className="h-4 w-4 mr-2" /> Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
