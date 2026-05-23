@@ -315,6 +315,51 @@ const OCR_RULES: OcrRule[] = [
       { text: "never share your otp",           weight: 3 },
       { text: "do not disclose this",           weight: 3 },
       { text: "never share your password",      weight: 3 },
+
+      // ── App Specific (lock / identity screens) ────────────────────────────
+      { text: "enter passcode",                 weight: 3 },
+      { text: "unlock your account",            weight: 3 },
+      { text: "account verification",           weight: 3 },
+      { text: "verify identity",                weight: 3 },
+      { text: "confirm identity",               weight: 3 },
+      { text: "prove its you",                  weight: 3 },
+      { text: "prove it's you",                 weight: 3 },
+      { text: "its really you",                 weight: 3 },
+      { text: "it's really you",                weight: 3 },
+
+      // ── Login Screen ──────────────────────────────────────────────────────
+      { text: "welcome back",                   weight: 2 },
+      { text: "sign up",                        weight: 1 },
+      { text: "create account",                 weight: 1 },
+      { text: "register",                       weight: 1 },
+      { text: "new user",                       weight: 1 },
+      { text: "existing user",                  weight: 1 },
+      { text: "remember this device",           weight: 3 },
+      { text: "keep me signed in",              weight: 2 },
+      { text: "stay signed in",                 weight: 2 },
+
+      // ── Token / Magic Link ────────────────────────────────────────────────
+      { text: "access token",                   weight: 3 },
+      { text: "token expired",                  weight: 3 },
+      { text: "refresh token",                  weight: 3 },
+      { text: "magic link",                     weight: 3 },
+      { text: "login link",                     weight: 3 },
+      { text: "click to login",                 weight: 3 },
+      { text: "tap to verify",                  weight: 3 },
+
+      // ── Captcha ───────────────────────────────────────────────────────────
+      { text: "captcha",                        weight: 3 },
+      { text: "i'm not a robot",                weight: 3 },
+      { text: "im not a robot",                 weight: 3 },
+      { text: "verify you are human",           weight: 3 },
+      { text: "complete verification",          weight: 3 },
+
+      // ── Biometric ─────────────────────────────────────────────────────────
+      { text: "fingerprint",                    weight: 3 },
+      { text: "face id",                        weight: 3 },
+      { text: "touch id",                       weight: 3 },
+      { text: "use biometric",                  weight: 3 },
+      { text: "biometric verification",         weight: 3 },
     ],
   },
 
