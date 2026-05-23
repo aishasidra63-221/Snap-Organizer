@@ -103,6 +103,18 @@ const FILENAME_RULES: FilenameRule[] = [
     ],
     category: "Documents",
   },
+  // Screenshots that are not OTP/chat/social — treat as Photos
+  {
+    patterns: [
+      /^screenshot/i, /[-_]screenshot/i, /screenshot[-_]/i,
+    ],
+    exclude: [
+      /otp/i, /whatsapp/i, /\bwa[-_]/i, /telegram/i, /signal/i,
+      /instagram/i, /tiktok/i, /facebook/i, /twitter/i, /snapchat/i,
+      /youtube/i, /reddit/i, /linkedin/i,
+    ],
+    category: "Photos",
+  },
   // Camera & photo apps
   {
     patterns: [
