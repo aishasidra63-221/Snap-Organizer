@@ -28,7 +28,7 @@ export const ALL_CATEGORIES: Category[] = [
 // First-pass: match by filename. Order matters — first match wins.
 // Keep patterns SPECIFIC. Avoid single common words.
 // ─────────────────────────────────────────────────────────────────────────────
-interface FilenameRule { patterns: RegExp[]; category: Category; }
+interface FilenameRule { patterns: RegExp[]; category: Category; exclude?: RegExp[]; }
 
 const FILENAME_RULES: FilenameRule[] = [
   // OTP — very specific only
@@ -103,11 +103,38 @@ const FILENAME_RULES: FilenameRule[] = [
     ],
     category: "Documents",
   },
-  // Camera photos
+  // Camera & photo apps
   {
     patterns: [
-      /^img_\d{8}_\d{6}/i, /^dsc[f]?_?\d+/i, /^pxl_\d{8}/i,
-      /^cam\d+/i, /^dji_\d+/i, /^photo_\d{4}-\d{2}-\d{2}/i,
+      // Standard camera prefixes
+      /^img_/i, /^dsc/i, /^dcim/i, /^cam_/i, /^pxl_/i, /^photo_/i,
+      // Shot modes
+      /^burst/i, /^portrait/i, /^selfie/i, /^pano_/i, /^night_/i,
+      /^wide_/i, /^macro_/i, /^mvimg_/i, /^cimg_/i, /^rimg_/i,
+      // Device brand prefixes
+      /^mi_/i, /^poco_/i, /^redmi_/i, /^oneplus_/i, /^realme_/i,
+      /^vivo_/i, /^oppo_/i, /^samsung_/i, /^huawei_/i, /^honor_/i,
+      // Editing & filter apps
+      /^vsco_/i, /^snapseed_/i, /^pixel_/i, /^gcam_/i, /^b612_/i,
+      /^snow_/i, /^cymera_/i, /^foodie_/i, /^retrica_/i, /^picart_/i,
+      /^canva_/i,
+      // Shot styles
+      /^bokeh_/i, /^hdr_/i, /^ultra_/i, /^zoom_/i, /^front_/i,
+      /^back_/i, /^timelapse_/i, /^slowmo_/i,
+      // Video / action cam
+      /^live_/i, /^video_/i, /^mov_/i, /^dji_/i, /^gopro_/i,
+      // Social app saved media
+      /^insta_/i, /^fb_/i, /^twitter_/i, /^tele_/i, /^signal_/i,
+      /^discord_/i, /^snapchat_/i, /^tg_/i, /^wp_temp_/i,
+      // Photo editing app exports
+      /^ps_/i, /^lr_/i, /^afterlight_/i, /^facetune_/i, /^meitu_/i,
+      /^beautycam_/i, /^ulike_/i,
+      // RAW formats
+      /^raw_/i, /^dng_/i, /^cr2_/i, /^nef_/i, /^arw_/i,
+      /\.dng$/i, /\.cr2$/i, /\.nef$/i, /\.arw$/i,
+    ],
+    exclude: [
+      /screenshot/i, /screen/i, /\bwa\b/i, /whatsapp/i, /\botp\b/i,
     ],
     category: "Photos",
   },
@@ -1572,7 +1599,10 @@ export function categorizeByFilename(filename: string): Category | null {
   const name = filename.toLowerCase();
   for (const rule of FILENAME_RULES) {
     for (const pattern of rule.patterns) {
-      if (pattern.test(name)) return rule.category;
+      if (pattern.test(name)) {
+        if (rule.exclude && rule.exclude.some(ex => ex.test(name))) break;
+        return rule.category;
+      }
     }
   }
   return null;
