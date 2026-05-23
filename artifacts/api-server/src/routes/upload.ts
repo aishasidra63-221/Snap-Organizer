@@ -92,6 +92,7 @@ router.post("/upload", (req, res, next) => {
         tempPath: string;
         needsOcr: boolean;
         entryIndex: number;
+        ocrText?: string | null;
       }[] = [];
 
       for (const file of files) {
@@ -130,6 +131,7 @@ router.post("/upload", (req, res, next) => {
           isDuplicate: f.isDuplicate,
           size: f.size,
           tempPath: f.tempPath,
+          ocrText: f.ocrText ?? null,
         })),
       });
 
@@ -156,6 +158,7 @@ router.post("/upload", (req, res, next) => {
         for (const [entryIndex, text] of ocrResults.entries()) {
           const entry = fileEntries[entryIndex];
           if (!entry || !entry.needsOcr) continue;
+          entry.ocrText = text || null;
           const byText = categorizeByText(text);
           if (byText) {
             entry.category = byText;
@@ -178,6 +181,7 @@ router.post("/upload", (req, res, next) => {
           isDuplicate: f.isDuplicate,
           size: f.size,
           tempPath: f.tempPath,
+          ocrText: f.ocrText ?? null,
         })),
       });
     } catch (e) {

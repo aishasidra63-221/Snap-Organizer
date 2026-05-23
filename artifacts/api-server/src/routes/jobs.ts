@@ -48,6 +48,7 @@ router.get("/jobs/:jobId/categories", (req, res) => {
       hash: f.hash,
       isDuplicate: f.isDuplicate,
       size: f.size,
+      ocrText: f.ocrText ?? null,
     })),
   }));
 
@@ -72,6 +73,8 @@ router.post("/jobs/:jobId/confirm", async (req, res) => {
   }
 
   const overrides: Record<string, string> = req.body?.categoryOverrides ?? {};
+  const deletedFiles: string[] = req.body?.deletedFiles ?? [];
+  const deletedSet = new Set(deletedFiles);
 
   updateJob(job.jobId, { status: "zipping" });
 
@@ -81,6 +84,7 @@ router.post("/jobs/:jobId/confirm", async (req, res) => {
 
       for (const file of job.files) {
         if (!fs.existsSync(file.tempPath)) continue;
+        if (deletedSet.has(file.originalName)) continue;
 
         const category = overrides[file.originalName] ?? file.category;
         const folderName = category.replace(/[/\\?%*:|"<>]/g, "-");

@@ -38,6 +38,11 @@ export interface FileEntry {
   hash: string;
   isDuplicate: boolean;
   size: number;
+  /**
+     * OCR-extracted text from the image, if OCR was run
+     * @nullable
+     */
+  ocrText?: string | null;
 }
 
 export interface CategoryGroup {
@@ -66,13 +71,15 @@ export interface Job {
 }
 
 /**
- * Map of filename to overridden category (user edits)
+ * Map of originalName to overridden category (user edits)
  */
 export type JobConfirmInputCategoryOverrides = {[key: string]: string};
 
 export interface JobConfirmInput {
-  /** Map of filename to overridden category (user edits) */
+  /** Map of originalName to overridden category (user edits) */
   categoryOverrides?: JobConfirmInputCategoryOverrides;
+  /** List of originalNames to exclude from the ZIP entirely */
+  deletedFiles?: string[];
 }
 
 export interface ConfirmResult {

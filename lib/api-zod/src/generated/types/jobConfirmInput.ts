@@ -8,6 +8,8 @@
 import type { JobConfirmInputCategoryOverrides } from './jobConfirmInputCategoryOverrides';
 
 export interface JobConfirmInput {
-  /** Map of filename to overridden category (user edits) */
+  /** Map of originalName to overridden category (user edits) */
   categoryOverrides?: JobConfirmInputCategoryOverrides;
+  /** List of originalNames to exclude from the ZIP entirely */
+  deletedFiles?: string[];
 }

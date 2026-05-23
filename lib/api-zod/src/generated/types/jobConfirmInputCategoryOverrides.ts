@@ -7,6 +7,6 @@
  */
 
 /**
- * Map of filename to overridden category (user edits)
+ * Map of originalName to overridden category (user edits)
  */
 export type JobConfirmInputCategoryOverrides = {[key: string]: string};

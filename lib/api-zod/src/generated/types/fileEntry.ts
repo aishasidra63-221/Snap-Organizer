@@ -13,4 +13,9 @@ export interface FileEntry {
   hash: string;
   isDuplicate: boolean;
   size: number;
+  /**
+     * OCR-extracted text from the image, if OCR was run
+     * @nullable
+     */
+  ocrText?: string | null;
 }

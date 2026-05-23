@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetJob, getGetJobQueryKey,
@@ -15,6 +15,7 @@ import {
   Moon, Sun, Download, CheckCircle, RotateCcw,
   AlertCircle, Loader2, X,
   Upload, Cpu, FolderOpen, ShieldCheck, Zap, ScanSearch, Eye,
+  Trash2, Search, FolderSymlink,
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import {
@@ -53,7 +54,7 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// ─── Upload Step (full landing page) ────────────────────────────────────────
+// ─── Upload Step ─────────────────────────────────────────────────────────────
 function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, files: File[]) => void }) {
   const [dragging, setDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -94,31 +95,19 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
 
   const totalSize = selectedFiles.reduce((a, f) => a + f.size, 0);
 
-  const scrollToUpload = () => {
-    uploadRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    setTimeout(() => inputRef.current?.click(), 400);
-  };
-
   return (
     <div className="flex flex-col min-h-[calc(100vh-56px)]">
-
-      {/* ══════════════════════════════════════════════════
-          HERO — centered title + tagline
-      ══════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-gradient-to-b from-accent/30 via-background to-background pt-14 pb-7 px-6 text-center">
-        {/* Blurred blobs */}
         <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-primary/10 blur-[80px]" />
         <div className="pointer-events-none absolute top-20 -right-20 w-64 h-64 rounded-full bg-violet-500/8 blur-3xl" />
         <div className="pointer-events-none absolute top-20 -left-20 w-64 h-64 rounded-full bg-pink-500/6 blur-3xl" />
 
         <div className="relative max-w-2xl mx-auto space-y-6">
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
             <ShieldCheck className="h-3.5 w-3.5" />
             Rule-based · No AI · No data leaves your browser
           </div>
 
-          {/* Title */}
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.07]">
             Organize your<br />
             <span className="bg-gradient-to-r from-primary via-violet-500 to-pink-500 bg-clip-text text-transparent">
@@ -126,14 +115,11 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
             </span>
           </h1>
 
-          {/* Subtitle */}
           <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed max-w-xl mx-auto">
             Drop up to <strong className="text-foreground">500 screenshots</strong> and SnapVault sorts everything into <strong className="text-foreground">smart folders</strong> — instantly.
           </p>
 
-          {/* ── UPLOAD ZONE ── */}
           <div ref={uploadRef} className="space-y-4 pt-2 text-left">
-            {/* Drop zone */}
             <div
               data-testid="dropzone"
               onDragOver={e => { e.preventDefault(); setDragging(true); }}
@@ -142,21 +128,16 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
               onClick={() => !uploading && inputRef.current?.click()}
               className={[
                 "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer select-none",
-                dragging
-                  ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10"
-                  : "border-border hover:border-primary/50 hover:bg-muted/20",
+                dragging ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/20",
                 uploading ? "cursor-not-allowed opacity-60 pointer-events-none" : "",
               ].join(" ")}
             >
-              {/* Grid bg */}
               <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
-                style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--foreground)) 1px,transparent 1px)", backgroundSize: "28px 28px" }}
-              />
+                style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--foreground)) 1px,transparent 1px)", backgroundSize: "28px 28px" }} />
               <input ref={inputRef} type="file" multiple accept="image/*" className="hidden"
                 onChange={onInputChange} disabled={uploading} data-testid="file-input" />
 
               <div className="relative flex flex-col items-center gap-5 px-8 py-12">
-                {/* Icon ring */}
                 <div className={`relative flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${dragging ? "bg-primary/15 scale-110" : "bg-muted"}`}>
                   <div className={`absolute inset-0 rounded-full border-2 border-dashed transition-all ${dragging ? "border-primary animate-spin" : "border-border/50"}`} style={{ animationDuration: "8s" }} />
                   <Upload className={`w-8 h-8 transition-colors ${dragging ? "text-primary" : "text-muted-foreground"}`} />
@@ -191,14 +172,12 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="flex items-center gap-2.5 text-destructive text-sm bg-destructive/8 border border-destructive/20 px-4 py-3 rounded-xl" data-testid="upload-error">
                 <AlertCircle className="h-4 w-4 shrink-0" />{error}
               </div>
             )}
 
-            {/* Upload progress */}
             {uploading && (
               <div className="space-y-2" data-testid="upload-progress">
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -209,7 +188,6 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
               </div>
             )}
 
-            {/* Action buttons */}
             <div className="flex gap-2.5">
               {selectedFiles.length > 0 && !uploading && (
                 <Button variant="outline" className="shrink-0" onClick={e => { e.stopPropagation(); setSelectedFiles([]); }} data-testid="button-clear">
@@ -228,7 +206,6 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
               </Button>
             </div>
 
-            {/* Feature pills */}
             <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-1">
               <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-400" /> SHA-256 dedup</span>
               <span className="flex items-center gap-1.5"><ScanSearch className="h-3.5 w-3.5 text-blue-400" /> OCR fallback</span>
@@ -238,32 +215,14 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════
-          HOW IT WORKS — 3 steps
-      ══════════════════════════════════════════════════ */}
       <section className="px-6 py-8 border-y border-border bg-muted/20">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-5">How it works</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              {
-                step: "01", Icon: Upload,
-                color: "text-primary", bg: "bg-primary/10",
-                title: "Upload photos",
-                desc: "Drag-and-drop or pick up to 500 screenshots. Any format: PNG, JPG, WebP, HEIC.",
-              },
-              {
-                step: "02", Icon: Cpu,
-                color: "text-violet-500", bg: "bg-violet-500/10",
-                title: "Auto-process",
-                desc: "SHA-256 deduplication removes exact copies. Rule-based + OCR categorization sorts the rest.",
-              },
-              {
-                step: "03", Icon: Download,
-                color: "text-emerald-500", bg: "bg-emerald-500/10",
-                title: "Download ZIP",
-                desc: "Review folder cards, approve, and download a structured ZIP with one folder per category.",
-              },
+              { step: "01", Icon: Upload, color: "text-primary", bg: "bg-primary/10", title: "Upload photos", desc: "Drag-and-drop or pick up to 500 screenshots. Any format: PNG, JPG, WebP, HEIC." },
+              { step: "02", Icon: Cpu, color: "text-violet-500", bg: "bg-violet-500/10", title: "Auto-process", desc: "SHA-256 deduplication removes exact copies. Rule-based + OCR categorization sorts the rest." },
+              { step: "03", Icon: Download, color: "text-emerald-500", bg: "bg-emerald-500/10", title: "Download ZIP", desc: "Review folder cards, approve, and download a structured ZIP with one folder per category." },
             ].map(({ step, Icon, color, bg, title, desc }) => (
               <div key={step} className="relative flex flex-col items-center text-center gap-4 p-6 rounded-2xl border border-border bg-card">
                 <span className="absolute top-4 right-4 text-xs font-mono font-bold text-muted-foreground/40">{step}</span>
@@ -280,9 +239,6 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════
-          FOLDERS — all 10 categories preview
-      ══════════════════════════════════════════════════ */}
       <section className="px-6 py-14 border-t border-border bg-muted/10">
         <div className="max-w-5xl mx-auto space-y-8">
           <div className="text-center space-y-2">
@@ -311,8 +267,6 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
         </div>
       </section>
 
-
-      {/* Footer */}
       <footer className="border-t border-border px-6 py-5 mt-auto">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-2 font-semibold text-foreground/70">
@@ -330,7 +284,7 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
   );
 }
 
-// ─── Processing Step ─────────────────────────────────────────────────────────
+// ─── Processing Step ──────────────────────────────────────────────────────────
 function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void }) {
   const { data: job, isError } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId), refetchInterval: 800, retry: 2 },
@@ -374,8 +328,6 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6">
       <div className="w-full max-w-md space-y-8">
-
-        {/* Ring + % */}
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-28 h-28">
             <div className="absolute inset-0 rounded-full bg-primary/8" />
@@ -397,7 +349,6 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
           </div>
         </div>
 
-        {/* Steps list */}
         <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border" data-testid="processing-progress">
           {steps.map((s, i) => {
             const isActive = i === steps.filter(x => x.done).length - 1 && !steps[i + 1]?.done;
@@ -415,7 +366,6 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
           })}
         </div>
 
-        {/* Duplicate notice */}
         {(job?.duplicateCount ?? 0) > 0 && (
           <div className="flex items-center gap-2.5 text-sm bg-red-500/8 border border-red-500/20 px-4 py-3 rounded-xl" data-testid="duplicate-notice">
             <DuplicateIcon className="h-4 w-4 text-red-400 shrink-0" />
@@ -427,56 +377,208 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
   );
 }
 
-// ─── Folder Detail Page (full-page inline view) ───────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface FileItem {
+  filename: string;
+  originalName: string;
+  category: string;
+  hash: string;
+  isDuplicate: boolean;
+  size: number;
+  ocrText?: string | null;
+}
+
+interface EffectiveGroup {
+  category: string;
+  count: number;
+  files: FileItem[];
+}
+
+// ─── Folder Detail Page ───────────────────────────────────────────────────────
 function FolderDetailPage({
   group,
   getPreviewUrl,
   onBack,
+  onDelete,
+  onMove,
 }: {
-  group: { category: string; count: number; files: { filename: string; originalName: string }[] };
+  group: EffectiveGroup;
   getPreviewUrl: (name: string) => string | null;
   onBack: () => void;
+  onDelete: (originalNames: string[]) => void;
+  onMove: (originalName: string, newCategory: string) => void;
 }) {
   const meta = CATEGORY_META[group.category] ?? CATEGORY_META["Unknown / Others"];
   const { Icon } = meta;
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [moveTarget, setMoveTarget] = useState<string | null>(null);
+
+  const filteredFiles = useMemo(() => {
+    if (!searchQuery.trim()) return group.files;
+    const q = searchQuery.toLowerCase();
+    return group.files.filter(f =>
+      f.originalName.toLowerCase().includes(q) ||
+      (f.ocrText?.toLowerCase().includes(q) ?? false)
+    );
+  }, [group.files, searchQuery]);
+
+  const toggleSelect = (originalName: string) => {
+    setSelectedFiles(prev => {
+      const next = new Set(prev);
+      if (next.has(originalName)) next.delete(originalName);
+      else next.add(originalName);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = () => {
+    onDelete(Array.from(selectedFiles));
+    setSelectedFiles(new Set());
+    setIsSelectMode(false);
+  };
+
+  const handleSelectAll = () => {
+    setSelectedFiles(new Set(filteredFiles.map(f => f.originalName)));
+  };
+
+  const exitSelectMode = () => {
+    setIsSelectMode(false);
+    setSelectedFiles(new Set());
+  };
+
+  const handleMoveConfirm = (newCategory: string) => {
+    if (!moveTarget) return;
+    onMove(moveTarget, newCategory);
+    setMoveTarget(null);
+  };
+
+  const q = searchQuery.toLowerCase();
+
   return (
     <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
-      {/* Sticky header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={onBack}
-          className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0"
-          aria-label="Back to folders"
-        >
-          <X className="h-4 w-4 text-foreground" />
-        </button>
-        <div className={`w-9 h-9 rounded-xl ${meta.bg} border border-white/10 flex items-center justify-center shrink-0`}>
-          <Icon className={`h-4.5 w-4.5 ${meta.color}`} />
+
+      {/* ── Sticky header ── */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
+        <div className="px-4 py-3 flex items-center gap-3">
+
+          {/* Back / Cancel */}
+          <button
+            onClick={isSelectMode ? exitSelectMode : onBack}
+            className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0"
+            aria-label={isSelectMode ? "Cancel selection" : "Back to folders"}
+          >
+            <X className="h-4 w-4 text-foreground" />
+          </button>
+
+          {isSelectMode ? (
+            <>
+              <p className="flex-1 text-sm font-semibold text-foreground">
+                {selectedFiles.size > 0 ? `${selectedFiles.size} selected` : "Tap to select"}
+              </p>
+              <button
+                onClick={handleSelectAll}
+                className="text-xs text-primary font-semibold px-2 py-1 rounded-lg hover:bg-primary/10 transition-colors"
+              >
+                Select all
+              </button>
+              {selectedFiles.size > 0 && (
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-semibold transition-all hover:opacity-90 active:scale-95"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete ({selectedFiles.size})
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div className={`w-9 h-9 rounded-xl ${meta.bg} border border-white/10 flex items-center justify-center shrink-0`}>
+                <Icon className={`h-4.5 w-4.5 ${meta.color}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold leading-tight truncate">{group.category}</p>
+                <p className="text-xs text-muted-foreground">{group.count} file{group.count !== 1 ? "s" : ""}</p>
+              </div>
+              <button
+                onClick={() => setIsSelectMode(true)}
+                className="text-xs text-muted-foreground hover:text-foreground font-semibold px-2.5 py-1.5 rounded-xl hover:bg-muted transition-colors shrink-0"
+              >
+                Select
+              </button>
+              <Badge variant="secondary" className="font-mono text-xs tabular-nums shrink-0" style={{ color: meta.textColor }}>
+                {group.count}
+              </Badge>
+            </>
+          )}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold leading-tight truncate">{group.category}</p>
-          <p className="text-xs text-muted-foreground">{group.count} file{group.count !== 1 ? "s" : ""}</p>
+
+        {/* ── Search bar ── */}
+        <div className="px-4 pb-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search by filename or text in image…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-8 py-2 text-sm bg-muted/60 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 placeholder:text-muted-foreground/50 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-muted-foreground/20 transition-colors"
+              >
+                <X className="h-3 w-3 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <p className="text-xs text-muted-foreground mt-1.5 pl-1">
+              {filteredFiles.length} result{filteredFiles.length !== 1 ? "s" : ""} for "{searchQuery}"
+            </p>
+          )}
         </div>
-        <Badge variant="secondary" className="font-mono text-xs tabular-nums shrink-0" style={{ color: meta.textColor }}>
-          {group.count}
-        </Badge>
       </div>
 
-      {/* Grid */}
+      {/* ── File grid ── */}
       <div className="flex-1 px-3 py-4 overflow-y-auto">
-        {group.files.length === 0 ? (
+        {filteredFiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
-            <PhotoIcon className="h-12 w-12 opacity-30" />
-            <p className="text-sm font-medium">No files in this folder</p>
+            {searchQuery ? (
+              <>
+                <Search className="h-10 w-10 opacity-25" />
+                <p className="text-sm font-medium">No files match "{searchQuery}"</p>
+                <button onClick={() => setSearchQuery("")} className="text-xs text-primary underline">Clear search</button>
+              </>
+            ) : (
+              <>
+                <PhotoIcon className="h-12 w-12 opacity-30" />
+                <p className="text-sm font-medium">No files in this folder</p>
+              </>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2">
-            {group.files.map(file => {
+            {filteredFiles.map(file => {
               const url = getPreviewUrl(file.originalName);
+              const isSelected = selectedFiles.has(file.originalName);
+              const nameHighlight = searchQuery && file.originalName.toLowerCase().includes(q);
+              const ocrHighlight = searchQuery && (file.ocrText?.toLowerCase().includes(q) ?? false);
+
               return (
                 <div key={file.filename} className="flex flex-col gap-1">
-                  <div className="relative aspect-square rounded-xl bg-muted border border-border/60 overflow-hidden">
+                  <div
+                    className={`relative aspect-square rounded-xl bg-muted overflow-hidden cursor-pointer transition-all duration-150 ${
+                      isSelected
+                        ? "ring-2 ring-primary ring-offset-1 ring-offset-background shadow-lg"
+                        : "border border-border/60 hover:border-border"
+                    }`}
+                    onClick={() => isSelectMode && toggleSelect(file.originalName)}
+                  >
                     {url ? (
                       <img
                         src={url}
@@ -489,8 +591,41 @@ function FolderDetailPage({
                         <PhotoIcon className="h-5 w-5 text-muted-foreground/40" />
                       </div>
                     )}
+
+                    {/* OCR match badge */}
+                    {ocrHighlight && !nameHighlight && (
+                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-primary/80 backdrop-blur-sm text-[9px] font-semibold text-white">
+                        OCR
+                      </div>
+                    )}
+
+                    {/* Selection checkbox (select mode) */}
+                    {isSelectMode && (
+                      <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${
+                        isSelected ? "bg-primary border-primary" : "bg-background/80 border-muted-foreground/40"
+                      }`}>
+                        {isSelected && (
+                          <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
+                            <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Move button (normal mode) */}
+                    {!isSelectMode && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setMoveTarget(file.originalName); }}
+                        className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-background/85 backdrop-blur-sm border border-border/50 flex items-center justify-center opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity shadow-sm"
+                        title="Move to another folder"
+                        aria-label={`Move ${file.originalName} to another folder`}
+                      >
+                        <FolderSymlink className="h-3 w-3 text-foreground" />
+                      </button>
+                    )}
                   </div>
-                  <p className="text-[10px] text-muted-foreground truncate px-0.5 font-mono leading-tight">
+
+                  <p className={`text-[10px] truncate px-0.5 font-mono leading-tight ${nameHighlight ? "text-primary font-bold" : "text-muted-foreground"}`}>
                     {file.originalName}
                   </p>
                 </div>
@@ -499,22 +634,74 @@ function FolderDetailPage({
           </div>
         )}
       </div>
+
+      {/* ── Move to folder overlay ── */}
+      {moveTarget && (
+        <div
+          className="fixed inset-0 z-50 bg-background/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          onClick={() => setMoveTarget(null)}
+        >
+          <div
+            className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-4 py-3.5 border-b border-border flex items-center gap-3">
+              <FolderSymlink className="h-4 w-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm">Move to folder</p>
+                <p className="text-xs text-muted-foreground truncate">{moveTarget}</p>
+              </div>
+              <button onClick={() => setMoveTarget(null)} className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
+                <X className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            </div>
+
+            {/* Category grid */}
+            <div className="p-3 grid grid-cols-2 gap-2 max-h-72 overflow-y-auto">
+              {Object.entries(CATEGORY_META)
+                .filter(([cat]) => cat !== group.category && cat !== "Duplicates")
+                .map(([cat, catMeta]) => {
+                  const CatIcon = catMeta.Icon;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => handleMoveConfirm(cat)}
+                      className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left active:scale-95 bg-gradient-to-br ${catMeta.gradient} border-border/60 hover:border-primary/40 hover:shadow-md`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg ${catMeta.bg} flex items-center justify-center shrink-0 border border-white/10`}>
+                        <CatIcon className={`h-3.5 w-3.5 ${catMeta.color}`} />
+                      </div>
+                      <span className="text-xs font-medium leading-tight">{cat}</span>
+                    </button>
+                  );
+                })}
+            </div>
+
+            <div className="px-3 pb-3">
+              <button
+                onClick={() => setMoveTarget(null)}
+                className="w-full py-2 text-sm text-muted-foreground hover:text-foreground font-medium rounded-xl hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ─── Review Step ─────────────────────────────────────────────────────────────
+// ─── Review Step ──────────────────────────────────────────────────────────────
 function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
   jobId: string;
   uploadedFiles: File[];
   onConfirm: () => void;
 }) {
-  const [overrides] = useState<Record<string, string>>({});
-  const [previewGroup, setPreviewGroup] = useState<{
-    category: string;
-    count: number;
-    files: { filename: string; originalName: string }[];
-  } | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set());
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const confirmJob = useConfirmJob();
 
@@ -522,26 +709,75 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
     query: { enabled: !!jobId, queryKey: getGetJobCategoriesQueryKey(jobId) },
   });
 
-  const fileMap = new Map(uploadedFiles.map(f => [f.name, f]));
+  const fileMap = useMemo(() => new Map(uploadedFiles.map(f => [f.name, f])), [uploadedFiles]);
   const getPreviewUrl = (originalName: string) => {
     const f = fileMap.get(originalName);
     return f ? URL.createObjectURL(f) : null;
   };
 
+  // Compute effective groups (applying client-side deletes + moves)
+  const effectiveGroups = useMemo((): EffectiveGroup[] => {
+    if (!breakdown) return [];
+
+    const grouped = new Map<string, FileItem[]>();
+
+    for (const group of breakdown.categories) {
+      for (const file of group.files) {
+        if (deletedFiles.has(file.originalName)) continue;
+        const effectiveCategory = overrides[file.originalName] ?? file.category;
+        if (!grouped.has(effectiveCategory)) grouped.set(effectiveCategory, []);
+        grouped.get(effectiveCategory)!.push({ ...file, category: effectiveCategory } as FileItem);
+      }
+    }
+
+    return Array.from(grouped.entries())
+      .map(([category, files]) => ({ category, count: files.length, files }))
+      .filter(g => g.count > 0)
+      .sort((a, b) => b.count - a.count);
+  }, [breakdown, deletedFiles, overrides]);
+
+  const handleDelete = (originalNames: string[]) => {
+    setDeletedFiles(prev => {
+      const next = new Set(prev);
+      originalNames.forEach(n => next.add(n));
+      return next;
+    });
+    setSelectedCategory(null);
+  };
+
+  const handleMove = (originalName: string, newCategory: string) => {
+    setOverrides(prev => ({ ...prev, [originalName]: newCategory }));
+  };
+
   const handleConfirm = () => {
     confirmJob.mutate(
-      { jobId, data: { categoryOverrides: overrides } },
-      { onSuccess: () => { queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) }); onConfirm(); } }
+      {
+        jobId,
+        data: {
+          categoryOverrides: overrides,
+          deletedFiles: Array.from(deletedFiles),
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) });
+          onConfirm();
+        },
+      }
     );
   };
 
-  // Show folder detail page when a category is selected
-  if (previewGroup) {
+  // Show folder detail page
+  if (selectedCategory !== null) {
+    const group = effectiveGroups.find(g => g.category === selectedCategory)
+      ?? { category: selectedCategory, count: 0, files: [] };
     return (
       <FolderDetailPage
-        group={previewGroup}
+        group={group}
         getPreviewUrl={getPreviewUrl}
-        onBack={() => setPreviewGroup(null)}
+        onBack={() => setSelectedCategory(null)}
+        onDelete={handleDelete}
+        onMove={handleMove}
       />
     );
   }
@@ -556,30 +792,39 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
     );
   }
 
-  const categories = breakdown?.categories ?? [];
   const totalFiles = breakdown?.totalFiles ?? 0;
+  const effectiveTotalFiles = totalFiles - deletedFiles.size;
   const duplicateCount = breakdown?.duplicateCount ?? 0;
+
+  const pendingChanges = deletedFiles.size + Object.keys(overrides).length;
 
   return (
     <div className="min-h-[calc(100vh-56px)] px-6 py-10">
       <div className="max-w-5xl mx-auto space-y-7">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-2 border-b border-border">
           <div>
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
               <FolderOpen className="h-3.5 w-3.5" /> Review folders
             </div>
             <h2 className="text-2xl font-bold">Review folders</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              <span className="text-foreground font-medium">{totalFiles.toLocaleString()}</span> files sorted into{" "}
-              <span className="text-foreground font-medium">{categories.length}</span> categories
+              <span className="text-foreground font-medium">{effectiveTotalFiles.toLocaleString()}</span> files in{" "}
+              <span className="text-foreground font-medium">{effectiveGroups.length}</span> categories
               {duplicateCount > 0 && (
                 <span className="ml-2 inline-flex items-center gap-1 text-red-400">
-                  · <DuplicateIcon className="h-3.5 w-3.5" /> {duplicateCount} duplicates found
+                  · <DuplicateIcon className="h-3.5 w-3.5" /> {duplicateCount} duplicates
                 </span>
               )}
             </p>
+            {pendingChanges > 0 && (
+              <div className="mt-2 inline-flex items-center gap-2 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
+                <span className="font-semibold">{pendingChanges}</span> pending change{pendingChanges !== 1 ? "s" : ""}
+                {deletedFiles.size > 0 && <span>· {deletedFiles.size} deleted</span>}
+                {Object.keys(overrides).length > 0 && <span>· {Object.keys(overrides).length} moved</span>}
+              </div>
+            )}
           </div>
           <Button
             size="lg"
@@ -600,9 +845,22 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
           </div>
         )}
 
+        {/* Tips bar */}
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
+            <Search className="h-3 w-3" /> Tap folder → search files
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
+            <FolderSymlink className="h-3 w-3" /> Hover thumbnail → move file
+          </span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
+            <Trash2 className="h-3 w-3" /> Select → bulk delete
+          </span>
+        </div>
+
         {/* Category cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map(group => {
+          {effectiveGroups.map(group => {
             const meta = CATEGORY_META[group.category] ?? CATEGORY_META["Unknown / Others"];
             const { Icon } = meta;
             const previews = group.files.slice(0, 4);
@@ -612,12 +870,11 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
               <button
                 key={group.category}
                 className={`relative overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] group text-left w-full cursor-pointer ${isDup ? "border-red-400/30" : "border-border hover:border-primary/25"}`}
-                onClick={() => setPreviewGroup({ category: group.category, count: group.count, files: group.files })}
+                onClick={() => setSelectedCategory(group.category)}
                 data-testid={`category-card-${group.category}`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient} opacity-70 pointer-events-none`} />
                 <div className="relative p-4 space-y-3">
-                  {/* Header row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className={`w-9 h-9 rounded-xl ${meta.bg} border border-white/10 flex items-center justify-center`}>
@@ -636,10 +893,8 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
                     </div>
                   </div>
 
-                  {/* Folder SVG */}
                   <FolderSVG color={meta.folderColor} className="w-full h-12" />
 
-                  {/* Thumbnails */}
                   <div className="flex gap-1.5">
                     {previews.map(file => {
                       const url = getPreviewUrl(file.originalName);
@@ -671,7 +926,7 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
   );
 }
 
-// ─── Done Step ───────────────────────────────────────────────────────────────
+// ─── Done Step ────────────────────────────────────────────────────────────────
 function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => void }) {
   const queryClient = useQueryClient();
   const cleanupJob = useCleanupJob();
@@ -710,7 +965,6 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6 py-12">
       <div className="w-full max-w-lg space-y-8">
 
-        {/* Status */}
         <div className="text-center space-y-3">
           <div className="relative inline-flex items-center justify-center w-24 h-24">
             <div className="absolute inset-0 rounded-full bg-primary/10" />
@@ -729,7 +983,6 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
           </p>
         </div>
 
-        {/* Stats */}
         {statsLoading ? (
           <div className="grid grid-cols-3 gap-3">
             {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
@@ -749,7 +1002,6 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
           </div>
         ) : null}
 
-        {/* Breakdown */}
         {sortedCats.length > 0 && (
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
             <div className="px-4 py-3 border-b border-border">
@@ -779,7 +1031,6 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
           </div>
         )}
 
-        {/* Actions */}
         <div className="space-y-2.5">
           <Button size="lg" className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
             disabled={!zipReady} onClick={handleDownload} data-testid="button-download">
@@ -797,7 +1048,7 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
   );
 }
 
-// ─── Main ────────────────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 type StepDef = { key: Step; label: string; Icon: React.ElementType };
 
 export default function Home() {
@@ -841,8 +1092,6 @@ export default function Home() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-
-          {/* Logo */}
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-sm shadow-primary/30">
               <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
@@ -853,7 +1102,6 @@ export default function Home() {
             <span className="font-extrabold text-base tracking-tight">SnapVault</span>
           </div>
 
-          {/* Step progress breadcrumb */}
           {step !== "upload" && (
             <div className="hidden sm:flex items-center gap-0.5 flex-1 justify-center">
               {stepDefs.map((s, i) => (
@@ -865,9 +1113,7 @@ export default function Home() {
                       ? "text-primary"
                       : "text-muted-foreground"
                   }`}>
-                    {i < currentIdx
-                      ? <CheckCircle className="h-3 w-3" />
-                      : <s.Icon className="h-3 w-3" />}
+                    {i < currentIdx ? <CheckCircle className="h-3 w-3" /> : <s.Icon className="h-3 w-3" />}
                     {s.label}
                   </div>
                   {i < stepDefs.length - 1 && <div className="w-5 h-px bg-border mx-0.5" />}
@@ -876,7 +1122,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Theme toggle */}
           <button
             onClick={toggleTheme}
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
@@ -888,7 +1133,6 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Pages */}
       {step === "upload" && <UploadStep onUploadComplete={handleUploadComplete} />}
       {step === "processing" && jobId && (
         <ProcessingStep jobId={jobId} onReset={() => { setJobId(null); setUploadedFiles([]); setStep("upload"); }} />

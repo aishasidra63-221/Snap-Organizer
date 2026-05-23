@@ -17,6 +17,7 @@ export interface FileEntry {
   isDuplicate: boolean;
   size: number;
   tempPath: string;
+  ocrText?: string | null;
 }
 
 export interface Job {

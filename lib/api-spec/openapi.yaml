@@ -242,6 +242,9 @@ components:
           type: boolean
         size:
           type: integer
+        ocrText:
+          type: ["string", "null"]
+          description: OCR-extracted text from the image, if OCR was run
       required:
         - filename
         - originalName
@@ -320,7 +323,12 @@ components:
           type: object
           additionalProperties:
             type: string
-          description: Map of filename to overridden category (user edits)
+          description: Map of originalName to overridden category (user edits)
+        deletedFiles:
+          type: array
+          items:
+            type: string
+          description: List of originalNames to exclude from the ZIP entirely
 
     ConfirmResult:
       type: object

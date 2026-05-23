@@ -54,7 +54,8 @@ export const GetJobCategoriesResponse = zod.object({
   "category": zod.string(),
   "hash": zod.string(),
   "isDuplicate": zod.boolean(),
-  "size": zod.number()
+  "size": zod.number(),
+  "ocrText": zod.string().nullish().describe('OCR-extracted text from the image, if OCR was run')
 }))
 })),
   "totalFiles": zod.number(),
@@ -70,7 +71,8 @@ export const ConfirmJobParams = zod.object({
 })
 
 export const ConfirmJobBody = zod.object({
-  "categoryOverrides": zod.record(zod.string(), zod.string()).optional().describe('Map of filename to overridden category (user edits)')
+  "categoryOverrides": zod.record(zod.string(), zod.string()).optional().describe('Map of originalName to overridden category (user edits)'),
+  "deletedFiles": zod.array(zod.string()).optional().describe('List of originalNames to exclude from the ZIP entirely')
 })
 
 export const ConfirmJobResponse = zod.object({
