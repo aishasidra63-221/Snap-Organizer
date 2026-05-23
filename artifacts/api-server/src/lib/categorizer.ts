@@ -2392,7 +2392,7 @@ export function categorizeByText(rawText: string): Category | null {
   return scores[0].category;
 }
 
-/** Combined pipeline: filename → OCR text → Unknown */
+/** Combined pipeline: filename → OCR text → Screenshot fallback → Unknown */
 export function classify(filename: string, ocrText?: string): Category {
   const byName = categorizeByFilename(filename);
   if (byName) return byName;
@@ -2401,6 +2401,9 @@ export function classify(filename: string, ocrText?: string): Category {
     const byText = categorizeByText(ocrText);
     if (byText) return byText;
   }
+
+  // Any Screenshot_ file that matched no folder falls back to Photos
+  if (/screenshot/i.test(filename)) return "Photos";
 
   return "Unknown / Others";
 }
