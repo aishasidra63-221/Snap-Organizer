@@ -1,6 +1,18 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
-import { Sun, Moon, ScanSearch, Copy, Folder, Cpu, ChevronRight } from "lucide-react";
+import { Sun, Moon, ScanSearch, Copy, Folder, Cpu, ChevronRight, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -52,6 +64,17 @@ export default function Settings() {
   const [dedupEnabled, setDedupEnabled] = useState(true);
   const [processingMode, setProcessingMode] = useState("Balanced");
   const [folderNaming, setFolderNaming] = useState("Category Name");
+  const [showClearDialog, setShowClearDialog] = useState(false);
+
+  const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
+
+  function handleClearAll() {
+    queryClient.clear();
+    localStorage.clear();
+    sessionStorage.clear();
+    navigate("/");
+  }
 
   return (
     <div className="flex flex-col gap-5 pb-28 pt-4 px-4">
@@ -166,6 +189,47 @@ export default function Settings() {
           </button>
         ))}
       </div>
+
+      {/* Danger Zone */}
+      <div>
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Danger Zone</div>
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 overflow-hidden">
+          <button
+            onClick={() => setShowClearDialog(true)}
+            className="flex items-center gap-3 px-4 py-4 w-full hover:bg-destructive/10 transition-colors text-left"
+          >
+            <span className="w-9 h-9 rounded-xl bg-destructive/15 flex items-center justify-center shrink-0">
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-destructive">Clear All Data</div>
+              <div className="text-xs text-destructive/70">Remove all screenshots and processed data</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove all uploaded screenshots and processed data from your browser. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearAll}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear All Data
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
