@@ -285,24 +285,77 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
 }
 
 // ─── Processing Step ──────────────────────────────────────────────────────────
+// Simulated timeline: minimum realistic ms spent in each phase.
+// endPct = cumulative display-% at the end of that phase.
+const PROC_TIMELINE = [
+  { endPct:  10, endMs:   500 },  // Files received
+  { endPct:  28, endMs:  1400 },  // SHA-256 hashing
+  { endPct:  46, endMs:  2200 },  // Duplicate detection
+  { endPct:  64, endMs:  3000 },  // Filename categorization
+  { endPct:  90, endMs:  5000 },  // OCR scan
+  { endPct:  99, endMs:  5800 },  // Ready for review (hold at 99 until server confirms)
+] as const;
+
+// % threshold at which each step's circle turns green
+const PROC_STEP_THRESHOLDS = [10, 28, 46, 64, 90, 100];
+
+function getSimulatedPct(elapsedMs: number): number {
+  let prev = { endPct: 0, endMs: 0 };
+  for (const stage of PROC_TIMELINE) {
+    if (elapsedMs <= stage.endMs) {
+      const t = (elapsedMs - prev.endMs) / (stage.endMs - prev.endMs);
+      return prev.endPct + (stage.endPct - prev.endPct) * t;
+    }
+    prev = stage;
+  }
+  return 99; // hold until server confirms done
+}
+
 function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void }) {
   const { data: job, isError } = useGetJob(jobId, {
     query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId), refetchInterval: 800, retry: 2 },
   });
 
+  const startTimeRef = useRef<number>(Date.now());
+  const [displayPct, setDisplayPct] = useState(0);
+
   const processed = job?.processedFiles ?? 0;
-  const total = job?.totalFiles ?? 0;
-  const progress = total > 0 ? Math.round((processed / total) * 100) : 0;
-  const isOcrPhase = processed > 0 && processed < total && job?.status === "processing";
+  const total     = job?.totalFiles    ?? 0;
+  const isDone    = job?.status === "awaiting_confirmation";
+
+  // 50 ms ticker — smooth animation regardless of server speed
+  useEffect(() => {
+    const id = setInterval(() => {
+      const elapsed   = Date.now() - startTimeRef.current;
+      const simulated = getSimulatedPct(elapsed);
+      // Server real progress (OCR phase) can pull the bar forward faster
+      const serverPct = total > 0 ? (processed / total) * 100 * 0.9 : 0;
+      const target    = isDone ? 100 : Math.max(simulated, serverPct);
+
+      setDisplayPct(prev => {
+        if (prev >= target) return prev;                        // never go back
+        const step = isDone
+          ? Math.max(1.5, (target - prev) * 0.18)              // fast final sweep
+          : Math.max(0.3, (target - prev) * 0.06);             // gentle catch-up
+        return Math.min(target, prev + step);
+      });
+    }, 50);
+    return () => clearInterval(id);
+  }, [isDone, processed, total]);
 
   const steps = [
-    { label: "Files received",                  done: true },
-    { label: "SHA-256 hashing",                 done: processed > 0 },
-    { label: "Duplicate detection",             done: processed > 0 },
-    { label: "Filename-rule categorization",    done: processed > 0 },
-    { label: "OCR text scan (unmatched files)", done: !isOcrPhase && job?.status === "awaiting_confirmation" },
-    { label: "Ready for review",                done: job?.status === "awaiting_confirmation" },
-  ];
+    "Files received",
+    "SHA-256 hashing",
+    "Duplicate detection",
+    "Filename-rule categorization",
+    "OCR text scan (unmatched files)",
+    "Ready for review",
+  ].map((label, i) => ({
+    label,
+    done: displayPct >= PROC_STEP_THRESHOLDS[i],
+  }));
+
+  const progress = Math.round(displayPct);
 
   if (isError || job?.status === "error") {
     return (
