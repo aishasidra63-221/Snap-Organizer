@@ -12,7 +12,7 @@ export async function runOcrBatch(
 
   const workers = await Promise.all(
     Array.from({ length: Math.min(CONCURRENCY, items.length) }, () =>
-      createWorker("eng", 1, {
+      createWorker("eng+urd", 1, {
         logger: () => {},
         errorHandler: () => {},
       })
