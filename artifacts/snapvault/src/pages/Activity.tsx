@@ -1,5 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { CheckCircle2, XCircle, Clock, Zap, ScanSearch, Activity as ActivityIcon, Loader2 } from "lucide-react";
+import {
+  CheckCircle2, XCircle, Clock, Zap, ScanSearch,
+  Activity as ActivityIcon, Loader2, Files, Copy, Timer,
+} from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -11,6 +14,7 @@ interface JobSummary {
   duplicateCount: number;
   ocrCount: number;
   createdAt: string;
+  completedAt: string | null;
   errorMessage: string | null;
 }
 
@@ -39,12 +43,15 @@ function formatRelativeTime(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-function JobStatusIcon({ status }: { status: string }) {
-  if (status === "ready") return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
-  if (status === "error") return <XCircle className="h-4 w-4 text-red-400" />;
-  if (isActive(status)) return <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />;
-  if (status === "awaiting_confirmation") return <Clock className="h-4 w-4 text-amber-400" />;
-  return <Clock className="h-4 w-4 text-muted-foreground" />;
+function formatDuration(startIso: string, endIso: string | null): string | null {
+  if (!endIso) return null;
+  const ms = new Date(endIso).getTime() - new Date(startIso).getTime();
+  if (ms < 0) return null;
+  const secs = Math.floor(ms / 1000);
+  if (secs < 60) return `${secs}s`;
+  const mins = Math.floor(secs / 60);
+  const rem = secs % 60;
+  return rem > 0 ? `${mins}m ${rem}s` : `${mins}m`;
 }
 
 function jobLabel(status: string): string {
@@ -53,8 +60,123 @@ function jobLabel(status: string): string {
   if (status === "processing") return "Processing…";
   if (status === "uploading") return "Uploading…";
   if (status === "zipping") return "Zipping…";
-  if (status === "awaiting_confirmation") return "Awaiting review";
+  if (status === "awaiting_confirmation") return "Ready for review";
   return status;
+}
+
+function StatusBadge({ status }: { status: string }) {
+  if (status === "ready" || status === "awaiting_confirmation") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/12 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold">
+        <CheckCircle2 className="h-2.5 w-2.5" /> {jobLabel(status)}
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/12 text-red-500 text-[10px] font-semibold">
+        <XCircle className="h-2.5 w-2.5" /> Failed
+      </span>
+    );
+  }
+  if (isActive(status)) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/12 text-blue-500 text-[10px] font-semibold">
+        <Loader2 className="h-2.5 w-2.5 animate-spin" /> {jobLabel(status)}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
+      <Clock className="h-2.5 w-2.5" /> {jobLabel(status)}
+    </span>
+  );
+}
+
+function JobCard({ job, index, total }: { job: JobSummary; index: number; total: number }) {
+  const active = isActive(job.status);
+  const progress = job.totalFiles > 0 ? Math.round((job.processedFiles / job.totalFiles) * 100) : 0;
+  const duration = formatDuration(job.createdAt, job.completedAt);
+  const cleaned = job.totalFiles - job.duplicateCount;
+
+  return (
+    <div className={`px-4 py-4 ${index < total - 1 ? "border-b border-border" : ""}`}>
+      {/* Top row: status badge + timestamp */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <StatusBadge status={job.status} />
+        <span className="text-[10px] text-muted-foreground shrink-0">
+          {formatRelativeTime(job.createdAt)}
+        </span>
+      </div>
+
+      {/* Stat chips */}
+      {!active && job.totalFiles > 0 && (
+        <div className="grid grid-cols-2 gap-1.5 mb-2">
+          <div className="flex items-center gap-1.5 bg-muted/60 rounded-xl px-2.5 py-1.5">
+            <Files className="h-3 w-3 text-muted-foreground shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-foreground leading-none">{job.totalFiles.toLocaleString()}</div>
+              <div className="text-[9px] text-muted-foreground leading-none mt-0.5">Files processed</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 bg-muted/60 rounded-xl px-2.5 py-1.5">
+            <Copy className="h-3 w-3 text-red-400 shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-foreground leading-none">{job.duplicateCount.toLocaleString()}</div>
+              <div className="text-[9px] text-muted-foreground leading-none mt-0.5">Duplicates</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 bg-muted/60 rounded-xl px-2.5 py-1.5">
+            <ScanSearch className="h-3 w-3 text-blue-400 shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-foreground leading-none">{job.ocrCount.toLocaleString()}</div>
+              <div className="text-[9px] text-muted-foreground leading-none mt-0.5">OCR scanned</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 bg-muted/60 rounded-xl px-2.5 py-1.5">
+            <Timer className="h-3 w-3 text-amber-400 shrink-0" />
+            <div>
+              <div className="text-xs font-semibold text-foreground leading-none">{duration ?? "–"}</div>
+              <div className="text-[9px] text-muted-foreground leading-none mt-0.5">Time taken</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cleaned summary line */}
+      {!active && job.totalFiles > 0 && (
+        <div className="text-[10px] text-muted-foreground">
+          {cleaned > 0
+            ? <><span className="text-foreground font-medium">{cleaned}</span> file{cleaned !== 1 ? "s" : ""} organized</>
+            : "No files organized"}
+          {job.duplicateCount > 0 && (
+            <> · <span className="text-red-400 font-medium">{job.duplicateCount}</span> duplicate{job.duplicateCount !== 1 ? "s" : ""} removed</>
+          )}
+        </div>
+      )}
+
+      {/* Progress bar (active only) */}
+      {active && job.totalFiles > 0 && (
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+            <span>{job.processedFiles} / {job.totalFiles} processed</span>
+            <span className="font-medium">{progress}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full bg-blue-500 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Error message */}
+      {job.status === "error" && job.errorMessage && (
+        <div className="mt-1 text-[10px] text-red-400 truncate">{job.errorMessage}</div>
+      )}
+    </div>
+  );
 }
 
 export default function Activity() {
@@ -75,9 +197,7 @@ export default function Activity() {
     }
   }, []);
 
-  useEffect(() => {
-    fetch_();
-  }, [fetch_]);
+  useEffect(() => { fetch_(); }, [fetch_]);
 
   // Poll every 2s while any job is active
   useEffect(() => {
@@ -87,7 +207,7 @@ export default function Activity() {
     return () => clearInterval(id);
   }, [data, fetch_]);
 
-  // Also poll every 5s regardless so the tab stays fresh when user navigates back
+  // Poll every 5s to keep tab fresh
   useEffect(() => {
     const id = setInterval(fetch_, 5000);
     return () => clearInterval(id);
@@ -97,23 +217,24 @@ export default function Activity() {
   const jobs = data?.jobs ?? [];
 
   const statCards = [
-    { label: "Total Cleaned",  value: stats_.totalCleaned,   icon: <CheckCircle2 className="h-4 w-4" />, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Duplicates",     value: stats_.totalDuplicates, icon: <XCircle className="h-4 w-4" />,      color: "text-red-400",     bg: "bg-red-400/10" },
-    { label: "Jobs Run",       value: stats_.jobsRun,         icon: <Zap className="h-4 w-4" />,          color: "text-amber-400",   bg: "bg-amber-400/10" },
-    { label: "OCR Scanned",    value: stats_.totalOcr,        icon: <ScanSearch className="h-4 w-4" />,   color: "text-blue-500",    bg: "bg-blue-500/10" },
+    { label: "Total Cleaned",  value: stats_.totalCleaned,    icon: <CheckCircle2 className="h-4 w-4" />, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Duplicates",     value: stats_.totalDuplicates,  icon: <XCircle className="h-4 w-4" />,      color: "text-red-400",     bg: "bg-red-400/10" },
+    { label: "Jobs Run",       value: stats_.jobsRun,          icon: <Zap className="h-4 w-4" />,          color: "text-amber-400",   bg: "bg-amber-400/10" },
+    { label: "OCR Scanned",    value: stats_.totalOcr,         icon: <ScanSearch className="h-4 w-4" />,   color: "text-blue-500",    bg: "bg-blue-500/10" },
   ];
 
   return (
     <div className="flex flex-col gap-5 pb-28 pt-4 px-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold tracking-tight text-foreground">Activity</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Your processing history and job logs</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Lifetime stats · last {Math.min(jobs.length, 20)} jobs</p>
         </div>
         {loading && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
       </div>
 
-      {/* Stats grid */}
+      {/* Lifetime stat cards */}
       <div className="grid grid-cols-2 gap-2.5">
         {statCards.map((s) => (
           <div key={s.label} className="rounded-2xl border border-border bg-card px-4 py-3.5 shadow-sm">
@@ -134,18 +255,25 @@ export default function Activity() {
 
       {/* Recent jobs */}
       <div>
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">
-          Recent Jobs
+        <div className="flex items-center justify-between mb-2 px-1">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Recent Jobs</span>
+          {jobs.length > 0 && (
+            <span className="text-[10px] text-muted-foreground">{jobs.length} / 20 slots</span>
+          )}
         </div>
 
         {loading ? (
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
             {[0, 1, 2].map((i) => (
-              <div key={i} className={`flex items-center gap-3 px-4 py-3.5 ${i < 2 ? "border-b border-border" : ""}`}>
-                <div className="w-4 h-4 rounded-full bg-muted animate-pulse shrink-0" />
-                <div className="flex-1 space-y-1.5">
-                  <div className="h-3.5 bg-muted animate-pulse rounded w-32" />
-                  <div className="h-3 bg-muted animate-pulse rounded w-20" />
+              <div key={i} className={`px-4 py-4 ${i < 2 ? "border-b border-border" : ""}`}>
+                <div className="flex justify-between mb-3">
+                  <div className="h-4 bg-muted animate-pulse rounded-full w-24" />
+                  <div className="h-3 bg-muted animate-pulse rounded w-12" />
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[0,1,2,3].map(j => (
+                    <div key={j} className="h-10 bg-muted animate-pulse rounded-xl" />
+                  ))}
                 </div>
               </div>
             ))}
@@ -160,55 +288,9 @@ export default function Activity() {
           </div>
         ) : (
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-            {jobs.slice(0, 20).map((job, i, arr) => {
-              const active = isActive(job.status);
-              const progress = job.totalFiles > 0
-                ? Math.round((job.processedFiles / job.totalFiles) * 100)
-                : 0;
-
-              return (
-                <div
-                  key={job.jobId}
-                  className={`flex items-start gap-3 px-4 py-3.5 ${i < arr.length - 1 ? "border-b border-border" : ""}`}
-                >
-                  <span className="shrink-0 mt-0.5">
-                    <JobStatusIcon status={job.status} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-medium text-foreground truncate">
-                        {jobLabel(job.status)}
-                      </div>
-                      <div className="text-xs text-muted-foreground shrink-0">
-                        {formatRelativeTime(job.createdAt)}
-                      </div>
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {job.totalFiles > 0
-                        ? `${job.totalFiles} file${job.totalFiles !== 1 ? "s" : ""}${job.duplicateCount > 0 ? ` · ${job.duplicateCount} duplicate${job.duplicateCount !== 1 ? "s" : ""}` : ""}`
-                        : "–"}
-                    </div>
-                    {active && job.totalFiles > 0 && (
-                      <div className="mt-2">
-                        <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                          <span>{job.processedFiles} / {job.totalFiles} processed</span>
-                          <span>{progress}%</span>
-                        </div>
-                        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {job.status === "error" && job.errorMessage && (
-                      <div className="text-xs text-red-400 mt-0.5 truncate">{job.errorMessage}</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+            {jobs.map((job, i) => (
+              <JobCard key={job.jobId} job={job} index={i} total={jobs.length} />
+            ))}
           </div>
         )}
       </div>

@@ -21,6 +21,7 @@ router.get("/jobs", (_req, res) => {
     duplicateCount: j.duplicateCount,
     ocrCount: j.ocrCount,
     createdAt: j.createdAt,
+    completedAt: j.completedAt ?? null,
     errorMessage: j.errorMessage ?? null,
   }));
 

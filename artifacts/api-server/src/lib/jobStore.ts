@@ -28,6 +28,7 @@ export interface Job {
   duplicateCount: number;
   ocrCount: number;
   createdAt: string;
+  completedAt: string | null;
   zipReady: boolean;
   errorMessage: string | null;
   files: FileEntry[];
@@ -35,9 +36,18 @@ export interface Job {
   uploadDir: string;
 }
 
+const MAX_JOBS = 20;
 const jobs = new Map<string, Job>();
 
 export function createJob(jobId: string, uploadDir: string): Job {
+  // Enforce 20-job cap — evict the oldest job when limit is reached
+  if (jobs.size >= MAX_JOBS) {
+    const oldest = Array.from(jobs.values()).sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    )[0];
+    if (oldest) jobs.delete(oldest.jobId);
+  }
+
   const job: Job = {
     jobId,
     status: "uploading",
@@ -46,6 +56,7 @@ export function createJob(jobId: string, uploadDir: string): Job {
     duplicateCount: 0,
     ocrCount: 0,
     createdAt: new Date().toISOString(),
+    completedAt: null,
     zipReady: false,
     errorMessage: null,
     files: [],
