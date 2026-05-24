@@ -670,11 +670,11 @@ function FolderDetailPage({
                       </div>
                     )}
 
-                    {/* Move button (normal mode) */}
+                    {/* Move button (normal mode) — always visible so mobile users can tap */}
                     {!isSelectMode && (
                       <button
                         onClick={e => { e.stopPropagation(); setMoveTarget(file.originalName); }}
-                        className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-background/85 backdrop-blur-sm border border-border/50 flex items-center justify-center opacity-0 hover:opacity-100 focus:opacity-100 transition-opacity shadow-sm"
+                        className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-background/80 backdrop-blur-sm border border-border/60 flex items-center justify-center opacity-60 hover:opacity-100 active:opacity-100 active:scale-95 transition-all shadow-sm"
                         title="Move to another folder"
                         aria-label={`Move ${file.originalName} to another folder`}
                       >
@@ -909,7 +909,7 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
             <Search className="h-3 w-3" /> Tap folder → search files
           </span>
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
-            <FolderSymlink className="h-3 w-3" /> Hover thumbnail → move file
+            <FolderSymlink className="h-3 w-3" /> Tap <FolderSymlink className="h-3 w-3 inline" /> icon → move file
           </span>
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
             <Trash2 className="h-3 w-3" /> Select → bulk delete
