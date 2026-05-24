@@ -40,7 +40,7 @@ function Router() {
       {/* All tabs stay mounted — only the active one is visible.
           This prevents expensive unmount/remount on every tab switch. */}
       <div className={activeTab === "/" ? undefined : "hidden"}><Home /></div>
-      <div className={activeTab === "/files" ? undefined : "hidden"}><Files /></div>
+      <div className={activeTab === "/files" ? undefined : "hidden"}><Files isVisible={activeTab === "/files"} /></div>
       <div className={activeTab === "/activity" ? undefined : "hidden"}>
         <Activity isVisible={activeTab === "/activity"} />
       </div>

@@ -13,16 +13,33 @@ router.get("/jobs", (_req, res) => {
   const totalDuplicates = all.reduce((sum, j) => sum + j.duplicateCount, 0);
   const totalOcr = all.reduce((sum, j) => sum + j.ocrCount, 0);
 
-  const jobs = all.map(j => ({
-    jobId: j.jobId,
-    status: j.status,
-    totalFiles: j.totalFiles,
-    processedFiles: j.processedFiles,
-    duplicateCount: j.duplicateCount,
-    ocrCount: j.ocrCount,
-    createdAt: j.createdAt,
-    errorMessage: j.errorMessage ?? null,
-  }));
+  const jobs = all.map(j => {
+    const categoryCounts: Record<string, number> = {};
+    for (const file of j.files) {
+      if (file.isDuplicate) continue;
+      categoryCounts[file.category] = (categoryCounts[file.category] ?? 0) + 1;
+    }
+    return {
+      jobId: j.jobId,
+      status: j.status,
+      totalFiles: j.totalFiles,
+      processedFiles: j.processedFiles,
+      duplicateCount: j.duplicateCount,
+      ocrCount: j.ocrCount,
+      createdAt: j.createdAt,
+      errorMessage: j.errorMessage ?? null,
+      zipReady: j.zipReady,
+      categoryCounts,
+    };
+  });
+
+  // Aggregate category counts across all jobs
+  const totalCategoryCounts: Record<string, number> = {};
+  for (const j of all) {
+    for (const [cat, count] of Object.entries(j.categoryCounts ?? {})) {
+      totalCategoryCounts[cat] = (totalCategoryCounts[cat] ?? 0) + count;
+    }
+  }
 
   res.json({
     jobs,
@@ -31,6 +48,7 @@ router.get("/jobs", (_req, res) => {
       totalDuplicates,
       jobsRun: all.length,
       totalOcr,
+      totalCategoryCounts,
     },
   });
 });
