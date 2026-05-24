@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createJob, updateJob, getUploadDir } from "../lib/jobStore.js";
 import { categorizeByFilename, categorizeByText } from "../lib/categorizer.js";
 import { runOcrBatch } from "../lib/ocr.js";
+import { scanQrCode } from "../lib/qr.js";
 import { logger } from "../lib/logger.js";
 
 const router = Router();
@@ -117,11 +118,10 @@ router.post("/upload", (req, res, next) => {
       }
 
       const duplicateCount = fileEntries.filter(f => f.isDuplicate).length;
-      const ocrCandidates = fileEntries.filter(f => f.needsOcr);
 
       // After pass 1 — store initial results and mark progress
       updateJob(jobId, {
-        processedFiles: fileEntries.length - ocrCandidates.length,
+        processedFiles: fileEntries.filter(f => !f.needsOcr).length,
         duplicateCount,
         files: fileEntries.map(f => ({
           filename: f.filename,
@@ -135,7 +135,29 @@ router.post("/upload", (req, res, next) => {
         })),
       });
 
-      // Pass 2: OCR on unknowns (async, batched)
+      // Pass 2: QR scan on unknowns — fast, runs before expensive OCR
+      const qrCandidates = fileEntries.filter(f => f.needsOcr);
+      if (qrCandidates.length > 0) {
+        logger.info({ count: qrCandidates.length, jobId }, "Starting QR scan pass");
+        await Promise.all(
+          qrCandidates.map(async (entry) => {
+            const qrText = await scanQrCode(entry.tempPath);
+            if (!qrText) return;
+            const byQr = categorizeByText(qrText);
+            if (byQr) {
+              entry.category = byQr;
+              entry.needsOcr = false;
+              entry.ocrText = qrText;
+              logger.info({ file: entry.originalName, category: byQr }, "QR classified");
+            }
+            // No keyword match — leave needsOcr=true so OCR still runs
+          })
+        );
+        logger.info({ jobId }, "QR scan pass complete");
+      }
+
+      // Pass 3: OCR on files still unclassified after QR
+      const ocrCandidates = fileEntries.filter(f => f.needsOcr);
       if (ocrCandidates.length > 0) {
         logger.info({ count: ocrCandidates.length, jobId }, "Starting OCR pass");
 
