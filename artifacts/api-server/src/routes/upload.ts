@@ -196,7 +196,6 @@ router.post("/upload", (req, res, next) => {
         processedFiles: fileEntries.length,
         duplicateCount,
         ocrCount: ocrCandidates.length,
-        completedAt: new Date().toISOString(),
         files: fileEntries.map(f => ({
           filename: f.filename,
           originalName: f.originalName,
@@ -212,7 +211,6 @@ router.post("/upload", (req, res, next) => {
       logger.error({ err: e, jobId }, "Processing failed");
       updateJob(jobId, {
         status: "error",
-        completedAt: new Date().toISOString(),
         errorMessage: e instanceof Error ? e.message : "Processing failed",
       });
     }
