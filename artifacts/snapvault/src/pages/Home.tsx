@@ -17,6 +17,11 @@ import {
   DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Moon, Sun, Download, CheckCircle, RotateCcw,
   AlertCircle, Loader2, X,
   Upload, Cpu, FolderOpen, ShieldCheck, Zap, ScanSearch, Eye,
@@ -763,14 +768,16 @@ function FolderDetailPage({
 }
 
 // ─── Review Step ──────────────────────────────────────────────────────────────
-function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
+function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
   jobId: string;
   uploadedFiles: File[];
   onConfirm: () => void;
+  onReset: () => void;
 }) {
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [showResetDialog, setShowResetDialog] = useState(false);
   const queryClient = useQueryClient();
   const confirmJob = useConfirmJob();
 
@@ -874,9 +881,13 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-2 border-b border-border">
           <div>
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
-              <FolderOpen className="h-3.5 w-3.5" /> Review folders
-            </div>
+            <button
+              onClick={() => setShowResetDialog(true)}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors group"
+            >
+              <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
+              <span>Start over</span>
+            </button>
             <h2 className="text-2xl font-bold">Review folders</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               <span className="text-foreground font-medium">{effectiveTotalFiles.toLocaleString()}</span> files in{" "}
@@ -991,6 +1002,24 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm }: {
           })}
         </div>
       </div>
+
+      {/* Start Over confirmation dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Start over?</AlertDialogTitle>
+            <AlertDialogDescription>
+              All uploaded files and categorisation results will be lost. You will return to the upload screen.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onReset}>
+              <RotateCcw className="h-4 w-4 mr-2" /> Start over
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -1283,7 +1312,7 @@ export default function Home() {
         <ProcessingStep jobId={jobId} onReset={resetSession} />
       )}
       {step === "review" && jobId && (
-        <ReviewStep jobId={jobId} uploadedFiles={uploadedFiles} onConfirm={() => setStep("done")} />
+        <ReviewStep jobId={jobId} uploadedFiles={uploadedFiles} onConfirm={() => setStep("done")} onReset={resetSession} />
       )}
       {step === "done" && jobId && (
         <DoneStep jobId={jobId} onStartOver={resetSession} />
