@@ -478,6 +478,7 @@ function FolderDetailPage({
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [moveTarget, setMoveTarget] = useState<string | null>(null);
+  const [movedConfirm, setMovedConfirm] = useState<string | null>(null);
 
   const filteredFiles = useMemo(() => {
     if (!searchQuery.trim()) return group.files;
@@ -516,6 +517,8 @@ function FolderDetailPage({
     if (!moveTarget) return;
     onMove(moveTarget, newCategory);
     setMoveTarget(null);
+    setMovedConfirm(newCategory);
+    setTimeout(() => setMovedConfirm(null), 2000);
   };
 
   const q = searchQuery.toLowerCase();
@@ -709,57 +712,86 @@ function FolderDetailPage({
         )}
       </div>
 
-      {/* ── Move to folder overlay ── */}
+      {/* ── Success toast ── */}
+      {movedConfirm && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] pointer-events-none">
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 text-white text-sm font-semibold shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <CheckCircle className="h-4 w-4 shrink-0" />
+            Moved to {movedConfirm}
+          </div>
+        </div>
+      )}
+
+      {/* ── Move to folder bottom sheet ── */}
       {moveTarget && (
         <div
-          className="fixed inset-0 z-50 bg-background/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-end justify-center"
           onClick={() => setMoveTarget(null)}
         >
+          {/* Scrim */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+
+          {/* Sheet */}
           <div
-            className="bg-card border border-border rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden"
+            className="relative bg-card w-full max-w-lg rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-250"
             onClick={e => e.stopPropagation()}
           >
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+
             {/* Header */}
-            <div className="px-4 py-3.5 border-b border-border flex items-center gap-3">
-              <FolderSymlink className="h-4 w-4 text-primary shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm">Move to folder</p>
-                <p className="text-xs text-muted-foreground truncate">{moveTarget}</p>
+            <div className="px-5 pt-2 pb-3 border-b border-border flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <FolderSymlink className="h-4 w-4 text-primary" />
               </div>
-              <button onClick={() => setMoveTarget(null)} className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center transition-colors">
-                <X className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm text-foreground">Move to folder</p>
+                <p className="text-xs text-muted-foreground truncate mt-0.5">{moveTarget}</p>
+              </div>
+              <button
+                onClick={() => setMoveTarget(null)}
+                className="w-8 h-8 rounded-xl hover:bg-muted flex items-center justify-center transition-colors shrink-0"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
 
-            {/* Category grid */}
-            <div className="p-3 grid grid-cols-2 gap-2 max-h-72 overflow-y-auto">
+            {/* Folder list */}
+            <div className="overflow-y-auto max-h-[55vh] py-2">
               {Object.entries(CATEGORY_META)
                 .filter(([cat]) => cat !== group.category && cat !== "Duplicates")
-                .map(([cat, catMeta]) => {
+                .map(([cat, catMeta], i, arr) => {
                   const CatIcon = catMeta.Icon;
                   return (
                     <button
                       key={cat}
                       onClick={() => handleMoveConfirm(cat)}
-                      className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left active:scale-95 bg-gradient-to-br ${catMeta.gradient} border-border/60 hover:border-primary/40 hover:shadow-md`}
+                      className={`w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors active:bg-muted/70 hover:bg-muted/50 ${i < arr.length - 1 ? "border-b border-border/50" : ""}`}
                     >
-                      <div className={`w-7 h-7 rounded-lg ${catMeta.bg} flex items-center justify-center shrink-0 border border-white/10`}>
-                        <CatIcon className={`h-3.5 w-3.5 ${catMeta.color}`} />
+                      <div className={`w-9 h-9 rounded-xl ${catMeta.bg} flex items-center justify-center shrink-0`}>
+                        <CatIcon className={`h-4 w-4 ${catMeta.color}`} />
                       </div>
-                      <span className="text-xs font-medium leading-tight">{cat}</span>
+                      <span className="flex-1 text-sm font-medium text-foreground">{cat}</span>
+                      <FolderSymlink className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
                     </button>
                   );
                 })}
             </div>
 
-            <div className="px-3 pb-3">
+            {/* Cancel */}
+            <div className="px-4 py-3 border-t border-border">
               <button
                 onClick={() => setMoveTarget(null)}
-                className="w-full py-2 text-sm text-muted-foreground hover:text-foreground font-medium rounded-xl hover:bg-muted transition-colors"
+                className="w-full py-3 text-sm font-semibold text-muted-foreground bg-muted hover:bg-muted/70 rounded-2xl transition-colors active:scale-[0.98]"
               >
                 Cancel
               </button>
             </div>
+
+            {/* Safe area spacer */}
+            <div className="h-safe-bottom h-2" />
           </div>
         </div>
       )}
@@ -812,17 +844,30 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
       .sort((a, b) => b.count - a.count);
   }, [breakdown, deletedFiles, overrides]);
 
+  // Auto-dismiss folder view when it becomes empty (all files deleted or moved out)
+  useEffect(() => {
+    if (selectedCategory === null) return;
+    const group = effectiveGroups.find(g => g.category === selectedCategory);
+    if (!group || group.count === 0) {
+      setSelectedCategory(null);
+    }
+  }, [effectiveGroups, selectedCategory]);
+
   const handleDelete = (originalNames: string[]) => {
     setDeletedFiles(prev => {
       const next = new Set(prev);
       originalNames.forEach(n => next.add(n));
       return next;
     });
-    setSelectedCategory(null);
+    // Don't force-navigate — the useEffect above handles it when folder empties
+    // but if files remain we stay in the folder
+    const remaining = (effectiveGroups.find(g => g.category === selectedCategory)?.count ?? 0) - originalNames.length;
+    if (remaining <= 0) setSelectedCategory(null);
   };
 
   const handleMove = (originalName: string, newCategory: string) => {
     setOverrides(prev => ({ ...prev, [originalName]: newCategory }));
+    // useEffect will auto-navigate back if the folder becomes empty after this move
   };
 
   const handleConfirm = () => {
