@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useLocation, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,16 +18,33 @@ const queryClient = new QueryClient({
   },
 });
 
+const TABS = ["/", "/files", "/activity", "/settings"] as const;
+
 function Router() {
+  const [location] = useLocation();
+
+  const activeTab = (() => {
+    if (location === "/") return "/";
+    for (const t of TABS) {
+      if (t !== "/" && location.startsWith(t)) return t;
+    }
+    return null;
+  })();
+
+  if (activeTab === null) {
+    return <NotFound />;
+  }
+
   return (
     <>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/files" component={Files} />
-        <Route path="/activity" component={Activity} />
-        <Route path="/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
+      {/* All tabs stay mounted — only the active one is visible.
+          This prevents expensive unmount/remount on every tab switch. */}
+      <div className={activeTab === "/" ? undefined : "hidden"}><Home /></div>
+      <div className={activeTab === "/files" ? undefined : "hidden"}><Files /></div>
+      <div className={activeTab === "/activity" ? undefined : "hidden"}>
+        <Activity isVisible={activeTab === "/activity"} />
+      </div>
+      <div className={activeTab === "/settings" ? undefined : "hidden"}><Settings /></div>
       <BottomNav />
     </>
   );

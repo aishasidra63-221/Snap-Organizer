@@ -57,7 +57,7 @@ function jobLabel(status: string): string {
   return status;
 }
 
-export default function Activity() {
+export default function Activity({ isVisible = true }: { isVisible?: boolean }) {
   const [data, setData] = useState<ActivityData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -75,23 +75,26 @@ export default function Activity() {
     }
   }, []);
 
+  // Fetch once when tab becomes visible
   useEffect(() => {
-    fetch_();
-  }, [fetch_]);
+    if (isVisible) fetch_();
+  }, [isVisible, fetch_]);
 
-  // Poll every 2s while any job is active
+  // Poll every 2s while any job is active and tab is visible
   useEffect(() => {
+    if (!isVisible) return;
     const hasActive = data?.jobs.some(j => isActive(j.status));
     if (!hasActive) return;
     const id = setInterval(fetch_, 2000);
     return () => clearInterval(id);
-  }, [data, fetch_]);
+  }, [data, fetch_, isVisible]);
 
-  // Also poll every 5s regardless so the tab stays fresh when user navigates back
+  // Refresh every 10s when tab is visible (relaxed from 5s since tab stays mounted)
   useEffect(() => {
-    const id = setInterval(fetch_, 5000);
+    if (!isVisible) return;
+    const id = setInterval(fetch_, 10000);
     return () => clearInterval(id);
-  }, [fetch_]);
+  }, [isVisible, fetch_]);
 
   const stats_ = data?.stats ?? { totalCleaned: 0, totalDuplicates: 0, jobsRun: 0, totalOcr: 0 };
   const jobs = data?.jobs ?? [];
