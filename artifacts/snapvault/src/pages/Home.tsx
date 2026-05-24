@@ -20,7 +20,7 @@ import {
   Moon, Sun, Download, CheckCircle, RotateCcw,
   AlertCircle, Loader2, X,
   Upload, Cpu, FolderOpen, ShieldCheck, Zap, ScanSearch, Eye,
-  Trash2, Search, FolderSymlink,
+  Trash2, Search, FolderSymlink, ArrowLeft,
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import {
@@ -523,13 +523,24 @@ function FolderDetailPage({
         <div className="px-4 py-3 flex items-center gap-3">
 
           {/* Back / Cancel */}
-          <button
-            onClick={isSelectMode ? exitSelectMode : onBack}
-            className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0"
-            aria-label={isSelectMode ? "Cancel selection" : "Back to folders"}
-          >
-            <X className="h-4 w-4 text-foreground" />
-          </button>
+          {isSelectMode ? (
+            <button
+              onClick={exitSelectMode}
+              className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0"
+              aria-label="Cancel selection"
+            >
+              <X className="h-4 w-4 text-foreground" />
+            </button>
+          ) : (
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-muted hover:bg-muted/70 transition-colors shrink-0"
+              aria-label="Back to folders"
+            >
+              <ArrowLeft className="h-4 w-4 text-foreground" />
+              <span className="text-sm font-medium text-foreground">Back</span>
+            </button>
+          )}
 
           {isSelectMode ? (
             <>
