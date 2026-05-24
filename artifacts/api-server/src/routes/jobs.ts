@@ -2,9 +2,38 @@ import { Router } from "express";
 import fs from "fs";
 import path from "path";
 import JSZip from "jszip";
-import { getJob, updateJob, deleteJob, type FileEntry } from "../lib/jobStore.js";
+import { getJob, updateJob, deleteJob, getAllJobs, type FileEntry } from "../lib/jobStore.js";
 
 const router = Router();
+
+router.get("/jobs", (_req, res) => {
+  const all = getAllJobs();
+
+  const totalCleaned = all.reduce((sum, j) => sum + (j.totalFiles - j.duplicateCount), 0);
+  const totalDuplicates = all.reduce((sum, j) => sum + j.duplicateCount, 0);
+  const totalOcr = all.reduce((sum, j) => sum + j.ocrCount, 0);
+
+  const jobs = all.map(j => ({
+    jobId: j.jobId,
+    status: j.status,
+    totalFiles: j.totalFiles,
+    processedFiles: j.processedFiles,
+    duplicateCount: j.duplicateCount,
+    ocrCount: j.ocrCount,
+    createdAt: j.createdAt,
+    errorMessage: j.errorMessage ?? null,
+  }));
+
+  res.json({
+    jobs,
+    stats: {
+      totalCleaned,
+      totalDuplicates,
+      jobsRun: all.length,
+      totalOcr,
+    },
+  });
+});
 
 router.get("/jobs/:jobId", (req, res) => {
   const job = getJob(req.params.jobId);

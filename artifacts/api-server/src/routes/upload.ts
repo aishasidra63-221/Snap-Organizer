@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
-import { createJob, updateJob, getUploadDir } from "../lib/jobStore.js";
+import { createJob, updateJob, getUploadDir, getJob } from "../lib/jobStore.js";
 import { categorizeByFilename, categorizeByText } from "../lib/categorizer.js";
 import { runOcrBatch } from "../lib/ocr.js";
 import { scanQrCode } from "../lib/qr.js";
@@ -195,6 +195,7 @@ router.post("/upload", (req, res, next) => {
         status: "awaiting_confirmation",
         processedFiles: fileEntries.length,
         duplicateCount,
+        ocrCount: ocrCandidates.length,
         files: fileEntries.map(f => ({
           filename: f.filename,
           originalName: f.originalName,

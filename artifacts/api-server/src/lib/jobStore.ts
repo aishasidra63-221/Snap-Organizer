@@ -26,6 +26,7 @@ export interface Job {
   totalFiles: number;
   processedFiles: number;
   duplicateCount: number;
+  ocrCount: number;
   createdAt: string;
   zipReady: boolean;
   errorMessage: string | null;
@@ -43,6 +44,7 @@ export function createJob(jobId: string, uploadDir: string): Job {
     totalFiles: 0,
     processedFiles: 0,
     duplicateCount: 0,
+    ocrCount: 0,
     createdAt: new Date().toISOString(),
     zipReady: false,
     errorMessage: null,
@@ -67,6 +69,12 @@ export function updateJob(jobId: string, updates: Partial<Job>): Job | undefined
 
 export function deleteJob(jobId: string): boolean {
   return jobs.delete(jobId);
+}
+
+export function getAllJobs(): Job[] {
+  return Array.from(jobs.values()).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 }
 
 export function getUploadDir(jobId: string): string {
