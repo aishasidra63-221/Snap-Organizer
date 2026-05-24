@@ -1,16 +1,7 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  useGetJob, getGetJobQueryKey,
-  useGetJobCategories, getGetJobCategoriesQueryKey,
-  useGetJobStats, getGetJobStatsQueryKey,
-  useConfirmJob, useCleanupJob,
-} from "@workspace/api-client-react";
-import { uploadFiles } from "@/lib/upload";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
@@ -33,6 +24,15 @@ import {
   PhotoIcon, MemeIcon, DocumentIcon, UnknownIcon, DuplicateIcon,
   FolderSVG,
 } from "@/components/CategoryIcons";
+import {
+  processFiles as runBrowserProcess,
+  generateAndDownloadZip,
+  getCategoryCounts,
+  type BrowserFileEntry,
+  type ProcessPhase,
+  type ProcessUpdate,
+} from "@/lib/browserProcessor";
+import { appendToHistory } from "@/lib/jobHistory";
 
 type Step = "upload" | "processing" | "review" | "done";
 
@@ -64,43 +64,41 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// ─── Upload Step ─────────────────────────────────────────────────────────────
-function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, files: File[]) => void }) {
+// ─── Upload Step ──────────────────────────────────────────────────────────────
+function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
   const [dragging, setDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const uploadRef = useRef<HTMLDivElement>(null);
+
+  const ALLOWED_TYPES = new Set([
+    "image/jpeg", "image/jpg", "image/png", "image/gif",
+    "image/webp", "image/bmp", "image/tiff", "image/heic", "image/heif",
+  ]);
+
+  const filterImages = (files: File[]) =>
+    files.filter(f => ALLOWED_TYPES.has(f.type) || f.name.match(/\.(jpe?g|png|gif|webp|bmp|tiff?|heic|heif)$/i));
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
-    setSelectedFiles(files);
+    const filtered = filterImages(Array.from(e.dataTransfer.files));
+    setSelectedFiles(filtered);
     setError(null);
   }, []);
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(Array.from(e.target.files ?? []));
+    setSelectedFiles(filterImages(Array.from(e.target.files ?? [])));
     setError(null);
   };
 
-  const handleUpload = async () => {
+  const handleOrganize = () => {
     if (!selectedFiles.length) return;
-    setUploading(true);
-    setError(null);
-    try {
-      const result = await uploadFiles(selectedFiles, (sent, total) => {
-        setUploadProgress(Math.round((sent / total) * 100));
-      });
-      onUploadComplete(result.jobId, selectedFiles);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed");
-    } finally {
-      setUploading(false);
+    if (selectedFiles.length > 500) {
+      setError("Maximum 500 files per batch");
+      return;
     }
+    onReady(selectedFiles);
   };
 
   const totalSize = selectedFiles.reduce((a, f) => a + f.size, 0);
@@ -115,7 +113,7 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
         <div className="relative max-w-2xl mx-auto space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
             <ShieldCheck className="h-3.5 w-3.5" />
-            Rule-based · No AI · No data leaves your browser
+            100% browser-based · No uploads · No AI · Private
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.07]">
@@ -126,26 +124,25 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
           </h1>
 
           <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed max-w-xl mx-auto">
-            Drop up to <strong className="text-foreground">500 screenshots</strong> and SnapVault sorts everything into <strong className="text-foreground">smart folders</strong> — instantly.
+            Drop up to <strong className="text-foreground">500 screenshots</strong> and SnapVault sorts everything into <strong className="text-foreground">smart folders</strong> — entirely in your browser.
           </p>
 
-          <div ref={uploadRef} className="space-y-4 pt-2 text-left">
+          <div className="space-y-4 pt-2 text-left">
             <div
               data-testid="dropzone"
               onDragOver={e => { e.preventDefault(); setDragging(true); }}
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
-              onClick={() => !uploading && inputRef.current?.click()}
+              onClick={() => inputRef.current?.click()}
               className={[
                 "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer select-none",
                 dragging ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/20",
-                uploading ? "cursor-not-allowed opacity-60 pointer-events-none" : "",
               ].join(" ")}
             >
               <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
                 style={{ backgroundImage: "linear-gradient(hsl(var(--foreground)) 1px,transparent 1px),linear-gradient(90deg,hsl(var(--foreground)) 1px,transparent 1px)", backgroundSize: "28px 28px" }} />
               <input ref={inputRef} type="file" multiple accept="image/*" className="hidden"
-                onChange={onInputChange} disabled={uploading} data-testid="file-input" />
+                onChange={onInputChange} data-testid="file-input" />
 
               <div className="relative flex flex-col items-center gap-5 px-8 py-12">
                 <div className={`relative flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${dragging ? "bg-primary/15 scale-110" : "bg-muted"}`}>
@@ -183,36 +180,24 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
             </div>
 
             {error && (
-              <div className="flex items-center gap-2.5 text-destructive text-sm bg-destructive/8 border border-destructive/20 px-4 py-3 rounded-xl" data-testid="upload-error">
+              <div className="flex items-center gap-2.5 text-destructive text-sm bg-destructive/8 border border-destructive/20 px-4 py-3 rounded-xl">
                 <AlertCircle className="h-4 w-4 shrink-0" />{error}
               </div>
             )}
 
-            {uploading && (
-              <div className="space-y-2" data-testid="upload-progress">
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Uploading to server...</span>
-                  <span className="font-mono font-semibold">{uploadProgress}%</span>
-                </div>
-                <Progress value={uploadProgress} className="h-2" />
-              </div>
-            )}
-
             <div className="flex gap-2.5">
-              {selectedFiles.length > 0 && !uploading && (
-                <Button variant="outline" className="shrink-0" onClick={e => { e.stopPropagation(); setSelectedFiles([]); }} data-testid="button-clear">
+              {selectedFiles.length > 0 && (
+                <Button variant="outline" className="shrink-0" onClick={e => { e.stopPropagation(); setSelectedFiles([]); }}>
                   <X className="h-4 w-4 mr-1.5" /> Clear
                 </Button>
               )}
               <Button
                 className="flex-1 h-12 text-base font-semibold shadow-md shadow-primary/20"
-                disabled={!selectedFiles.length || uploading}
-                onClick={handleUpload}
+                disabled={!selectedFiles.length}
+                onClick={handleOrganize}
                 data-testid="button-upload"
               >
-                {uploading
-                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading...</>
-                  : <>{selectedFiles.length > 0 ? `Organize ${selectedFiles.length.toLocaleString()} images Now` : "Organize Now"}</>}
+                {selectedFiles.length > 0 ? `Organize ${selectedFiles.length.toLocaleString()} images Now` : "Organize Now"}
               </Button>
             </div>
 
@@ -230,8 +215,8 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
           <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-5">How it works</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { step: "01", Icon: Upload, color: "text-primary", bg: "bg-primary/10", title: "Upload photos", desc: "Drag-and-drop or pick up to 500 screenshots. Any format: PNG, JPG, WebP, HEIC." },
-              { step: "02", Icon: Cpu, color: "text-violet-500", bg: "bg-violet-500/10", title: "Auto-process", desc: "SHA-256 deduplication removes exact copies. Rule-based + OCR categorization sorts the rest." },
+              { step: "01", Icon: Upload, color: "text-primary", bg: "bg-primary/10", title: "Select photos", desc: "Drag-and-drop or pick up to 500 screenshots. PNG, JPG, WebP, HEIC — anything works." },
+              { step: "02", Icon: Cpu, color: "text-violet-500", bg: "bg-violet-500/10", title: "Auto-process", desc: "SHA-256 deduplication + rule-based + OCR categorisation — all in your browser. Nothing uploaded." },
               { step: "03", Icon: Download, color: "text-emerald-500", bg: "bg-emerald-500/10", title: "Download ZIP", desc: "Review folder cards, approve, and download a structured ZIP with one folder per category." },
             ].map(({ step, Icon, color, bg, title, desc }) => (
               <div key={step} className="relative flex flex-col items-center text-center gap-4 p-6 rounded-2xl border border-border bg-card">
@@ -287,7 +272,7 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
             </div>
             SnapVault
           </div>
-          <p>No data stored · No cloud · No AI · Fully offline processing</p>
+          <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
         </div>
       </footer>
     </div>
@@ -295,79 +280,49 @@ function UploadStep({ onUploadComplete }: { onUploadComplete: (jobId: string, fi
 }
 
 // ─── Processing Step ──────────────────────────────────────────────────────────
-// Simulated timeline: minimum realistic ms spent in each phase.
-// endPct = cumulative display-% at the end of that phase.
-const PROC_TIMELINE = [
-  { endPct:  10, endMs:   500 },  // Files received
-  { endPct:  28, endMs:  1400 },  // SHA-256 hashing
-  { endPct:  46, endMs:  2200 },  // Duplicate detection
-  { endPct:  64, endMs:  3000 },  // Filename categorization
-  { endPct:  90, endMs:  5000 },  // OCR scan
-  { endPct:  99, endMs:  5800 },  // Ready for review (hold at 99 until server confirms)
-] as const;
-
-// % threshold at which each step's circle turns green
-const PROC_STEP_THRESHOLDS = [10, 28, 46, 64, 90, 100];
-
-function getSimulatedPct(elapsedMs: number): number {
-  let prev = { endPct: 0, endMs: 0 };
-  for (const stage of PROC_TIMELINE) {
-    if (elapsedMs <= stage.endMs) {
-      const t = (elapsedMs - prev.endMs) / (stage.endMs - prev.endMs);
-      return prev.endPct + (stage.endPct - prev.endPct) * t;
-    }
-    prev = stage;
-  }
-  return 99; // hold until server confirms done
+interface ProcessingState {
+  phase: ProcessPhase;
+  processedFiles: number;
+  totalFiles: number;
+  ocrDone: number;
+  ocrTotal: number;
+  duplicateCount: number;
 }
 
-function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void }) {
-  const { data: job, isError } = useGetJob(jobId, {
-    query: { enabled: !!jobId, queryKey: getGetJobQueryKey(jobId), refetchInterval: 800, retry: 2 },
-  });
-
-  const startTimeRef = useRef<number>(Date.now());
-  const [displayPct, setDisplayPct] = useState(0);
-
-  const processed = job?.processedFiles ?? 0;
-  const total     = job?.totalFiles    ?? 0;
-  const isDone    = job?.status === "awaiting_confirmation";
-
-  // 50 ms ticker — smooth animation regardless of server speed
-  useEffect(() => {
-    const id = setInterval(() => {
-      const elapsed   = Date.now() - startTimeRef.current;
-      const simulated = getSimulatedPct(elapsed);
-      // Server real progress (OCR phase) can pull the bar forward faster
-      const serverPct = total > 0 ? (processed / total) * 100 * 0.9 : 0;
-      const target    = isDone ? 100 : Math.max(simulated, serverPct);
-
-      setDisplayPct(prev => {
-        if (prev >= target) return prev;                        // never go back
-        const step = isDone
-          ? Math.max(1.5, (target - prev) * 0.18)              // fast final sweep
-          : Math.max(0.3, (target - prev) * 0.06);             // gentle catch-up
-        return Math.min(target, prev + step);
-      });
-    }, 50);
-    return () => clearInterval(id);
-  }, [isDone, processed, total]);
+function ProcessingStep({
+  progress,
+  error,
+  onReset,
+}: {
+  progress: ProcessingState;
+  error: string | null;
+  onReset: () => void;
+}) {
+  const phaseLabel: Record<ProcessPhase, string> = {
+    "hashing": "SHA-256 hashing + filename classification",
+    "qr":      "QR code scanning",
+    "ocr":     "OCR text recognition",
+    "":        "Starting…",
+  };
 
   const steps = [
-    "Files received",
-    "SHA-256 hashing",
-    "Duplicate detection",
-    "Filename-rule categorization",
-    "OCR text scan (unmatched files)",
-    "Ready for review",
-  ].map((label, i) => ({
-    label,
-    done: displayPct >= PROC_STEP_THRESHOLDS[i],
-  }));
+    { label: "Files received",                   done: progress.processedFiles > 0 || progress.phase !== "" },
+    { label: "SHA-256 hashing + deduplication",  done: progress.phase === "qr" || progress.phase === "ocr" || (progress.phase === "hashing" && progress.processedFiles === progress.totalFiles && progress.totalFiles > 0) },
+    { label: "Filename-rule categorisation",     done: progress.phase === "qr" || progress.phase === "ocr" },
+    { label: "QR code scanning",                 done: progress.phase === "ocr" },
+    { label: "OCR text scan (unmatched files)",  done: false },
+  ];
 
-  const progress = Math.round(displayPct);
+  const displayPct = (() => {
+    if (!progress.totalFiles) return 0;
+    if (progress.phase === "hashing") return Math.round((progress.processedFiles / progress.totalFiles) * 60);
+    if (progress.phase === "qr") return 65;
+    if (progress.phase === "ocr" && progress.ocrTotal > 0)
+      return 70 + Math.round((progress.ocrDone / progress.ocrTotal) * 28);
+    return 10;
+  })();
 
-  if (isError || job?.status === "error") {
+  if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6">
         <div className="w-full max-w-sm space-y-6 text-center">
@@ -376,11 +331,9 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
           </div>
           <div>
             <h2 className="text-2xl font-bold">Processing failed</h2>
-            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-              {job?.errorMessage ?? "The server lost track of your job — this happens if the server restarted. Please upload again."}
-            </p>
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">{error}</p>
           </div>
-          <Button className="w-full h-11" onClick={onReset} data-testid="button-retry">
+          <Button className="w-full h-11" onClick={onReset}>
             <RotateCcw className="h-4 w-4 mr-2" /> Start over
           </Button>
         </div>
@@ -397,26 +350,40 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
             <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 112 112">
               <circle cx="56" cy="56" r="48" fill="none" stroke="hsl(var(--muted))" strokeWidth="6"/>
               <circle cx="56" cy="56" r="48" fill="none" stroke="hsl(var(--primary))" strokeWidth="6"
-                strokeLinecap="round" strokeDasharray={`${progress * 3.016} 302`}
+                strokeLinecap="round" strokeDasharray={`${displayPct * 3.016} 302`}
                 className="transition-all duration-500"/>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold font-mono text-primary">{progress}%</span>
+              <span className="text-2xl font-bold font-mono text-primary">{displayPct}%</span>
             </div>
           </div>
           <div className="text-center">
             <h2 className="text-2xl font-bold">Processing images</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {total > 0 ? `${processed.toLocaleString()} of ${total.toLocaleString()} files` : "Starting…"}
+              {progress.phase === "ocr" && progress.ocrTotal > 0
+                ? `OCR: ${progress.ocrDone} / ${progress.ocrTotal} files`
+                : progress.totalFiles > 0
+                ? `${progress.processedFiles.toLocaleString()} of ${progress.totalFiles.toLocaleString()} files`
+                : "Starting…"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
+              <ShieldCheck className="h-3 w-3 text-emerald-400" />
+              Processing in your browser — nothing uploaded
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border" data-testid="processing-progress">
+        <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
           {steps.map((s, i) => {
-            const isActive = i === steps.filter(x => x.done).length - 1 && !steps[i + 1]?.done;
+            const isActive = !s.done && (
+              (i === 0 && progress.phase === "hashing" && progress.processedFiles === 0) ||
+              (i === 1 && progress.phase === "hashing" && progress.processedFiles > 0) ||
+              (i === 2 && progress.phase === "hashing" && progress.processedFiles === progress.totalFiles) ||
+              (i === 3 && progress.phase === "qr") ||
+              (i === 4 && progress.phase === "ocr")
+            );
             return (
-              <div key={i} className={`flex items-center gap-3 px-4 py-3.5 transition-colors ${s.done ? "" : "opacity-35"}`}>
+              <div key={i} className={`flex items-center gap-3 px-4 py-3.5 transition-colors ${s.done || isActive ? "" : "opacity-35"}`}>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${s.done ? "bg-primary" : "bg-muted"}`}>
                   {s.done
                     ? <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5"><path d="M3 8l4 4 6-7" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -429,10 +396,10 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
           })}
         </div>
 
-        {(job?.duplicateCount ?? 0) > 0 && (
-          <div className="flex items-center gap-2.5 text-sm bg-red-500/8 border border-red-500/20 px-4 py-3 rounded-xl" data-testid="duplicate-notice">
+        {progress.duplicateCount > 0 && (
+          <div className="flex items-center gap-2.5 text-sm bg-red-500/8 border border-red-500/20 px-4 py-3 rounded-xl">
             <DuplicateIcon className="h-4 w-4 text-red-400 shrink-0" />
-            <span>Found <strong className="text-red-400">{job?.duplicateCount}</strong> exact duplicate{job?.duplicateCount !== 1 ? "s" : ""} — moved to Duplicates folder</span>
+            <span>Found <strong className="text-red-400">{progress.duplicateCount}</strong> exact duplicate{progress.duplicateCount !== 1 ? "s" : ""} — moved to Duplicates folder</span>
           </div>
         )}
       </div>
@@ -440,7 +407,7 @@ function ProcessingStep({ jobId, onReset }: { jobId: string; onReset: () => void
   );
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Shared types for Review ───────────────────────────────────────────────────
 interface FileItem {
   filename: string;
   originalName: string;
@@ -489,11 +456,10 @@ function FolderDetailPage({
     );
   }, [group.files, searchQuery]);
 
-  const toggleSelect = (originalName: string) => {
+  const toggleSelect = (name: string) => {
     setSelectedFiles(prev => {
       const next = new Set(prev);
-      if (next.has(originalName)) next.delete(originalName);
-      else next.add(originalName);
+      if (next.has(name)) next.delete(name); else next.add(name);
       return next;
     });
   };
@@ -502,15 +468,6 @@ function FolderDetailPage({
     onDelete(Array.from(selectedFiles));
     setSelectedFiles(new Set());
     setIsSelectMode(false);
-  };
-
-  const handleSelectAll = () => {
-    setSelectedFiles(new Set(filteredFiles.map(f => f.originalName)));
-  };
-
-  const exitSelectMode = () => {
-    setIsSelectMode(false);
-    setSelectedFiles(new Set());
   };
 
   const handleMoveConfirm = (newCategory: string) => {
@@ -525,26 +482,16 @@ function FolderDetailPage({
 
   return (
     <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
-
-      {/* ── Sticky header ── */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b border-border">
         <div className="px-4 py-3 flex items-center gap-3">
-
-          {/* Back / Cancel */}
           {isSelectMode ? (
-            <button
-              onClick={exitSelectMode}
-              className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0"
-              aria-label="Cancel selection"
-            >
+            <button onClick={() => { setIsSelectMode(false); setSelectedFiles(new Set()); }}
+              className="w-9 h-9 rounded-xl bg-muted hover:bg-muted/70 flex items-center justify-center transition-colors shrink-0">
               <X className="h-4 w-4 text-foreground" />
             </button>
           ) : (
-            <button
-              onClick={onBack}
-              className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-muted hover:bg-muted/70 transition-colors shrink-0"
-              aria-label="Back to folders"
-            >
+            <button onClick={onBack}
+              className="flex items-center gap-1.5 px-3 h-9 rounded-xl bg-muted hover:bg-muted/70 transition-colors shrink-0">
               <ArrowLeft className="h-4 w-4 text-foreground" />
               <span className="text-sm font-medium text-foreground">Back</span>
             </button>
@@ -555,19 +502,14 @@ function FolderDetailPage({
               <p className="flex-1 text-sm font-semibold text-foreground">
                 {selectedFiles.size > 0 ? `${selectedFiles.size} selected` : "Tap to select"}
               </p>
-              <button
-                onClick={handleSelectAll}
-                className="text-xs text-primary font-semibold px-2 py-1 rounded-lg hover:bg-primary/10 transition-colors"
-              >
+              <button onClick={() => setSelectedFiles(new Set(filteredFiles.map(f => f.originalName)))}
+                className="text-xs text-primary font-semibold px-2 py-1 rounded-lg hover:bg-primary/10 transition-colors">
                 Select all
               </button>
               {selectedFiles.size > 0 && (
-                <button
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-semibold transition-all hover:opacity-90 active:scale-95"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Delete ({selectedFiles.size})
+                <button onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-semibold transition-all hover:opacity-90 active:scale-95">
+                  <Trash2 className="h-3.5 w-3.5" /> Delete ({selectedFiles.size})
                 </button>
               )}
             </>
@@ -580,10 +522,8 @@ function FolderDetailPage({
                 <p className="text-sm font-semibold leading-tight truncate">{group.category}</p>
                 <p className="text-xs text-muted-foreground">{group.count} file{group.count !== 1 ? "s" : ""}</p>
               </div>
-              <button
-                onClick={() => setIsSelectMode(true)}
-                className="text-xs text-muted-foreground hover:text-foreground font-semibold px-2.5 py-1.5 rounded-xl hover:bg-muted transition-colors shrink-0"
-              >
+              <button onClick={() => setIsSelectMode(true)}
+                className="text-xs text-muted-foreground hover:text-foreground font-semibold px-2.5 py-1.5 rounded-xl hover:bg-muted transition-colors shrink-0">
                 Select
               </button>
               <Badge variant="secondary" className="font-mono text-xs tabular-nums shrink-0" style={{ color: meta.textColor }}>
@@ -593,22 +533,15 @@ function FolderDetailPage({
           )}
         </div>
 
-        {/* ── Search bar ── */}
         <div className="px-4 pb-3">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search by filename or text in image…"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-8 py-2 text-sm bg-muted/60 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 placeholder:text-muted-foreground/50 transition-all"
-            />
+            <input type="text" placeholder="Search by filename or text in image…"
+              value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-8 pr-8 py-2 text-sm bg-muted/60 border border-border rounded-xl outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 placeholder:text-muted-foreground/50 transition-all" />
             {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-muted-foreground/20 transition-colors"
-              >
+              <button onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-muted-foreground/20 transition-colors">
                 <X className="h-3 w-3 text-muted-foreground" />
               </button>
             )}
@@ -621,7 +554,6 @@ function FolderDetailPage({
         </div>
       </div>
 
-      {/* ── File grid ── */}
       <div className="flex-1 px-3 py-4 overflow-y-auto">
         {filteredFiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
@@ -650,33 +582,21 @@ function FolderDetailPage({
                 <div key={file.filename} className="flex flex-col gap-1">
                   <div
                     className={`relative aspect-square rounded-xl bg-muted overflow-hidden cursor-pointer transition-all duration-150 ${
-                      isSelected
-                        ? "ring-2 ring-primary ring-offset-1 ring-offset-background shadow-lg"
-                        : "border border-border/60 hover:border-border"
+                      isSelected ? "ring-2 ring-primary ring-offset-1 ring-offset-background shadow-lg" : "border border-border/60 hover:border-border"
                     }`}
                     onClick={() => isSelectMode && toggleSelect(file.originalName)}
                   >
                     {url ? (
-                      <img
-                        src={url}
-                        alt={file.originalName}
-                        className="w-full h-full object-cover"
-                        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
+                      <img src={url} alt={file.originalName} className="w-full h-full object-cover"
+                        onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <PhotoIcon className="h-5 w-5 text-muted-foreground/40" />
                       </div>
                     )}
-
-                    {/* OCR match badge */}
                     {ocrHighlight && !nameHighlight && (
-                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-primary/80 backdrop-blur-sm text-[9px] font-semibold text-white">
-                        OCR
-                      </div>
+                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-primary/80 backdrop-blur-sm text-[9px] font-semibold text-white">OCR</div>
                     )}
-
-                    {/* Selection checkbox (select mode) */}
                     {isSelectMode && (
                       <div className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${
                         isSelected ? "bg-primary border-primary" : "bg-background/80 border-muted-foreground/40"
@@ -688,20 +608,16 @@ function FolderDetailPage({
                         )}
                       </div>
                     )}
-
-                    {/* Move button (normal mode) — always visible so mobile users can tap */}
                     {!isSelectMode && (
                       <button
                         onClick={e => { e.stopPropagation(); setMoveTarget(file.originalName); }}
                         className="absolute top-1 right-1 w-6 h-6 rounded-lg bg-background/80 backdrop-blur-sm border border-border/60 flex items-center justify-center opacity-60 hover:opacity-100 active:opacity-100 active:scale-95 transition-all shadow-sm"
                         title="Move to another folder"
-                        aria-label={`Move ${file.originalName} to another folder`}
                       >
                         <FolderSymlink className="h-3 w-3 text-foreground" />
                       </button>
                     )}
                   </div>
-
                   <p className={`text-[10px] truncate px-0.5 font-mono leading-tight ${nameHighlight ? "text-primary font-bold" : "text-muted-foreground"}`}>
                     {file.originalName}
                   </p>
@@ -712,36 +628,19 @@ function FolderDetailPage({
         )}
       </div>
 
-      {/* ── Success toast ── */}
       {movedConfirm && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] pointer-events-none">
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500 text-white text-sm font-semibold shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <CheckCircle className="h-4 w-4 shrink-0" />
-            Moved to {movedConfirm}
+            <CheckCircle className="h-4 w-4 shrink-0" /> Moved to {movedConfirm}
           </div>
         </div>
       )}
 
-      {/* ── Move to folder bottom sheet ── */}
       {moveTarget && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          onClick={() => setMoveTarget(null)}
-        >
-          {/* Scrim */}
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setMoveTarget(null)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-
-          {/* Sheet */}
-          <div
-            className="relative bg-card w-full max-w-lg rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-250"
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Drag handle */}
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            </div>
-
-            {/* Header */}
+          <div className="relative bg-card w-full max-w-lg rounded-t-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-250" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 rounded-full bg-muted-foreground/30" /></div>
             <div className="px-5 pt-2 pb-3 border-b border-border flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <FolderSymlink className="h-4 w-4 text-primary" />
@@ -750,26 +649,18 @@ function FolderDetailPage({
                 <p className="font-semibold text-sm text-foreground">Move to folder</p>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{moveTarget}</p>
               </div>
-              <button
-                onClick={() => setMoveTarget(null)}
-                className="w-8 h-8 rounded-xl hover:bg-muted flex items-center justify-center transition-colors shrink-0"
-              >
+              <button onClick={() => setMoveTarget(null)} className="w-8 h-8 rounded-xl hover:bg-muted flex items-center justify-center transition-colors shrink-0">
                 <X className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
-
-            {/* Folder list */}
             <div className="overflow-y-auto max-h-[55vh] py-2">
               {Object.entries(CATEGORY_META)
                 .filter(([cat]) => cat !== group.category && cat !== "Duplicates")
                 .map(([cat, catMeta], i, arr) => {
                   const CatIcon = catMeta.Icon;
                   return (
-                    <button
-                      key={cat}
-                      onClick={() => handleMoveConfirm(cat)}
-                      className={`w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors active:bg-muted/70 hover:bg-muted/50 ${i < arr.length - 1 ? "border-b border-border/50" : ""}`}
-                    >
+                    <button key={cat} onClick={() => handleMoveConfirm(cat)}
+                      className={`w-full flex items-center gap-3.5 px-5 py-3.5 text-left transition-colors active:bg-muted/70 hover:bg-muted/50 ${i < arr.length - 1 ? "border-b border-border/50" : ""}`}>
                       <div className={`w-9 h-9 rounded-xl ${catMeta.bg} flex items-center justify-center shrink-0`}>
                         <CatIcon className={`h-4 w-4 ${catMeta.color}`} />
                       </div>
@@ -779,19 +670,13 @@ function FolderDetailPage({
                   );
                 })}
             </div>
-
-            {/* Cancel */}
             <div className="px-4 py-3 border-t border-border">
-              <button
-                onClick={() => setMoveTarget(null)}
-                className="w-full py-3 text-sm font-semibold text-muted-foreground bg-muted hover:bg-muted/70 rounded-2xl transition-colors active:scale-[0.98]"
-              >
+              <button onClick={() => setMoveTarget(null)}
+                className="w-full py-3 text-sm font-semibold text-muted-foreground bg-muted hover:bg-muted/70 rounded-2xl transition-colors active:scale-[0.98]">
                 Cancel
               </button>
             </div>
-
-            {/* Safe area spacer */}
-            <div className="h-safe-bottom h-2" />
+            <div className="h-2" />
           </div>
         </div>
       )}
@@ -800,57 +685,54 @@ function FolderDetailPage({
 }
 
 // ─── Review Step ──────────────────────────────────────────────────────────────
-function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
-  jobId: string;
-  uploadedFiles: File[];
-  onConfirm: () => void;
+function ReviewStep({
+  entries,
+  onConfirm,
+  onReset,
+}: {
+  entries: BrowserFileEntry[];
+  onConfirm: (overrides: Record<string, string>, deletedFiles: Set<string>) => void;
   onReset: () => void;
 }) {
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const queryClient = useQueryClient();
-  const confirmJob = useConfirmJob();
 
-  const { data: breakdown, isLoading } = useGetJobCategories(jobId, {
-    query: { enabled: !!jobId, queryKey: getGetJobCategoriesQueryKey(jobId) },
-  });
+  // Build a preview URL map from entries
+  const previewMap = useMemo(() =>
+    new Map(entries.map(e => [e.originalName, e.previewUrl])),
+    [entries]
+  );
 
-  const fileMap = useMemo(() => new Map(uploadedFiles.map(f => [f.name, f])), [uploadedFiles]);
-  const getPreviewUrl = (originalName: string) => {
-    const f = fileMap.get(originalName);
-    return f ? URL.createObjectURL(f) : null;
-  };
+  const getPreviewUrl = (originalName: string) => previewMap.get(originalName) ?? null;
 
-  // Compute effective groups (applying client-side deletes + moves)
   const effectiveGroups = useMemo((): EffectiveGroup[] => {
-    if (!breakdown) return [];
-
     const grouped = new Map<string, FileItem[]>();
-
-    for (const group of breakdown.categories) {
-      for (const file of group.files) {
-        if (deletedFiles.has(file.originalName)) continue;
-        const effectiveCategory = overrides[file.originalName] ?? file.category;
-        if (!grouped.has(effectiveCategory)) grouped.set(effectiveCategory, []);
-        grouped.get(effectiveCategory)!.push({ ...file, category: effectiveCategory } as FileItem);
-      }
+    for (const entry of entries) {
+      if (deletedFiles.has(entry.originalName)) continue;
+      const effectiveCategory = overrides[entry.originalName] ?? entry.category;
+      if (!grouped.has(effectiveCategory)) grouped.set(effectiveCategory, []);
+      grouped.get(effectiveCategory)!.push({
+        filename: entry.id,
+        originalName: entry.originalName,
+        category: effectiveCategory,
+        hash: entry.hash,
+        isDuplicate: entry.isDuplicate,
+        size: entry.size,
+        ocrText: entry.ocrText,
+      });
     }
-
     return Array.from(grouped.entries())
       .map(([category, files]) => ({ category, count: files.length, files }))
       .filter(g => g.count > 0)
       .sort((a, b) => b.count - a.count);
-  }, [breakdown, deletedFiles, overrides]);
+  }, [entries, deletedFiles, overrides]);
 
-  // Auto-dismiss folder view when it becomes empty (all files deleted or moved out)
   useEffect(() => {
     if (selectedCategory === null) return;
     const group = effectiveGroups.find(g => g.category === selectedCategory);
-    if (!group || group.count === 0) {
-      setSelectedCategory(null);
-    }
+    if (!group || group.count === 0) setSelectedCategory(null);
   }, [effectiveGroups, selectedCategory]);
 
   const handleDelete = (originalNames: string[]) => {
@@ -859,36 +741,19 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
       originalNames.forEach(n => next.add(n));
       return next;
     });
-    // Don't force-navigate — the useEffect above handles it when folder empties
-    // but if files remain we stay in the folder
     const remaining = (effectiveGroups.find(g => g.category === selectedCategory)?.count ?? 0) - originalNames.length;
     if (remaining <= 0) setSelectedCategory(null);
   };
 
   const handleMove = (originalName: string, newCategory: string) => {
     setOverrides(prev => ({ ...prev, [originalName]: newCategory }));
-    // useEffect will auto-navigate back if the folder becomes empty after this move
   };
 
-  const handleConfirm = () => {
-    confirmJob.mutate(
-      {
-        jobId,
-        data: {
-          categoryOverrides: overrides,
-          deletedFiles: Array.from(deletedFiles),
-        },
-      },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getGetJobQueryKey(jobId) });
-          onConfirm();
-        },
-      }
-    );
-  };
+  const totalFiles = entries.length;
+  const effectiveTotalFiles = totalFiles - deletedFiles.size;
+  const duplicateCount = entries.filter(e => e.isDuplicate).length;
+  const pendingChanges = deletedFiles.size + Object.keys(overrides).length;
 
-  // Show folder detail page
   if (selectedCategory !== null) {
     const group = effectiveGroups.find(g => g.category === selectedCategory)
       ?? { category: selectedCategory, count: 0, files: [] };
@@ -903,33 +768,13 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="p-8 max-w-5xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-52 rounded-2xl" />)}
-        </div>
-      </div>
-    );
-  }
-
-  const totalFiles = breakdown?.totalFiles ?? 0;
-  const effectiveTotalFiles = totalFiles - deletedFiles.size;
-  const duplicateCount = breakdown?.duplicateCount ?? 0;
-
-  const pendingChanges = deletedFiles.size + Object.keys(overrides).length;
-
   return (
     <div className="min-h-[calc(100vh-56px)] px-6 py-10">
       <div className="max-w-5xl mx-auto space-y-7">
-
-        {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-2 border-b border-border">
           <div>
-            <button
-              onClick={() => setShowResetDialog(true)}
-              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors group"
-            >
+            <button onClick={() => setShowResetDialog(true)}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors group">
               <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
               <span>Start over</span>
             </button>
@@ -954,49 +799,37 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
           <Button
             size="lg"
             className="shrink-0 h-11 px-6 font-semibold shadow-md shadow-primary/20"
-            onClick={handleConfirm}
-            disabled={confirmJob.isPending}
+            onClick={() => onConfirm(overrides, deletedFiles)}
             data-testid="button-confirm"
           >
-            {confirmJob.isPending
-              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Building ZIP...</>
-              : <><CheckCircle className="h-4 w-4 mr-2" /> Approve &amp; Generate ZIP</>}
+            <CheckCircle className="h-4 w-4 mr-2" /> Approve &amp; Generate ZIP
           </Button>
         </div>
 
-        {confirmJob.isError && (
-          <div className="flex items-center gap-2 text-destructive text-sm bg-destructive/8 border border-destructive/20 px-4 py-3 rounded-xl">
-            <AlertCircle className="h-4 w-4" /> Failed to confirm — please try again
-          </div>
-        )}
-
-        {/* Tips bar */}
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
             <Search className="h-3 w-3" /> Tap folder → search files
           </span>
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
-            <FolderSymlink className="h-3 w-3" /> Tap <FolderSymlink className="h-3 w-3 inline" /> icon → move file
+            <FolderSymlink className="h-3 w-3" /> Tap ⇄ icon to move
           </span>
           <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 border border-border">
-            <Trash2 className="h-3 w-3" /> Select → bulk delete
+            <Eye className="h-3 w-3" /> Tap → select to bulk delete
           </span>
         </div>
 
-        {/* Category cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {effectiveGroups.map(group => {
             const meta = CATEGORY_META[group.category] ?? CATEGORY_META["Unknown / Others"];
             const { Icon } = meta;
             const previews = group.files.slice(0, 4);
-            const isDup = group.category === "Duplicates";
 
             return (
               <button
                 key={group.category}
-                className={`relative overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] group text-left w-full cursor-pointer ${isDup ? "border-red-400/30" : "border-border hover:border-primary/25"}`}
                 onClick={() => setSelectedCategory(group.category)}
-                data-testid={`category-card-${group.category}`}
+                data-testid={`folder-${group.category}`}
+                className={`relative overflow-hidden rounded-2xl border border-border bg-card text-left transition-all duration-200 hover:shadow-lg hover:scale-[1.01] hover:border-primary/30 active:scale-[0.99] group`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${meta.gradient} opacity-70 pointer-events-none`} />
                 <div className="relative p-4 space-y-3">
@@ -1024,7 +857,7 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
                     {previews.map(file => {
                       const url = getPreviewUrl(file.originalName);
                       return (
-                        <div key={file.filename} className="flex-1 h-14 rounded-lg bg-muted border border-border/60 overflow-hidden" data-testid={`preview-${file.filename}`}>
+                        <div key={file.filename} className="flex-1 h-14 rounded-lg bg-muted border border-border/60 overflow-hidden">
                           {url
                             ? <img src={url} alt="" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
                             : <div className="w-full h-full flex items-center justify-center"><PhotoIcon className="h-4 w-4 text-muted-foreground" /></div>}
@@ -1048,7 +881,6 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
         </div>
       </div>
 
-      {/* Start Over confirmation dialog */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1070,99 +902,77 @@ function ReviewStep({ jobId, uploadedFiles, onConfirm, onReset }: {
 }
 
 // ─── Done Step ────────────────────────────────────────────────────────────────
-function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => void }) {
-  const queryClient = useQueryClient();
-  const cleanupJob = useCleanupJob();
-
-  const { data: stats, isLoading: statsLoading } = useGetJobStats(jobId, {
-    query: {
-      enabled: !!jobId,
-      queryKey: getGetJobStatsQueryKey(jobId),
-      refetchInterval: q => (q.state.data?.zipSizeBytes == null ? 1000 : false),
-    },
-  });
-
-  const { data: job } = useGetJob(jobId, {
-    query: {
-      enabled: !!jobId,
-      queryKey: getGetJobQueryKey(jobId),
-      refetchInterval: q => (q.state.data?.zipReady ? false : 800),
-    },
-  });
-
-  const zipReady = job?.zipReady ?? false;
+function DoneStep({
+  entries,
+  overrides,
+  deletedFiles,
+  onStartOver,
+}: {
+  entries: BrowserFileEntry[];
+  overrides: Record<string, string>;
+  deletedFiles: Set<string>;
+  onStartOver: () => void;
+}) {
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [zipName, setZipName] = useState("");
+  const [zipping, setZipping] = useState(false);
+  const [zipProgress, setZipProgress] = useState(0);
 
   const defaultZipName = `SnapVault_Export_${new Date().toISOString().slice(0, 10)}`;
-  const [showNameDialog, setShowNameDialog] = useState(false);
-  const [zipName, setZipName] = useState(defaultZipName);
+
+  const effectiveEntries = entries.filter(e => !deletedFiles.has(e.originalName));
+  const categoryCounts: Record<string, number> = {};
+  for (const e of effectiveEntries) {
+    const cat = overrides[e.originalName] ?? e.category;
+    categoryCounts[cat] = (categoryCounts[cat] ?? 0) + 1;
+  }
+
+  const totalFiles = effectiveEntries.length;
+  const dupeCount = entries.filter(e => e.isDuplicate && !deletedFiles.has(e.originalName)).length;
+  const sortedCats = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
 
   const handleDownload = async () => {
-    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-    const url = `${base}/api/jobs/${jobId}/download`;
-    const filename = (zipName.trim() || defaultZipName).replace(/\.zip$/i, "") + ".zip";
+    const name = (zipName.trim() || defaultZipName).replace(/\.zip$/i, "");
+    setZipping(true);
+    setZipProgress(0);
     try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
-    } catch {
-      window.open(url, "_blank");
+      await generateAndDownloadZip(entries, deletedFiles, overrides, name, setZipProgress);
+    } finally {
+      setZipping(false);
+      setShowNameDialog(false);
     }
-    setShowNameDialog(false);
   };
-
-  const handleStartOver = () => {
-    cleanupJob.mutate({ jobId }, { onSuccess: () => queryClient.clear() });
-    onStartOver();
-  };
-
-  const sortedCats = Object.entries(stats?.categoryCounts ?? {}).sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-56px)] px-6 py-12">
       <div className="w-full max-w-lg space-y-8">
-
         <div className="text-center space-y-3">
           <div className="relative inline-flex items-center justify-center w-24 h-24">
             <div className="absolute inset-0 rounded-full bg-primary/10" />
-            <div className={`absolute inset-0 rounded-full border-2 border-primary/20 ${zipReady ? "" : "animate-ping"}`} style={{ animationDuration: "2.5s" }} />
-            {zipReady
-              ? <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12"><circle cx="24" cy="24" r="20" fill="hsl(var(--primary) / 0.15)"/><path d="M13 24l8 9 14-15" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              : <Loader2 className="h-10 w-10 text-primary animate-spin" />}
+            <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12">
+              <circle cx="24" cy="24" r="20" fill="hsl(var(--primary) / 0.15)"/>
+              <path d="M13 24l8 9 14-15" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-          <h2 className="text-3xl font-bold">
-            {zipReady ? "Archive ready!" : "Building archive…"}
-          </h2>
-          <p className="text-muted-foreground">
-            {zipReady
-              ? "All images organized and compressed. Download your structured ZIP below."
-              : "Compressing categorized folders — just a few seconds."}
-          </p>
+          <h2 className="text-3xl font-bold">Ready to download!</h2>
+          <p className="text-muted-foreground">Your screenshots are organised. Download the ZIP below.</p>
+          <div className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+            <ShieldCheck className="h-3.5 w-3.5" /> ZIP generated in your browser — nothing uploaded
+          </div>
         </div>
 
-        {statsLoading ? (
-          <div className="grid grid-cols-3 gap-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
-          </div>
-        ) : stats ? (
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: "Total files",  value: stats.totalFiles, color: "text-foreground" },
-              { label: "Duplicates",   value: stats.duplicateCount, color: "text-red-400" },
-              { label: "Categories",   value: Object.keys(stats.categoryCounts).length, color: "text-primary" },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="bg-card border border-border rounded-2xl p-4 text-center space-y-1">
-                <p className={`text-3xl font-bold tabular-nums ${color}`}>{value}</p>
-                <p className="text-xs text-muted-foreground">{label}</p>
-              </div>
-            ))}
-          </div>
-        ) : null}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Total files",  value: totalFiles, color: "text-foreground" },
+            { label: "Duplicates",   value: dupeCount,  color: "text-red-400" },
+            { label: "Categories",   value: sortedCats.length, color: "text-primary" },
+          ].map(({ label, value, color }) => (
+            <div key={label} className="bg-card border border-border rounded-2xl p-4 text-center space-y-1">
+              <p className={`text-3xl font-bold tabular-nums ${color}`}>{value}</p>
+              <p className="text-xs text-muted-foreground">{label}</p>
+            </div>
+          ))}
+        </div>
 
         {sortedCats.length > 0 && (
           <div className="bg-card border border-border rounded-2xl overflow-hidden">
@@ -1173,11 +983,11 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
               {sortedCats.map(([cat, count]) => {
                 const meta = CATEGORY_META[cat] ?? CATEGORY_META["Unknown / Others"];
                 const { Icon } = meta;
-                const pct = stats!.totalFiles > 0 ? Math.round((count / stats!.totalFiles) * 100) : 0;
+                const pct = totalFiles > 0 ? Math.round((count / totalFiles) * 100) : 0;
                 return (
                   <div key={cat} className="flex items-center gap-3 px-4 py-2.5">
                     <div className={`w-7 h-7 rounded-lg ${meta.bg} flex items-center justify-center shrink-0`}>
-                      <Icon className={`${meta.color}`} style={{ width: 15, height: 15 }} />
+                      <Icon className={meta.color} style={{ width: 15, height: 15 }} />
                     </div>
                     <span className="flex-1 text-sm text-foreground truncate">{cat}</span>
                     <div className="flex items-center gap-2.5">
@@ -1193,21 +1003,33 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
           </div>
         )}
 
+        {zipping && (
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Building ZIP…</span>
+              <span className="font-mono">{Math.round(zipProgress)}%</span>
+            </div>
+            <Progress value={zipProgress} className="h-2" />
+          </div>
+        )}
+
         <div className="space-y-2.5">
-          <Button size="lg" className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
-            disabled={!zipReady} onClick={() => { setZipName(defaultZipName); setShowNameDialog(true); }} data-testid="button-download">
-            {zipReady
-              ? <><Download className="h-5 w-5 mr-2" /> Download ZIP{stats?.zipSizeBytes ? ` · ${formatBytes(stats.zipSizeBytes)}` : ""}</>
-              : <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Preparing download...</>}
+          <Button
+            size="lg"
+            className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
+            disabled={zipping}
+            onClick={() => { setZipName(defaultZipName); setShowNameDialog(true); }}
+            data-testid="button-download"
+          >
+            <Download className="h-5 w-5 mr-2" /> Download ZIP
           </Button>
           <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground"
-            onClick={handleStartOver} data-testid="button-start-over">
+            onClick={onStartOver} data-testid="button-start-over">
             <RotateCcw className="h-4 w-4 mr-2" /> Start over
           </Button>
         </div>
       </div>
 
-      {/* ZIP naming dialog */}
       <Dialog open={showNameDialog} onOpenChange={setShowNameDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -1220,7 +1042,7 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
             <Input
               value={zipName}
               onChange={e => setZipName(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && zipName.trim()) handleDownload(); }}
+              onKeyDown={e => { if (e.key === "Enter" && !zipping) handleDownload(); }}
               placeholder={defaultZipName}
               className="font-mono text-sm"
               autoFocus
@@ -1230,9 +1052,9 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
             </p>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowNameDialog(false)}>Cancel</Button>
-            <Button onClick={handleDownload} disabled={!zipName.trim()}>
-              <Download className="h-4 w-4 mr-2" /> Download
+            <Button variant="outline" onClick={() => setShowNameDialog(false)} disabled={zipping}>Cancel</Button>
+            <Button onClick={handleDownload} disabled={zipping}>
+              {zipping ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Building…</> : <><Download className="h-4 w-4 mr-2" /> Download</>}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1242,73 +1064,86 @@ function DoneStep({ jobId, onStartOver }: { jobId: string; onStartOver: () => vo
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-type StepDef = { key: Step; label: string; Icon: React.ElementType };
-
-// ─── Session helpers (survive SPA navigation; cleared on tab/refresh) ─────────
-const SS_STEP  = "sv_step";
-const SS_JOB   = "sv_jobId";
-
-function ssGet<T>(key: string, fallback: T): T {
-  try { const v = sessionStorage.getItem(key); return v !== null ? JSON.parse(v) as T : fallback; } catch { return fallback; }
-}
-function ssSet(key: string, value: unknown) {
-  try { sessionStorage.setItem(key, JSON.stringify(value)); } catch { /* ignore */ }
-}
-function ssClear(...keys: string[]) {
-  keys.forEach(k => { try { sessionStorage.removeItem(k); } catch { /* ignore */ } });
-}
+const DEFAULT_PROGRESS: ProcessingState = {
+  phase: "", processedFiles: 0, totalFiles: 0, ocrDone: 0, ocrTotal: 0, duplicateCount: 0,
+};
 
 export default function Home() {
-  const [step,    setStepRaw]  = useState<Step>(() => ssGet<Step>(SS_STEP, "upload"));
-  const [jobId,   setJobIdRaw] = useState<string | null>(() => ssGet<string | null>(SS_JOB, null));
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [step, setStep] = useState<Step>("upload");
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [entries, setEntries] = useState<BrowserFileEntry[]>([]);
+  const [progress, setProgress] = useState<ProcessingState>(DEFAULT_PROGRESS);
+  const [processingError, setProcessingError] = useState<string | null>(null);
+  const [confirmedOverrides, setConfirmedOverrides] = useState<Record<string, string>>({});
+  const [confirmedDeletes, setConfirmedDeletes] = useState<Set<string>>(new Set());
   const { theme, toggleTheme } = useTheme();
 
-  // Keep sessionStorage in sync whenever state changes
-  const setStep = (s: Step) => { setStepRaw(s); ssSet(SS_STEP, s); };
-  const setJobId = (id: string | null) => { setJobIdRaw(id); ssSet(SS_JOB, id); };
+  // Start browser processing when step becomes "processing"
+  useEffect(() => {
+    if (step !== "processing" || !pendingFiles.length) return;
+    let cancelled = false;
 
-  // Helper: full reset — clears session storage too
-  const resetSession = () => {
-    ssClear(SS_STEP, SS_JOB);
-    setStepRaw("upload");
-    setJobIdRaw(null);
-    setUploadedFiles([]);
-  };
+    const run = async () => {
+      try {
+        setProcessingError(null);
+        const result = await runBrowserProcess(pendingFiles, (update: ProcessUpdate) => {
+          if (!cancelled) setProgress(prev => ({ ...prev, ...update }));
+        });
+        if (!cancelled) {
+          setEntries(result);
+          setStep("review");
+          appendToHistory({
+            jobId: crypto.randomUUID(),
+            totalFiles: result.length,
+            duplicateCount: result.filter(e => e.isDuplicate).length,
+            ocrCount: result.filter(e => e.ocrText !== null && !e.isDuplicate).length,
+            createdAt: new Date().toISOString(),
+            categoryCounts: getCategoryCounts(result),
+          });
+        }
+      } catch (e) {
+        if (!cancelled) setProcessingError(e instanceof Error ? e.message : "Processing failed");
+      }
+    };
 
-  const { data: job } = useGetJob(jobId ?? "", {
-    query: {
-      enabled: !!jobId && step === "processing",
-      queryKey: getGetJobQueryKey(jobId ?? ""),
-      refetchInterval: q => {
-        const d = q.state.data;
-        if (d?.status === "awaiting_confirmation") return false;
-        return 800;
-      },
-    },
-  });
+    run();
+    return () => { cancelled = true; };
+  }, [step, pendingFiles]);
 
-  if (step === "processing" && job?.status === "awaiting_confirmation") {
-    setStep("review");
-  }
-
-  const handleUploadComplete = (jid: string, files: File[]) => {
-    setJobId(jid);
-    setUploadedFiles(files);
+  const handleReady = (files: File[]) => {
+    setPendingFiles(files);
+    setProgress(DEFAULT_PROGRESS);
     setStep("processing");
   };
 
-  const stepDefs: StepDef[] = [
-    { key: "upload",     label: "Upload",   Icon: Upload },
-    { key: "processing", label: "Process",  Icon: Cpu },
-    { key: "review",     label: "Review",   Icon: FolderOpen },
-    { key: "done",       label: "Download", Icon: Download },
+  const handleConfirm = (overrides: Record<string, string>, deletes: Set<string>) => {
+    setConfirmedOverrides(overrides);
+    setConfirmedDeletes(deletes);
+    setStep("done");
+  };
+
+  const resetAll = () => {
+    // Revoke object URLs to free memory
+    entries.forEach(e => { try { URL.revokeObjectURL(e.previewUrl); } catch {} });
+    setStep("upload");
+    setPendingFiles([]);
+    setEntries([]);
+    setProgress(DEFAULT_PROGRESS);
+    setProcessingError(null);
+    setConfirmedOverrides({});
+    setConfirmedDeletes(new Set());
+  };
+
+  const stepDefs = [
+    { key: "upload" as Step,     label: "Upload",   Icon: Upload },
+    { key: "processing" as Step, label: "Process",  Icon: Cpu },
+    { key: "review" as Step,     label: "Review",   Icon: FolderOpen },
+    { key: "done" as Step,       label: "Download", Icon: Download },
   ];
   const currentIdx = stepDefs.findIndex(s => s.key === step);
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Navbar */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 shrink-0">
@@ -1326,11 +1161,9 @@ export default function Home() {
               {stepDefs.map((s, i) => (
                 <div key={s.key} className="flex items-center gap-0.5">
                   <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                    i === currentIdx
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : i < currentIdx
-                      ? "text-primary"
-                      : "text-muted-foreground"
+                    i === currentIdx ? "bg-primary text-primary-foreground shadow-sm"
+                    : i < currentIdx ? "text-primary"
+                    : "text-muted-foreground"
                   }`}>
                     {i < currentIdx ? <CheckCircle className="h-3 w-3" /> : <s.Icon className="h-3 w-3" />}
                     {s.label}
@@ -1341,26 +1174,19 @@ export default function Home() {
             </div>
           )}
 
-          <button
-            onClick={toggleTheme}
+          <button onClick={toggleTheme}
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
-            data-testid="button-theme-toggle"
-            aria-label="Toggle theme"
-          >
+            aria-label="Toggle theme">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
         </div>
       </header>
 
-      {step === "upload" && <UploadStep onUploadComplete={handleUploadComplete} />}
-      {step === "processing" && jobId && (
-        <ProcessingStep jobId={jobId} onReset={resetSession} />
-      )}
-      {step === "review" && jobId && (
-        <ReviewStep jobId={jobId} uploadedFiles={uploadedFiles} onConfirm={() => setStep("done")} onReset={resetSession} />
-      )}
-      {step === "done" && jobId && (
-        <DoneStep jobId={jobId} onStartOver={resetSession} />
+      {step === "upload" && <UploadStep onReady={handleReady} />}
+      {step === "processing" && <ProcessingStep progress={progress} error={processingError} onReset={resetAll} />}
+      {step === "review" && <ReviewStep entries={entries} onConfirm={handleConfirm} onReset={resetAll} />}
+      {step === "done" && (
+        <DoneStep entries={entries} overrides={confirmedOverrides} deletedFiles={confirmedDeletes} onStartOver={resetAll} />
       )}
     </div>
   );

@@ -424,6 +424,16 @@ importers:
         version: 3.25.76
 
   artifacts/snapvault:
+    dependencies:
+      jsqr:
+        specifier: ^1.4.0
+        version: 1.4.0
+      jszip:
+        specifier: ^3.10.1
+        version: 3.10.1
+      tesseract.js:
+        specifier: ^7.0.0
+        version: 7.0.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
