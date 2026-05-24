@@ -2356,28 +2356,42 @@ export function categorizeByFilename(filename: string): Category | null {
   return null;
 }
 
+// ─── OCR priority order (first match wins — do NOT change order) ──────────────
+const OCR_PRIORITY: Category[] = [
+  "OTP / Security",
+  "WhatsApp / Chats",
+  "Social Media",
+  "Documents",
+  "Payments / Receipts",
+  "Study / Notes",
+  "Memes / Entertainment",
+  "Photos",
+];
+
 // ─── OCR text classifier ──────────────────────────────────────────────────────
 export function categorizeByText(rawText: string): Category | null {
   const text = rawText.toLowerCase();
 
-  const scores: { category: Category; score: number }[] = [];
-
+  // Collect every category whose minScore is met
+  const matched = new Set<Category>();
   for (const rule of OCR_RULES) {
     let score = 0;
     for (const kw of rule.keywords) {
-      // Use regex pattern if provided, otherwise fall back to exact substring
-      const matched = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
-      if (matched) score += kw.weight;
+      const hit = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
+      if (hit) score += kw.weight;
     }
-    if (score >= rule.minScore) {
-      scores.push({ category: rule.category, score });
-    }
+    if (score >= rule.minScore) matched.add(rule.category);
   }
 
-  if (!scores.length) return null;
+  if (!matched.size) return null;
 
-  scores.sort((a, b) => b.score - a.score);
-  return scores[0].category;
+  // Return the highest-priority match, not the highest-scoring one
+  for (const cat of OCR_PRIORITY) {
+    if (matched.has(cat)) return cat;
+  }
+
+  // Fallback: any match not in priority list (shouldn't happen)
+  return [...matched][0];
 }
 
 /** Combined pipeline: filename → OCR text → Unknown */
