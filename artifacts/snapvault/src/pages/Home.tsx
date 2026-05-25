@@ -150,7 +150,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
               onClick={() => inputRef.current?.click()}
               className={[
                 "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer select-none",
-                dragging ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10" : "border-border hover:border-primary/50 hover:bg-muted/20",
+                dragging ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10" : "border-slate-300 dark:border-slate-500 hover:border-primary/50 hover:bg-muted/20",
               ].join(" ")}
             >
               <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
@@ -160,7 +160,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
 
               <div className="relative flex flex-col items-center gap-5 px-8 py-12">
                 <div className={`relative flex items-center justify-center w-20 h-20 rounded-full transition-all duration-300 ${dragging ? "bg-primary/15 scale-110" : "bg-muted"}`}>
-                  <div className={`absolute inset-0 rounded-full border-2 border-dashed transition-all ${dragging ? "border-primary animate-spin" : "border-border/50"}`} style={{ animationDuration: "8s" }} />
+                  <div className={`absolute inset-0 rounded-full border-2 border-dashed transition-all ${dragging ? "border-primary animate-spin" : "border-slate-300 dark:border-slate-500"}`} style={{ animationDuration: "8s" }} />
                   <Upload className={`w-8 h-8 transition-colors ${dragging ? "text-primary" : "text-muted-foreground"}`} />
                 </div>
 
