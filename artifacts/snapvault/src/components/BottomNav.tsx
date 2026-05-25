@@ -26,21 +26,6 @@ const tabs: Tab[] = [
     ),
   },
   {
-    key: "files",
-    label: "Files",
-    path: "/files",
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 7a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l1.414 1.414A1 1 0 0 0 12.414 7H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" />
-      </svg>
-    ),
-    activeIcon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-        <path d="M11.707 4.293A1 1 0 0 0 11 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6.586l-1.414-1.414A1 1 0 0 0 11.707 4.293z" />
-      </svg>
-    ),
-  },
-  {
     key: "activity",
     label: "Activity",
     path: "/activity",
