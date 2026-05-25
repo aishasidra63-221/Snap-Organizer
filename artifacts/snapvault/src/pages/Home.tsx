@@ -65,7 +65,15 @@ function formatBytes(bytes: number): string {
 }
 
 // ─── Upload Step ──────────────────────────────────────────────────────────────
-function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
+function UploadStep({
+  onReady,
+  enableOcr,
+  onToggleOcr,
+}: {
+  onReady: (files: File[]) => void;
+  enableOcr: boolean;
+  onToggleOcr: () => void;
+}) {
   const [dragging, setDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -201,9 +209,36 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
               </Button>
             </div>
 
+            {/* OCR toggle */}
+            <button
+              type="button"
+              onClick={onToggleOcr}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all duration-200 text-left ${
+                enableOcr
+                  ? "border-blue-500/40 bg-blue-500/8"
+                  : "border-border bg-muted/30 hover:bg-muted/60"
+              }`}
+            >
+              <div className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${enableOcr ? "bg-blue-500" : "bg-muted-foreground/30"}`}>
+                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${enableOcr ? "translate-x-4" : "translate-x-0.5"}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  <ScanSearch className={`h-3.5 w-3.5 ${enableOcr ? "text-blue-500" : "text-muted-foreground"}`} />
+                  Deep Scan (OCR)
+                  <span className="text-[10px] font-normal px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 ml-1">Slow</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {enableOcr
+                    ? "ON — reads text inside images to categorise better (2–10s per image)"
+                    : "OFF — uses filename only · instant results (recommended)"}
+                </p>
+              </div>
+            </button>
+
             <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground pt-1">
               <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-400" /> SHA-256 dedup</span>
-              <span className="flex items-center gap-1.5"><ScanSearch className="h-3.5 w-3.5 text-blue-400" /> OCR fallback</span>
+              <span className="flex items-center gap-1.5"><ScanSearch className="h-3.5 w-3.5 text-blue-400" /> OCR optional</span>
               <span className="flex items-center gap-1.5"><Download className="h-3.5 w-3.5 text-emerald-400" /> ZIP export</span>
             </div>
           </div>
