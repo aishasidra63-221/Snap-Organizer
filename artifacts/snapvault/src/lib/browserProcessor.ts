@@ -65,10 +65,14 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
-// ─── SPEED FIX: Crop top 40% + downscale to max 1200px before OCR ────────────
-// Screenshots have headers, app names, amounts at the top — bottom half is
-// mostly content that doesn't help with categorisation. Cropping reduces
-// pixels by ~60% which makes Tesseract 3-4x faster with no accuracy loss.
+// ─── ACCURACY FIX: Multi-strip crop — top 40% + bottom 22% ──────────────────
+// Two strips are stitched into one canvas so Tesseract runs just once.
+//
+//  Top strip  (0–40%)  — catches: app name, OTP code, "Payment Successful"
+//  Bot strip (78–100%) — catches: total amount, "valid for X mins", "₹ 200"
+//
+// Skipping the middle ~38% (plain chat bubbles / feed content) keeps pixel
+// count to ~62% of original — fast enough, far more accurate than top-only.
 async function prepareForOcr(file: File): Promise<HTMLCanvasElement | null> {
   return new Promise(resolve => {
     const img = new Image();
@@ -76,13 +80,28 @@ async function prepareForOcr(file: File): Promise<HTMLCanvasElement | null> {
     img.onload = () => {
       try {
         const MAX_WIDTH = 1200;
-        const cropHeight = Math.round(img.height * 0.4); // top 40% only
         const scale = Math.min(1, MAX_WIDTH / img.width);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(cropHeight * scale);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, img.width, cropHeight, 0, 0, canvas.width, canvas.height);
+        const w = Math.round(img.width * scale);
+
+        // Top strip: rows 0 → 40%
+        const topSrcH  = Math.round(img.height * 0.40);
+        const topDstH  = Math.round(topSrcH  * scale);
+
+        // Bottom strip: rows 78% → 100%
+        const botSrcY  = Math.round(img.height * 0.78);
+        const botSrcH  = img.height - botSrcY;
+        const botDstH  = Math.round(botSrcH  * scale);
+
+        const canvas   = document.createElement("canvas");
+        canvas.width   = w;
+        canvas.height  = topDstH + botDstH;
+        const ctx      = canvas.getContext("2d")!;
+
+        // Draw top strip
+        ctx.drawImage(img, 0, 0,       img.width, topSrcH, 0, 0,       w, topDstH);
+        // Draw bottom strip directly below
+        ctx.drawImage(img, 0, botSrcY, img.width, botSrcH, 0, topDstH, w, botDstH);
+
         resolve(canvas);
       } catch {
         resolve(null);

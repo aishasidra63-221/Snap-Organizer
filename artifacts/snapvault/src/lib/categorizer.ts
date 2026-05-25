@@ -403,6 +403,22 @@ const OCR_RULES: OcrRule[] = [
       { text: "touch id",                       weight: 3 },
       { text: "use biometric",                  weight: 3 },
       { text: "biometric verification",         weight: 3 },
+
+      // ── Urdu / Hinglish OTP signals ──────────────────────────────────────
+      { text: "aapka otp",                      weight: 3 },  // "your OTP"
+      { text: "apka otp",                       weight: 3 },
+      { text: "otp bheja gaya",                 weight: 3 },  // "OTP has been sent"
+      { text: "otp bheja",                      weight: 3 },
+      { text: "code bheja gaya",                weight: 3 },  // "code has been sent"
+      { text: "code darj karen",                weight: 3 },  // "enter code"
+      { text: "verify karen",                   weight: 2 },  // "please verify"
+      { text: "tasdeeq karen",                  weight: 3 },  // "confirm/verify"
+      { text: "password bhool gaye",            weight: 3 },  // "forgot password"
+      { text: "password badlen",                weight: 3 },  // "change password"
+      { text: "password reset karen",           weight: 3 },
+      { text: "naya password",                  weight: 3 },  // "new password"
+      { text: "login ki koshish",               weight: 3 },  // "login attempt"
+      { text: "koi aur login kar raha",         weight: 3 },  // "someone else logging in"
     ],
   },
 
@@ -493,14 +509,43 @@ const OCR_RULES: OcrRule[] = [
       { text: "au small finance",        weight: 3 },
       // Currency signals
       { text: "₹",                       weight: 2 },
+      { text: "₨",                       weight: 2 },  // Rupee sign
       { text: "rs.",                     weight: 2 },
       { text: "inr",                     weight: 1 },
       { text: "pkr",                     weight: 2 },
+      // Currency + amount together → instant classify (e.g. "PKR 500", "Rs. 1,200", "₹2000", "₨350")
+      { text: "pkr+amount", pattern: /(?:pkr|rs\.?|₹|₨)\s*[\d,]{2,}/i, weight: 3 },
       { text: "fee / charge",            weight: 2 },
       { text: "no charge",               weight: 1 },
       { text: "sent to",                 weight: 1 },
       { text: "sent by",                 weight: 1 },
       { text: "id#",                     weight: 1 },
+
+      // ── Urdu / Hinglish payment signals ──────────────────────────────────
+      { text: "paisa bheja",             weight: 3 },  // "money sent"
+      { text: "paise bheje",             weight: 3 },
+      { text: "paisa mila",              weight: 3 },  // "money received"
+      { text: "paise mile",              weight: 3 },
+      { text: "raqam bheji",             weight: 3 },  // "amount sent"
+      { text: "raqam mili",              weight: 3 },  // "amount received"
+      { text: "raqam",                   weight: 1 },  // "amount" (supporting)
+      { text: "raseed",                  weight: 2 },  // "receipt"
+      { text: "bhugtan",                 weight: 2 },  // "payment"
+      { text: "bhugtan ho gaya",         weight: 3 },  // "payment done"
+      { text: "bhugtan kiya",            weight: 3 },  // "payment made"
+      { text: "transfer ho gaya",        weight: 3 },  // "transfer done"
+      { text: "paise transfer",          weight: 3 },  // "money transfer"
+      { text: "account mein aa gaye",    weight: 3 },  // "arrived in account"
+      { text: "account se kate",         weight: 3 },  // "deducted from account"
+      { text: "balance kam ho gaya",     weight: 3 },  // "balance reduced"
+      { text: "available balance",       weight: 2 },  // balance screen
+      { text: "current balance",         weight: 2 },
+      { text: "account balance",         weight: 2 },
+      { text: "remaining balance",       weight: 2 },
+      { text: "low balance",             weight: 2 },
+      { text: "insufficient balance",    weight: 3 },
+      { text: "bill ada kar diya",       weight: 3 },  // "bill paid"
+      { text: "bill ada karen",          weight: 2 },  // "pay bill"
       // Debit/credit
       { text: "amount debited",          weight: 3 },
       { text: "amount credited",         weight: 3 },
@@ -2465,29 +2510,49 @@ const OCR_PRIORITY: Category[] = [
 ];
 
 // ─── OCR text classifier ──────────────────────────────────────────────────────
+// Strategy: score every rule, keep only those that meet minScore.
+// If multiple categories qualify → return the HIGHEST-SCORING one.
+// On equal score, OCR_PRIORITY acts as a tiebreaker (OTP beats Payments, etc.)
+// This prevents a barely-qualifying OTP match from stealing a high-confidence
+// payment screenshot (e.g. score 3 OTP vs score 18 Payments → Payments wins).
 export function categorizeByText(rawText: string): Category | null {
   const text = rawText.toLowerCase();
 
-  // Collect every category whose minScore is met
-  const matched = new Set<Category>();
+  // Score every rule
+  const scores = new Map<Category, number>();
   for (const rule of OCR_RULES) {
     let score = 0;
     for (const kw of rule.keywords) {
       const hit = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
       if (hit) score += kw.weight;
     }
-    if (score >= rule.minScore) matched.add(rule.category);
+    if (score >= rule.minScore) scores.set(rule.category, score);
   }
 
-  if (!matched.size) return null;
+  if (!scores.size) return null;
 
-  // Return the highest-priority match, not the highest-scoring one
-  for (const cat of OCR_PRIORITY) {
-    if (matched.has(cat)) return cat;
+  // Single match — fast path
+  if (scores.size === 1) return [...scores.keys()][0];
+
+  // Multiple matches: highest score wins.
+  // Tiebreak: lower OCR_PRIORITY index = higher importance (e.g. OTP > Payments).
+  const priorityOf = (cat: Category) => {
+    const i = OCR_PRIORITY.indexOf(cat);
+    return i === -1 ? OCR_PRIORITY.length : i;
+  };
+
+  let best: Category | null = null;
+  let bestScore = -1;
+  let bestPri = Infinity;
+  for (const [cat, score] of scores) {
+    const pri = priorityOf(cat);
+    if (score > bestScore || (score === bestScore && pri < bestPri)) {
+      best = cat;
+      bestScore = score;
+      bestPri = pri;
+    }
   }
-
-  // Fallback: any match not in priority list (shouldn't happen)
-  return [...matched][0];
+  return best;
 }
 
 /** Combined pipeline: filename → OCR text → Unknown */
