@@ -268,7 +268,11 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
           <div className="flex items-center gap-2 font-semibold text-foreground/70">
             <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
               <svg viewBox="0 0 20 20" fill="none" className="w-3 h-3">
-                <path d="M3 6a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" fill="white" fillOpacity="0.9"/>
+                <path d="M10 1.5L3 4.5V10c0 4.2 3.1 7.5 7 8.5 3.9-1 7-4.3 7-8.5V4.5L10 1.5z" fill="white" fillOpacity="0.15"/>
+                <rect x="4.5" y="8" width="11" height="7" rx="1.5" fill="white"/>
+                <path d="M8.2 8l1-1.8h1.6l1 1.8z" fill="white"/>
+                <circle cx="10" cy="11.5" r="2.2" stroke="rgba(79,70,229,0.4)" strokeWidth="1.1" fill="rgba(79,70,229,0.08)"/>
+                <circle cx="10" cy="11.5" r="0.8" fill="rgba(79,70,229,0.45)"/>
               </svg>
             </div>
             OrganizeShots
@@ -1199,8 +1203,11 @@ export default function Home() {
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-sm shadow-primary/30">
               <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-                <path d="M3 6a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" fill="white" fillOpacity="0.95"/>
-                <rect x="7" y="10" width="6" height="1.5" rx="0.75" fill="white" fillOpacity="0.55"/>
+                <path d="M10 1.5L3 4.5V10c0 4.2 3.1 7.5 7 8.5 3.9-1 7-4.3 7-8.5V4.5L10 1.5z" fill="white" fillOpacity="0.15"/>
+                <rect x="4.5" y="8" width="11" height="7" rx="1.5" fill="white"/>
+                <path d="M8.2 8l1-1.8h1.6l1 1.8z" fill="white"/>
+                <circle cx="10" cy="11.5" r="2.2" stroke="rgba(79,70,229,0.4)" strokeWidth="1.1" fill="rgba(79,70,229,0.08)"/>
+                <circle cx="10" cy="11.5" r="0.8" fill="rgba(79,70,229,0.45)"/>
               </svg>
             </div>
             <span className="font-extrabold text-base tracking-tight">OrganizeShots</span>
