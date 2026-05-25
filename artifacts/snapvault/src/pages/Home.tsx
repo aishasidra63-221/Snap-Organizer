@@ -80,23 +80,35 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
   const filterImages = (files: File[]) =>
     files.filter(f => ALLOWED_TYPES.has(f.type) || f.name.match(/\.(jpe?g|png|gif|webp|bmp|tiff?|heic|heif)$/i));
 
+  const MAX_FILES = 100;
+
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
     const filtered = filterImages(Array.from(e.dataTransfer.files));
+    if (filtered.length > MAX_FILES) {
+      setError(`Maximum 100 screenshots allowed per batch. You selected ${filtered.length}.`);
+      return;
+    }
     setSelectedFiles(filtered);
     setError(null);
   }, []);
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(filterImages(Array.from(e.target.files ?? [])));
+    const filtered = filterImages(Array.from(e.target.files ?? []));
+    if (filtered.length > MAX_FILES) {
+      setError(`Maximum 100 screenshots allowed per batch. You selected ${filtered.length}.`);
+      e.target.value = "";
+      return;
+    }
+    setSelectedFiles(filtered);
     setError(null);
   };
 
   const handleOrganize = () => {
     if (!selectedFiles.length) return;
-    if (selectedFiles.length > 500) {
-      setError("Maximum 500 files per batch");
+    if (selectedFiles.length > MAX_FILES) {
+      setError(`Maximum 100 screenshots allowed per batch`);
       return;
     }
     onReady(selectedFiles);
@@ -125,7 +137,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
           </h1>
 
           <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed max-w-xl mx-auto">
-            Drop up to <strong className="text-foreground">500 screenshots</strong> and OrganizeShots sorts everything into <strong className="text-foreground">smart folders</strong> — entirely in your browser.
+            Drop up to <strong className="text-foreground">100 screenshots</strong> and OrganizeShots sorts everything into <strong className="text-foreground">smart folders</strong> — entirely in your browser.
           </p>
 
           <div className="space-y-4 pt-2 text-left">
@@ -153,7 +165,18 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
 
                 {selectedFiles.length > 0 ? (
                   <div className="text-center space-y-1 w-full">
-                    <p className="text-2xl font-bold">{selectedFiles.length.toLocaleString()} images selected</p>
+                    <div className="flex items-center justify-center gap-2">
+                      <p className="text-2xl font-bold">{selectedFiles.length.toLocaleString()} images selected</p>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${selectedFiles.length >= 100 ? "bg-red-500/15 text-red-500" : selectedFiles.length >= 80 ? "bg-amber-500/15 text-amber-500" : "bg-primary/10 text-primary"}`}>
+                        {selectedFiles.length} / 100
+                      </span>
+                    </div>
+                    <div className="w-full max-w-xs mx-auto mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${selectedFiles.length >= 100 ? "bg-red-500" : selectedFiles.length >= 80 ? "bg-amber-500" : "bg-primary"}`}
+                        style={{ width: `${Math.min((selectedFiles.length / 100) * 100, 100)}%` }}
+                      />
+                    </div>
                     <p className="text-sm text-muted-foreground">{formatBytes(totalSize)} total · click to change</p>
                     <div className="flex items-center justify-center gap-1.5 mt-4 flex-wrap max-w-sm mx-auto">
                       {selectedFiles.slice(0, 9).map((f, i) => (
@@ -216,7 +239,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
           <p className="text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-5">How it works</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { step: "01", Icon: Upload, color: "text-primary", bg: "bg-primary/10", title: "Select photos", desc: "Drag-and-drop or pick up to 500 screenshots. PNG, JPG, WebP, HEIC — anything works." },
+              { step: "01", Icon: Upload, color: "text-primary", bg: "bg-primary/10", title: "Select photos", desc: "Drag-and-drop or pick up to 100 screenshots. PNG, JPG, WebP, HEIC — anything works." },
               { step: "02", Icon: Cpu, color: "text-violet-500", bg: "bg-violet-500/10", title: "Auto-process", desc: "SHA-256 deduplication + rule-based + OCR categorisation — all in your browser. Nothing uploaded." },
               { step: "03", Icon: Download, color: "text-emerald-500", bg: "bg-emerald-500/10", title: "Download ZIP", desc: "Review folder cards, approve, and download a structured ZIP with one folder per category." },
             ].map(({ step, Icon, color, bg, title, desc }) => (
