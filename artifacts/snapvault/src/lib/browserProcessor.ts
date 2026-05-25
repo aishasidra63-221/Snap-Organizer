@@ -61,14 +61,10 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
-const MAX_OCR_FILES = 30; // cap to avoid long waits
-
 export async function processFiles(
   files: File[],
-  onUpdate: (u: ProcessUpdate) => void,
-  options: { enableOcr?: boolean } = {}
+  onUpdate: (u: ProcessUpdate) => void
 ): Promise<BrowserFileEntry[]> {
-  const { enableOcr = false } = options;
   const entries: BrowserFileEntry[] = [];
   const seenHashes = new Map<string, string>();
 
@@ -112,27 +108,22 @@ export async function processFiles(
     );
   }
 
-  // Pass 3: OCR on still-unknown files (only when enabled)
-  if (enableOcr) {
-    const ocrCandidates = entries
-      .filter(e => !e.isDuplicate && e.category === "Unknown / Others")
-      .slice(0, MAX_OCR_FILES);
-
-    if (ocrCandidates.length > 0) {
-      onUpdate({ phase: "ocr", processedFiles: 0, totalFiles: ocrCandidates.length, ocrDone: 0, ocrTotal: ocrCandidates.length });
-      const worker = await createWorker("eng", 1, { logger: () => {} } as Parameters<typeof createWorker>[2]);
-      for (let i = 0; i < ocrCandidates.length; i++) {
-        const entry = ocrCandidates[i];
-        try {
-          const { data: { text } } = await worker.recognize(entry.file);
-          entry.ocrText = text;
-          const byText = categorizeByText(text);
-          if (byText) entry.category = byText;
-        } catch { /* skip failed OCR */ }
-        onUpdate({ processedFiles: i + 1, ocrDone: i + 1, ocrTotal: ocrCandidates.length });
-      }
-      await worker.terminate();
+  // Pass 3: OCR on still-unknown files
+  const ocrCandidates = entries.filter(e => !e.isDuplicate && e.category === "Unknown / Others");
+  if (ocrCandidates.length > 0) {
+    onUpdate({ phase: "ocr", processedFiles: 0, totalFiles: ocrCandidates.length, ocrDone: 0, ocrTotal: ocrCandidates.length });
+    const worker = await createWorker("eng", 1, { logger: () => {} } as Parameters<typeof createWorker>[2]);
+    for (let i = 0; i < ocrCandidates.length; i++) {
+      const entry = ocrCandidates[i];
+      try {
+        const { data: { text } } = await worker.recognize(entry.file);
+        entry.ocrText = text;
+        const byText = categorizeByText(text);
+        if (byText) entry.category = byText;
+      } catch { /* skip failed OCR */ }
+      onUpdate({ processedFiles: i + 1, ocrDone: i + 1, ocrTotal: ocrCandidates.length });
     }
+    await worker.terminate();
   }
 
   return entries;
