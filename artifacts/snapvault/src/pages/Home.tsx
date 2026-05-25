@@ -287,6 +287,7 @@ interface ProcessingState {
   ocrDone: number;
   ocrTotal: number;
   duplicateCount: number;
+  workerCount: number;
 }
 
 function ProcessingStep({
@@ -310,7 +311,7 @@ function ProcessingStep({
     { label: "SHA-256 hashing + deduplication",  done: progress.phase === "qr" || progress.phase === "ocr" || (progress.phase === "hashing" && progress.processedFiles === progress.totalFiles && progress.totalFiles > 0) },
     { label: "Filename-rule categorisation",     done: progress.phase === "qr" || progress.phase === "ocr" },
     { label: "QR code scanning",                 done: progress.phase === "ocr" },
-    { label: "OCR text scan (unmatched files)",  done: false },
+    { label: `OCR text scan${progress.workerCount > 1 ? ` · ${progress.workerCount} workers` : ""} (unmatched files)`, done: false },
   ];
 
   const displayPct = (() => {
@@ -361,7 +362,7 @@ function ProcessingStep({
             <h2 className="text-2xl font-bold">Processing images</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
               {progress.phase === "ocr" && progress.ocrTotal > 0
-                ? `OCR: ${progress.ocrDone} / ${progress.ocrTotal} files`
+                ? `OCR: ${progress.ocrDone} / ${progress.ocrTotal} files · ${progress.workerCount} parallel worker${progress.workerCount !== 1 ? "s" : ""}`
                 : progress.totalFiles > 0
                 ? `${progress.processedFiles.toLocaleString()} of ${progress.totalFiles.toLocaleString()} files`
                 : "Starting…"}
@@ -1065,7 +1066,7 @@ function DoneStep({
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const DEFAULT_PROGRESS: ProcessingState = {
-  phase: "", processedFiles: 0, totalFiles: 0, ocrDone: 0, ocrTotal: 0, duplicateCount: 0,
+  phase: "", processedFiles: 0, totalFiles: 0, ocrDone: 0, ocrTotal: 0, duplicateCount: 0, workerCount: 1,
 };
 
 export default function Home() {

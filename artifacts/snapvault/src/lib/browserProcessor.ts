@@ -1,5 +1,5 @@
 import jsQR from "jsqr";
-import { createWorker } from "tesseract.js";
+import { createWorker, createScheduler } from "tesseract.js";
 import JSZip from "jszip";
 import { categorizeByFilename, categorizeByText } from "./categorizer";
 
@@ -24,8 +24,10 @@ export interface ProcessUpdate {
   ocrDone?: number;
   ocrTotal?: number;
   duplicateCount?: number;
+  workerCount?: number;
 }
 
+// ─── Hashing ──────────────────────────────────────────────────────────────────
 async function hashFile(file: File): Promise<string> {
   const buf = await file.arrayBuffer();
   const hash = await crypto.subtle.digest("SHA-256", buf);
@@ -34,6 +36,7 @@ async function hashFile(file: File): Promise<string> {
     .join("");
 }
 
+// ─── QR scanning (canvas, runs on main thread but is fast) ───────────────────
 async function scanQr(file: File): Promise<string | null> {
   return new Promise(resolve => {
     const img = new Image();
@@ -61,6 +64,15 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
+// ─── How many OCR workers to spin up ─────────────────────────────────────────
+// Cap at 4 — beyond that memory pressure outweighs the gains.
+// Also cap at the number of files so we don't over-provision.
+function pickWorkerCount(fileCount: number): number {
+  const cores = navigator.hardwareConcurrency ?? 2;
+  return Math.max(1, Math.min(cores, 4, fileCount));
+}
+
+// ─── Main processing pipeline ─────────────────────────────────────────────────
 export async function processFiles(
   files: File[],
   onUpdate: (u: ProcessUpdate) => void
@@ -68,33 +80,40 @@ export async function processFiles(
   const entries: BrowserFileEntry[] = [];
   const seenHashes = new Map<string, string>();
 
-  // Pass 1: SHA-256 hash + filename categorisation
+  // ── Pass 1: SHA-256 hash + filename categorisation ──────────────────────────
+  // Hashes in parallel batches of 8 — keeps memory manageable on mobile.
+  const HASH_BATCH = 8;
   onUpdate({ phase: "hashing", processedFiles: 0, totalFiles: files.length, duplicateCount: 0 });
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const hash = await hashFile(file);
-    const isDuplicate = seenHashes.has(hash);
-    if (!isDuplicate) seenHashes.set(hash, file.name);
+  for (let i = 0; i < files.length; i += HASH_BATCH) {
+    const batch = files.slice(i, i + HASH_BATCH);
+    const hashes = await Promise.all(batch.map(hashFile));
 
-    const byFilename = isDuplicate ? "Duplicates" : categorizeByFilename(file.name);
-    entries.push({
-      id: crypto.randomUUID(),
-      originalName: file.name,
-      category: byFilename ?? "Unknown / Others",
-      hash,
-      isDuplicate,
-      size: file.size,
-      file,
-      previewUrl: URL.createObjectURL(file),
-      ocrText: null,
-    });
+    for (let j = 0; j < batch.length; j++) {
+      const file = batch[j];
+      const hash = hashes[j];
+      const isDuplicate = seenHashes.has(hash);
+      if (!isDuplicate) seenHashes.set(hash, file.name);
+
+      const byFilename = isDuplicate ? "Duplicates" : categorizeByFilename(file.name);
+      entries.push({
+        id: crypto.randomUUID(),
+        originalName: file.name,
+        category: byFilename ?? "Unknown / Others",
+        hash,
+        isDuplicate,
+        size: file.size,
+        file,
+        previewUrl: URL.createObjectURL(file),
+        ocrText: null,
+      });
+    }
 
     const dupes = entries.filter(e => e.isDuplicate).length;
-    onUpdate({ processedFiles: i + 1, duplicateCount: dupes });
+    onUpdate({ processedFiles: Math.min(i + HASH_BATCH, files.length), duplicateCount: dupes });
   }
 
-  // Pass 2: QR scan on unknowns
+  // ── Pass 2: QR scan on unknowns (all in parallel — fast canvas ops) ─────────
   const qrCandidates = entries.filter(e => !e.isDuplicate && e.category === "Unknown / Others");
   if (qrCandidates.length > 0) {
     onUpdate({ phase: "qr" });
@@ -108,27 +127,51 @@ export async function processFiles(
     );
   }
 
-  // Pass 3: OCR on still-unknown files
+  // ── Pass 3: Parallel OCR via Tesseract Scheduler ────────────────────────────
   const ocrCandidates = entries.filter(e => !e.isDuplicate && e.category === "Unknown / Others");
   if (ocrCandidates.length > 0) {
-    onUpdate({ phase: "ocr", processedFiles: 0, totalFiles: ocrCandidates.length, ocrDone: 0, ocrTotal: ocrCandidates.length });
-    const worker = await createWorker("eng", 1, { logger: () => {} } as Parameters<typeof createWorker>[2]);
-    for (let i = 0; i < ocrCandidates.length; i++) {
-      const entry = ocrCandidates[i];
-      try {
-        const { data: { text } } = await worker.recognize(entry.file);
-        entry.ocrText = text;
-        const byText = categorizeByText(text);
-        if (byText) entry.category = byText;
-      } catch { /* skip failed OCR */ }
-      onUpdate({ processedFiles: i + 1, ocrDone: i + 1, ocrTotal: ocrCandidates.length });
-    }
-    await worker.terminate();
+    const numWorkers = pickWorkerCount(ocrCandidates.length);
+    onUpdate({
+      phase: "ocr",
+      processedFiles: 0,
+      totalFiles: ocrCandidates.length,
+      ocrDone: 0,
+      ocrTotal: ocrCandidates.length,
+      workerCount: numWorkers,
+    });
+
+    // Build scheduler with N parallel workers
+    const scheduler = createScheduler();
+    const workerInits = Array.from({ length: numWorkers }, () =>
+      createWorker("eng", 1, { logger: () => {} } as Parameters<typeof createWorker>[2])
+    );
+    const workers = await Promise.all(workerInits);
+    workers.forEach(w => scheduler.addWorker(w));
+
+    let ocrDone = 0;
+
+    await Promise.all(
+      ocrCandidates.map(async entry => {
+        try {
+          // scheduler.addJob automatically routes to the next free worker
+          const { data: { text } } = await scheduler.addJob("recognize", entry.file);
+          entry.ocrText = text;
+          const byText = categorizeByText(text);
+          if (byText) entry.category = byText;
+        } catch { /* skip on error */ }
+
+        ocrDone++;
+        onUpdate({ processedFiles: ocrDone, ocrDone, ocrTotal: ocrCandidates.length });
+      })
+    );
+
+    await scheduler.terminate(); // terminates all workers cleanly
   }
 
   return entries;
 }
 
+// ─── Utilities ────────────────────────────────────────────────────────────────
 export function getCategoryCounts(entries: BrowserFileEntry[]): Record<string, number> {
   const counts: Record<string, number> = {};
   for (const e of entries) counts[e.category] = (counts[e.category] ?? 0) + 1;
