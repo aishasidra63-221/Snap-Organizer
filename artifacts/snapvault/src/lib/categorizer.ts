@@ -151,7 +151,9 @@ const FILENAME_RULES: FilenameRule[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 // Each keyword can be a plain string (exact substring) OR a regex pattern.
 interface OcrKeyword { text: string; pattern?: RegExp; weight: 3 | 2 | 1; }
-interface OcrRule { category: Category; minScore: number; keywords: OcrKeyword[]; }
+// requireAnchor: if true, at least one keyword with weight≥2 must match before
+// any weight-1 keywords contribute. Prevents 3×weight-1 false positives.
+interface OcrRule { category: Category; minScore: number; requireAnchor?: boolean; keywords: OcrKeyword[]; }
 
 const OCR_RULES: OcrRule[] = [
 
@@ -430,6 +432,7 @@ const OCR_RULES: OcrRule[] = [
   {
     category: "Payments / Receipts",
     minScore: 3,
+    requireAnchor: true,  // at least one weight≥2 keyword must match
     keywords: [
       // UPI payment apps — instant classify
       { text: "payment successful",      weight: 3 },
@@ -507,19 +510,14 @@ const OCR_RULES: OcrRule[] = [
       { text: "canara bank",             weight: 3 },
       { text: "idfc bank",               weight: 3 },
       { text: "au small finance",        weight: 3 },
-      // Currency signals
+      // Currency signals — only specific enough combos kept
       { text: "₹",                       weight: 2 },
       { text: "₨",                       weight: 2 },  // Rupee sign
       { text: "rs.",                     weight: 2 },
-      { text: "inr",                     weight: 1 },
       { text: "pkr",                     weight: 2 },
       // Currency + amount together → instant classify (e.g. "PKR 500", "Rs. 1,200", "₹2000", "₨350")
       { text: "pkr+amount", pattern: /(?:pkr|rs\.?|₹|₨)\s*[\d,]{2,}/i, weight: 3 },
       { text: "fee / charge",            weight: 2 },
-      { text: "no charge",               weight: 1 },
-      { text: "sent to",                 weight: 1 },
-      { text: "sent by",                 weight: 1 },
-      { text: "id#",                     weight: 1 },
 
       // ── Urdu / Hinglish payment signals ──────────────────────────────────
       { text: "paisa bheja",             weight: 3 },  // "money sent"
@@ -561,10 +559,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "order confirmed",         weight: 3 },
       { text: "order id",                weight: 2 },
       { text: "order #",                 weight: 2 },
-      { text: "your order",              weight: 1 },
       { text: "out for delivery",        weight: 3 },
-      { text: "arriving",                weight: 1 },
-      { text: "delivered",               weight: 1 },
       { text: "return initiated",        weight: 3 },
       { text: "refund initiated",        weight: 3 },
       { text: "refund of",               weight: 3 },
@@ -585,13 +580,12 @@ const OCR_RULES: OcrRule[] = [
       { text: "your ride receipt",       weight: 3 },
       { text: "trip receipt",            weight: 3 },
       { text: "fare breakdown",          weight: 3 },
-      { text: "ola",                     weight: 1 },
-      { text: "uber",                    weight: 1 },
+      { text: "ola",                     weight: 2 },
+      { text: "uber",                    weight: 2 },
       { text: "rapido",                  weight: 2 },
       // Utility bills
       { text: "electricity bill",        weight: 3 },
       { text: "bill amount",             weight: 2 },
-      { text: "due date",                weight: 1 },
       { text: "recharge successful",     weight: 3 },
       { text: "mobile recharge",         weight: 3 },
       { text: "dth recharge",            weight: 3 },
@@ -606,9 +600,6 @@ const OCR_RULES: OcrRule[] = [
       { text: "account statement",       weight: 3 },
       { text: "total amount",            weight: 2 },
       { text: "grand total",             weight: 2 },
-      { text: "subtotal",                weight: 1 },
-      { text: "amount:",                 weight: 1 },
-      { text: "total:",                  weight: 1 },
       { text: "billing address",         weight: 2 },
       { text: "receipt",                 weight: 2 },
       { text: "invoice",                 weight: 2 },
@@ -679,26 +670,12 @@ const OCR_RULES: OcrRule[] = [
       { text: "picpay",                  weight: 3 },
       { text: "rappi pay",               weight: 3 },
       // ── Global currencies ──
-      { text: "$",                       weight: 1 },
-      { text: "usd",                     weight: 1 },
-      { text: "€",                       weight: 1 },
-      { text: "eur",                     weight: 1 },
-      { text: "£",                       weight: 1 },
-      { text: "gbp",                     weight: 1 },
-      { text: "¥",                       weight: 1 },
-      { text: "¥",                       weight: 1 },
-      { text: "cad",                     weight: 1 },
-      { text: "aud",                     weight: 1 },
       { text: "aed",                     weight: 2 },
       { text: "sar",                     weight: 2 },
       { text: "bdt",                     weight: 2 },
       { text: "egp",                     weight: 2 },
       { text: "ngn",                     weight: 2 },
       { text: "kes",                     weight: 2 },
-      { text: "try",                     weight: 1 },
-      { text: "idr",                     weight: 1 },
-      { text: "thb",                     weight: 1 },
-      { text: "myr",                     weight: 1 },
       // ── Global transaction phrases ──
       { text: "funds transferred",       weight: 3 },
       { text: "transfer complete",       weight: 3 },
@@ -795,10 +772,8 @@ const OCR_RULES: OcrRule[] = [
       { text: "paypal",                  weight: 3 },
       { text: "stripe",                  weight: 2 },
       // ── Freelance platforms ──
-      { text: "standard request",        weight: 1 },
       { text: "order accepted",          weight: 2 },
       { text: "payment released",        weight: 3 },
-      { text: "milestone",               weight: 1 },
       { text: "fiverr",                  weight: 3 },
       { text: "upwork",                  weight: 3 },
       { text: "freelancer",              weight: 2 },
@@ -2522,10 +2497,18 @@ export function categorizeByText(rawText: string): Category | null {
   const scores = new Map<Category, number>();
   for (const rule of OCR_RULES) {
     let score = 0;
+    let anchorHit = false;  // tracks whether any weight≥2 keyword matched
     for (const kw of rule.keywords) {
       const hit = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
-      if (hit) score += kw.weight;
+      if (hit) {
+        score += kw.weight;
+        if (kw.weight >= 2) anchorHit = true;
+      }
     }
+    // requireAnchor guard: if set, at least one weight≥2 keyword must match.
+    // This prevents 3× generic weight-1 hits (e.g. "$" + "total:" + "sent to")
+    // from falsely triggering the rule.
+    if (rule.requireAnchor && !anchorHit) continue;
     if (score >= rule.minScore) scores.set(rule.category, score);
   }
 
