@@ -64,6 +64,50 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
+// ─── OCR Preprocessing: resize to ≤800px wide + grayscale ───────────────────
+function preprocessForOcr(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const MAX_WIDTH = 800;
+        const scale = img.width > MAX_WIDTH ? MAX_WIDTH / img.width : 1;
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+
+        // Draw resized image
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // Convert to grayscale in-place
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const d = imageData.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+          d[i] = d[i + 1] = d[i + 2] = gray;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        canvas.toBlob(blob => {
+          URL.revokeObjectURL(url);
+          if (blob) resolve(blob);
+          else reject(new Error("canvas.toBlob returned null"));
+        }, "image/png");
+      } catch (err) {
+        URL.revokeObjectURL(url);
+        reject(err);
+      }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Image load failed")); };
+    img.src = url;
+  });
+}
+
 // ─── How many OCR workers to spin up ─────────────────────────────────────────
 // Cap at 4 — beyond that memory pressure outweighs the gains.
 // Also cap at the number of files so we don't over-provision.
@@ -153,8 +197,10 @@ export async function processFiles(
     await Promise.all(
       ocrCandidates.map(async entry => {
         try {
-          // scheduler.addJob automatically routes to the next free worker
-          const { data: { text } } = await scheduler.addJob("recognize", entry.file);
+          // Preprocess: resize to ≤800px wide + grayscale — only for OCR.
+          // Original file is kept on entry.file for display and ZIP export.
+          const ocrBlob = await preprocessForOcr(entry.file).catch(() => entry.file);
+          const { data: { text } } = await scheduler.addJob("recognize", ocrBlob);
           entry.ocrText = text;
           const byText = categorizeByText(text);
           if (byText) entry.category = byText;
