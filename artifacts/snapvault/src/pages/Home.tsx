@@ -34,6 +34,7 @@ import {
   type ProcessUpdate,
 } from "@/lib/browserProcessor";
 import { appendToHistory } from "@/lib/jobHistory";
+import { loadFolderNaming } from "@/lib/folderNaming";
 
 type Step = "upload" | "processing" | "review" | "done";
 
@@ -959,6 +960,9 @@ function DoneStep({
 
   const defaultZipName = `OrganizeShots_Export_${new Date().toISOString().slice(0, 10)}`;
 
+  const namingConfig = loadFolderNaming();
+  const exportDate = new Date();
+
   useEffect(() => {
     let cancelled = false;
     setBuildProgress(0);
@@ -967,10 +971,10 @@ function DoneStep({
 
     buildZipBlob(entries, deletedFiles, overrides, pct => {
       if (!cancelled) setBuildProgress(pct);
-    }).then(blob => {
+    }, namingConfig, exportDate).then(blob => {
       if (!cancelled) { setPrebuiltBlob(blob); setBuildDone(true); }
     }).catch(() => {
-      if (!cancelled) setBuildDone(true); // failed silently — user can still trigger on demand
+      if (!cancelled) setBuildDone(true);
     });
 
     return () => { cancelled = true; };
@@ -997,7 +1001,7 @@ function DoneStep({
         downloadBlob(prebuiltBlob, name); // instant — already built
       } else {
         // fallback: build now (shouldn't normally happen)
-        const blob = await buildZipBlob(entries, deletedFiles, overrides, () => {});
+        const blob = await buildZipBlob(entries, deletedFiles, overrides, () => {}, namingConfig, exportDate);
         downloadBlob(blob, name);
       }
     } finally {

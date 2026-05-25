@@ -2,6 +2,7 @@ import jsQR from "jsqr";
 import { createWorker, createScheduler } from "tesseract.js";
 import JSZip from "jszip";
 import { categorizeByFilename, categorizeByText } from "./categorizer";
+import { buildFolderName, type FolderNamingConfig } from "./folderNaming";
 
 export interface BrowserFileEntry {
   id: string;
@@ -295,13 +296,17 @@ export async function buildZipBlob(
   entries: BrowserFileEntry[],
   deletedFiles: Set<string>,
   overrides: Record<string, string>,
-  onProgress: (pct: number) => void
+  onProgress: (pct: number) => void,
+  namingConfig?: FolderNamingConfig,
+  exportDate?: Date,
 ): Promise<Blob> {
   const zip = new JSZip();
+  const cfg: FolderNamingConfig = namingConfig ?? { style: "category", customPrefix: "" };
+  const date = exportDate ?? new Date();
   for (const entry of entries) {
     if (deletedFiles.has(entry.originalName)) continue;
     const category = overrides[entry.originalName] ?? entry.category;
-    const folderName = category.replace(/[/\\:*?"<>|]/g, "_");
+    const folderName = buildFolderName(category, cfg, date);
     zip.folder(folderName)!.file(entry.originalName, await entry.file.arrayBuffer());
   }
   return zip.generateAsync(

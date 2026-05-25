@@ -7,6 +7,10 @@ import {
   Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
 } from "lucide-react";
 import {
+  loadFolderNaming, saveFolderNaming,
+  type FolderNamingStyle, type FolderNamingConfig,
+} from "@/lib/folderNaming";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
   AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -306,16 +310,22 @@ function FAQPage({ onBack }: { onBack: () => void }) {
 type SubPage = "privacy" | "terms" | "faq" | null;
 
 const processingModes = ["Balanced", "Fast", "Thorough"];
-const folderOptions = ["Category Name", "Date + Category", "Custom"];
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const [ocrEnabled, setOcrEnabled] = useState(true);
   const [dedupEnabled, setDedupEnabled] = useState(true);
   const [processingMode, setProcessingMode] = useState("Balanced");
-  const [folderNaming, setFolderNaming] = useState("Category Name");
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [subPage, setSubPage] = useState<SubPage>(null);
+
+  const [namingConfig, setNamingConfig] = useState<FolderNamingConfig>(loadFolderNaming);
+
+  function updateNaming(patch: Partial<FolderNamingConfig>) {
+    const updated = { ...namingConfig, ...patch };
+    setNamingConfig(updated);
+    saveFolderNaming(updated);
+  }
 
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
@@ -404,29 +414,114 @@ export default function Settings() {
       {/* Organisation */}
       <div>
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Organisation</div>
-        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
-          <SettingsRow
-            icon={<Folder className="h-4 w-4" />}
-            label="Folder Naming"
-            desc="How category folders are named"
-            right={
-              <div className="flex flex-col gap-1 items-end">
-                {folderOptions.map((o) => (
-                  <button
-                    key={o}
-                    onClick={() => setFolderNaming(o)}
-                    className="px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-colors"
-                    style={{
-                      background: folderNaming === o ? "hsl(var(--primary))" : "hsl(var(--muted))",
-                      color: folderNaming === o ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
-                    }}
-                  >
-                    {o}
-                  </button>
-                ))}
-              </div>
-            }
-          />
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+          {/* Folder Naming header */}
+          <div className="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-border">
+            <span className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0 text-muted-foreground">
+              <Folder className="h-4 w-4" />
+            </span>
+            <div>
+              <div className="text-sm font-medium text-foreground">Folder Naming Style</div>
+              <div className="text-xs text-muted-foreground">Controls how ZIP folder names are generated</div>
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="flex flex-col divide-y divide-border">
+            {(
+              [
+                {
+                  id: "category" as FolderNamingStyle,
+                  label: "Category Only",
+                  badge: "Default",
+                  preview: ["OTP-Security/", "Payments-Receipts/", "WhatsApp-Chats/"],
+                },
+                {
+                  id: "date_category" as FolderNamingStyle,
+                  label: "Date + Category",
+                  badge: null,
+                  preview: [
+                    `${new Date().toISOString().slice(0,10)}_OTP-Security/`,
+                    `${new Date().toISOString().slice(0,10)}_Payments-Receipts/`,
+                  ],
+                },
+                {
+                  id: "custom" as FolderNamingStyle,
+                  label: "Custom Prefix",
+                  badge: null,
+                  preview: null,
+                },
+              ] as { id: FolderNamingStyle; label: string; badge: string | null; preview: string[] | null }[]
+            ).map((opt) => {
+              const active = namingConfig.style === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => updateNaming({ style: opt.id })}
+                  className={`w-full text-left px-4 py-3.5 transition-colors ${active ? "bg-primary/5" : "hover:bg-muted/30"}`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span
+                      className="flex-shrink-0 w-4.5 h-4.5 rounded-full border-2 flex items-center justify-center transition-colors"
+                      style={{
+                        borderColor: active ? "hsl(var(--primary))" : "hsl(var(--border))",
+                        width: 18, height: 18,
+                      }}
+                    >
+                      {active && (
+                        <span
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ width: 10, height: 10, background: "hsl(var(--primary))" }}
+                        />
+                      )}
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">{opt.label}</span>
+                    {opt.badge && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {opt.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Live preview */}
+                  {opt.preview && active && (
+                    <div className="mt-2.5 ml-7 flex flex-col gap-1">
+                      {opt.preview.map((p) => (
+                        <div key={p} className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+                          <Folder className="h-3 w-3 text-primary shrink-0" />
+                          {p}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Custom prefix input */}
+                  {opt.id === "custom" && active && (
+                    <div className="mt-3 ml-7 space-y-2" onClick={e => e.stopPropagation()}>
+                      <input
+                        type="text"
+                        placeholder="Enter prefix (e.g. Bilal, Work, 2025)"
+                        value={namingConfig.customPrefix}
+                        onChange={e => updateNaming({ customPrefix: e.target.value })}
+                        className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                        maxLength={30}
+                      />
+                      {namingConfig.customPrefix.trim() && (
+                        <div className="flex flex-col gap-1">
+                          {["OTP-Security/", "Payments-Receipts/"].map(p => (
+                            <div key={p} className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
+                              <Folder className="h-3 w-3 text-primary shrink-0" />
+                              {namingConfig.customPrefix.trim().replace(/[/\\:*?"<>|]/g, "-").replace(/\s+/g, "-")}_{p}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
