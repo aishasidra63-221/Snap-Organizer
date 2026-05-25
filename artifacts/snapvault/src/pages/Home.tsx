@@ -26,7 +26,8 @@ import {
 } from "@/components/CategoryIcons";
 import {
   processFiles as runBrowserProcess,
-  generateAndDownloadZip,
+  buildZipBlob,
+  downloadBlob,
   getCategoryCounts,
   type BrowserFileEntry,
   type ProcessPhase,
@@ -124,7 +125,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
           </h1>
 
           <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed max-w-xl mx-auto">
-            Drop up to <strong className="text-foreground">500 screenshots</strong> and SnapVault sorts everything into <strong className="text-foreground">smart folders</strong> — entirely in your browser.
+            Drop up to <strong className="text-foreground">500 screenshots</strong> and OrganizeShots sorts everything into <strong className="text-foreground">smart folders</strong> — entirely in your browser.
           </p>
 
           <div className="space-y-4 pt-2 text-left">
@@ -270,7 +271,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
                 <path d="M3 6a2 2 0 0 1 2-2h4l2 3h6a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6z" fill="white" fillOpacity="0.9"/>
               </svg>
             </div>
-            SnapVault
+            OrganizeShots
           </div>
           <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
         </div>
@@ -916,10 +917,31 @@ function DoneStep({
 }) {
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [zipName, setZipName] = useState("");
-  const [zipping, setZipping] = useState(false);
-  const [zipProgress, setZipProgress] = useState(0);
+  const [downloading, setDownloading] = useState(false);
 
-  const defaultZipName = `SnapVault_Export_${new Date().toISOString().slice(0, 10)}`;
+  // Pre-build the ZIP in the background as soon as this screen mounts
+  const [prebuiltBlob, setPrebuiltBlob] = useState<Blob | null>(null);
+  const [buildProgress, setBuildProgress] = useState(0);
+  const [buildDone, setBuildDone] = useState(false);
+
+  const defaultZipName = `OrganizeShots_Export_${new Date().toISOString().slice(0, 10)}`;
+
+  useEffect(() => {
+    let cancelled = false;
+    setBuildProgress(0);
+    setBuildDone(false);
+    setPrebuiltBlob(null);
+
+    buildZipBlob(entries, deletedFiles, overrides, pct => {
+      if (!cancelled) setBuildProgress(pct);
+    }).then(blob => {
+      if (!cancelled) { setPrebuiltBlob(blob); setBuildDone(true); }
+    }).catch(() => {
+      if (!cancelled) setBuildDone(true); // failed silently — user can still trigger on demand
+    });
+
+    return () => { cancelled = true; };
+  }, []); // intentionally run once on mount only
 
   const effectiveEntries = entries.filter(e => !deletedFiles.has(e.originalName));
   const categoryCounts: Record<string, number> = {};
@@ -932,14 +954,21 @@ function DoneStep({
   const dupeCount = entries.filter(e => e.isDuplicate && !deletedFiles.has(e.originalName)).length;
   const sortedCats = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
 
+  const zipSizeLabel = prebuiltBlob ? ` · ${formatBytes(prebuiltBlob.size)}` : !buildDone ? " · estimating…" : "";
+
   const handleDownload = async () => {
     const name = (zipName.trim() || defaultZipName).replace(/\.zip$/i, "");
-    setZipping(true);
-    setZipProgress(0);
+    setDownloading(true);
     try {
-      await generateAndDownloadZip(entries, deletedFiles, overrides, name, setZipProgress);
+      if (prebuiltBlob) {
+        downloadBlob(prebuiltBlob, name); // instant — already built
+      } else {
+        // fallback: build now (shouldn't normally happen)
+        const blob = await buildZipBlob(entries, deletedFiles, overrides, () => {});
+        downloadBlob(blob, name);
+      }
     } finally {
-      setZipping(false);
+      setDownloading(false);
       setShowNameDialog(false);
     }
   };
@@ -958,7 +987,7 @@ function DoneStep({
           <h2 className="text-3xl font-bold">Ready to download!</h2>
           <p className="text-muted-foreground">Your screenshots are organised. Download the ZIP below.</p>
           <div className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
-            <ShieldCheck className="h-3.5 w-3.5" /> ZIP generated in your browser — nothing uploaded
+            <ShieldCheck className="h-3.5 w-3.5" /> ZIP built in your browser — nothing uploaded
           </div>
         </div>
 
@@ -1004,13 +1033,16 @@ function DoneStep({
           </div>
         )}
 
-        {zipping && (
-          <div className="space-y-2">
+        {/* Background ZIP build progress */}
+        {!buildDone && (
+          <div className="space-y-1.5">
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5"><Loader2 className="h-3 w-3 animate-spin" /> Building ZIP…</span>
-              <span className="font-mono">{Math.round(zipProgress)}%</span>
+              <span className="flex items-center gap-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" /> Preparing ZIP in background…
+              </span>
+              <span className="font-mono">{Math.round(buildProgress)}%</span>
             </div>
-            <Progress value={zipProgress} className="h-2" />
+            <Progress value={buildProgress} className="h-1.5" />
           </div>
         )}
 
@@ -1018,11 +1050,21 @@ function DoneStep({
           <Button
             size="lg"
             className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
-            disabled={zipping}
+            disabled={downloading}
             onClick={() => { setZipName(defaultZipName); setShowNameDialog(true); }}
             data-testid="button-download"
           >
-            <Download className="h-5 w-5 mr-2" /> Download ZIP
+            {buildDone ? (
+              <>
+                <Download className="h-5 w-5 mr-2" />
+                Download ZIP{zipSizeLabel}
+              </>
+            ) : (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Preparing{zipSizeLabel}
+              </>
+            )}
           </Button>
           <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground"
             onClick={onStartOver} data-testid="button-start-over">
@@ -1037,13 +1079,18 @@ function DoneStep({
             <DialogTitle>Name your ZIP file</DialogTitle>
             <DialogDescription>
               Choose a name for your download. The <span className="font-mono text-xs">.zip</span> extension will be added automatically.
+              {prebuiltBlob && (
+                <span className="block mt-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                  File size: {formatBytes(prebuiltBlob.size)}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="py-1">
             <Input
               value={zipName}
               onChange={e => setZipName(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && !zipping) handleDownload(); }}
+              onKeyDown={e => { if (e.key === "Enter" && !downloading) handleDownload(); }}
               placeholder={defaultZipName}
               className="font-mono text-sm"
               autoFocus
@@ -1053,9 +1100,11 @@ function DoneStep({
             </p>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowNameDialog(false)} disabled={zipping}>Cancel</Button>
-            <Button onClick={handleDownload} disabled={zipping}>
-              {zipping ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Building…</> : <><Download className="h-4 w-4 mr-2" /> Download</>}
+            <Button variant="outline" onClick={() => setShowNameDialog(false)} disabled={downloading}>Cancel</Button>
+            <Button onClick={handleDownload} disabled={downloading}>
+              {downloading
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Downloading…</>
+                : <><Download className="h-4 w-4 mr-2" /> Download{prebuiltBlob ? ` · ${formatBytes(prebuiltBlob.size)}` : ""}</>}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1154,7 +1203,7 @@ export default function Home() {
                 <rect x="7" y="10" width="6" height="1.5" rx="0.75" fill="white" fillOpacity="0.55"/>
               </svg>
             </div>
-            <span className="font-extrabold text-base tracking-tight">SnapVault</span>
+            <span className="font-extrabold text-base tracking-tight">OrganizeShots</span>
           </div>
 
           {step !== "upload" && (

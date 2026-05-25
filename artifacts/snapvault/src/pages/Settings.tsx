@@ -69,19 +69,19 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
   const sections = [
     {
       title: "No Data Leaves Your Device",
-      body: "SnapVault processes all your screenshots locally — on your own device and browser. We do not upload your images to any external server, cloud, or third-party service. Your screenshots never leave your control.",
+      body: "OrganizeShots processes all your screenshots locally — on your own device and browser. We do not upload your images to any external server, cloud, or third-party service. Your screenshots never leave your control.",
     },
     {
       title: "What We Process",
-      body: "When you upload screenshots, SnapVault temporarily stores them in memory to run OCR (text recognition) and categorisation. This data exists only for the duration of your session and is automatically cleared when you close the tab or click 'Start Over'.",
+      body: "When you upload screenshots, OrganizeShots temporarily stores them in memory to run OCR (text recognition) and categorisation. This data exists only for the duration of your session and is automatically cleared when you close the tab or click 'Start Over'.",
     },
     {
       title: "OCR & Text Recognition",
-      body: "SnapVault reads text from your screenshots using Tesseract.js — an open-source OCR engine that runs entirely in your browser or on the local server. Extracted text is used only to determine which folder a screenshot belongs to, and is never stored permanently or shared.",
+      body: "OrganizeShots reads text from your screenshots using Tesseract.js — an open-source OCR engine that runs entirely in your browser or on the local server. Extracted text is used only to determine which folder a screenshot belongs to, and is never stored permanently or shared.",
     },
     {
       title: "No Accounts, No Tracking",
-      body: "SnapVault requires no account, login, or registration. We do not track your usage, install analytics cookies, or collect any personally identifiable information. There are no third-party trackers embedded in the app.",
+      body: "OrganizeShots requires no account, login, or registration. We do not track your usage, install analytics cookies, or collect any personally identifiable information. There are no third-party trackers embedded in the app.",
     },
     {
       title: "Local Storage",
@@ -93,11 +93,11 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
     },
     {
       title: "Children's Privacy",
-      body: "SnapVault is not directed at children under 13 and does not knowingly collect any information from minors. If you believe a child has used the service, no personal data is collected regardless.",
+      body: "OrganizeShots is not directed at children under 13 and does not knowingly collect any information from minors. If you believe a child has used the service, no personal data is collected regardless.",
     },
     {
       title: "Changes to This Policy",
-      body: "If this privacy policy changes, we will update the policy text in the app. Continued use of SnapVault after any change constitutes acceptance of the updated policy.",
+      body: "If this privacy policy changes, we will update the policy text in the app. Continued use of OrganizeShots after any change constitutes acceptance of the updated policy.",
     },
     {
       title: "Contact",
@@ -119,7 +119,7 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground px-1">Last updated: May 2025 · SnapVault v1.0.0</p>
+        <p className="text-xs text-muted-foreground px-1">Last updated: May 2025 · OrganizeShots v1.0.0</p>
 
         {sections.map((s) => (
           <div key={s.title} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex flex-col gap-1.5">
@@ -138,39 +138,39 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
   const sections = [
     {
       title: "Acceptance of Terms",
-      body: "By using SnapVault, you agree to these Terms of Service. If you do not agree, please discontinue use of the application. These terms apply to all users of the app.",
+      body: "By using OrganizeShots, you agree to these Terms of Service. If you do not agree, please discontinue use of the application. These terms apply to all users of the app.",
     },
     {
-      title: "What SnapVault Is",
-      body: "SnapVault is a screenshot organisation tool. It analyses images you provide, categorises them using rule-based logic and OCR, and packages them into an organised ZIP archive for download. It is a tool — not a storage service.",
+      title: "What OrganizeShots Is",
+      body: "OrganizeShots is a screenshot organisation tool. It analyses images you provide, categorises them using rule-based logic and OCR, and packages them into an organised ZIP archive for download. It is a tool — not a storage service.",
     },
     {
       title: "Your Content",
-      body: "You retain full ownership of all screenshots and images you upload. SnapVault does not claim any rights over your content. You are responsible for ensuring you have the right to process the images you upload.",
+      body: "You retain full ownership of all screenshots and images you upload. OrganizeShots does not claim any rights over your content. You are responsible for ensuring you have the right to process the images you upload.",
     },
     {
       title: "Acceptable Use",
-      body: "You agree to use SnapVault only for lawful purposes. You must not upload images that contain illegal content, violate third-party intellectual property rights, or attempt to exploit, crash, or reverse-engineer the application.",
+      body: "You agree to use OrganizeShots only for lawful purposes. You must not upload images that contain illegal content, violate third-party intellectual property rights, or attempt to exploit, crash, or reverse-engineer the application.",
     },
     {
       title: "No Warranty",
-      body: "SnapVault is provided 'as is' without any warranty of any kind, express or implied. We do not guarantee that categorisation will be 100% accurate, that the service will be uninterrupted, or that files will be retained beyond your current session.",
+      body: "OrganizeShots is provided 'as is' without any warranty of any kind, express or implied. We do not guarantee that categorisation will be 100% accurate, that the service will be uninterrupted, or that files will be retained beyond your current session.",
     },
     {
       title: "Limitation of Liability",
-      body: "To the maximum extent permitted by law, SnapVault and its developers shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app, including loss of data, loss of files, or incorrect categorisation.",
+      body: "To the maximum extent permitted by law, OrganizeShots and its developers shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app, including loss of data, loss of files, or incorrect categorisation.",
     },
     {
       title: "Data Responsibility",
-      body: "You are responsible for downloading and backing up your organised ZIP before closing the session. SnapVault does not permanently store your images — session data is deleted when your session ends.",
+      body: "You are responsible for downloading and backing up your organised ZIP before closing the session. OrganizeShots does not permanently store your images — session data is deleted when your session ends.",
     },
     {
       title: "Modifications to the App",
-      body: "We reserve the right to modify, update, or discontinue SnapVault at any time without notice. Features may change between versions.",
+      body: "We reserve the right to modify, update, or discontinue OrganizeShots at any time without notice. Features may change between versions.",
     },
     {
       title: "Governing Law",
-      body: "These terms are governed by applicable local law. Any disputes arising from use of SnapVault will be handled in accordance with the applicable jurisdiction of the developer.",
+      body: "These terms are governed by applicable local law. Any disputes arising from use of OrganizeShots will be handled in accordance with the applicable jurisdiction of the developer.",
     },
   ];
 
@@ -188,7 +188,7 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground px-1">Last updated: May 2025 · SnapVault v1.0.0</p>
+        <p className="text-xs text-muted-foreground px-1">Last updated: May 2025 · OrganizeShots v1.0.0</p>
 
         {sections.map((s) => (
           <div key={s.title} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex flex-col gap-1.5">
@@ -205,28 +205,28 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
 
 const faqs = [
   {
-    q: "What types of images does SnapVault support?",
-    a: "SnapVault supports PNG, JPG/JPEG, WebP, BMP, GIF, HEIC, and TIFF formats. Most screenshots from Android, iOS, Windows, and Mac are automatically supported.",
+    q: "What types of images does OrganizeShots support?",
+    a: "OrganizeShots supports PNG, JPG/JPEG, WebP, BMP, GIF, HEIC, and TIFF formats. Most screenshots from Android, iOS, Windows, and Mac are automatically supported.",
   },
   {
     q: "How many screenshots can I upload at once?",
     a: "You can upload up to 500 screenshots in a single batch. Each file can be up to 50 MB. For best results, upload screenshots from the same time period together.",
   },
   {
-    q: "How does SnapVault decide which folder a screenshot goes into?",
-    a: "SnapVault uses a three-step rule-based system: first it checks the filename (e.g. 'IMG-20240101-WA' goes to WhatsApp), then it scans for QR codes and checks their text, then it runs OCR to read visible text. Keywords like 'OTP', 'UPI', 'receipt', 'Instagram', 'lecture' etc. determine the folder. No AI is used.",
+    q: "How does OrganizeShots decide which folder a screenshot goes into?",
+    a: "OrganizeShots uses a three-step rule-based system: first it checks the filename (e.g. 'IMG-20240101-WA' goes to WhatsApp), then it scans for QR codes and checks their text, then it runs OCR to read visible text. Keywords like 'OTP', 'UPI', 'receipt', 'Instagram', 'lecture' etc. determine the folder. No AI is used.",
   },
   {
-    q: "Does SnapVault use AI or send my images to the internet?",
-    a: "No. SnapVault is 100% rule-based and uses open-source OCR (Tesseract.js). Your images are never sent to any external AI service, cloud storage, or third-party server. Everything runs locally.",
+    q: "Does OrganizeShots use AI or send my images to the internet?",
+    a: "No. OrganizeShots is 100% rule-based and uses open-source OCR (Tesseract.js). Your images are never sent to any external AI service, cloud storage, or third-party server. Everything runs locally.",
   },
   {
     q: "What are the folder categories?",
-    a: "SnapVault organises screenshots into: OTP / Security, Payments / Receipts, WhatsApp / Chats, Social Media, Study / Notes, Photos, Memes / Entertainment, Documents, and Unknown / Others. Exact duplicates go into the Duplicates folder.",
+    a: "OrganizeShots organises screenshots into: OTP / Security, Payments / Receipts, WhatsApp / Chats, Social Media, Study / Notes, Photos, Memes / Entertainment, Documents, and Unknown / Others. Exact duplicates go into the Duplicates folder.",
   },
   {
     q: "What happens to my screenshots after I download the ZIP?",
-    a: "Once your session ends or you click 'Start Over', all your uploaded screenshots and temporary files are permanently deleted from the server. SnapVault does not retain any copies.",
+    a: "Once your session ends or you click 'Start Over', all your uploaded screenshots and temporary files are permanently deleted from the server. OrganizeShots does not retain any copies.",
   },
   {
     q: "A screenshot was put in the wrong folder. Can I move it?",
@@ -238,14 +238,14 @@ const faqs = [
   },
   {
     q: "Why are some screenshots in 'Unknown / Others'?",
-    a: "If SnapVault can't confidently match a screenshot to a known category — because the filename is generic and the visible text doesn't contain recognised keywords — it places it in Unknown / Others. You can manually move these after processing.",
+    a: "If OrganizeShots can't confidently match a screenshot to a known category — because the filename is generic and the visible text doesn't contain recognised keywords — it places it in Unknown / Others. You can manually move these after processing.",
   },
   {
     q: "Can I re-download a ZIP from a previous session?",
     a: "Yes — go to the Files tab and find the Recent Batches section. Any completed batch with a ready ZIP will have a download button you can tap again.",
   },
   {
-    q: "Does SnapVault work offline?",
+    q: "Does OrganizeShots work offline?",
     a: "The app requires a server connection for uploading and processing. However, once your ZIP is downloaded, it's a completely standalone file on your device and can be opened without any internet connection.",
   },
   {
@@ -287,7 +287,7 @@ function FAQPage({ onBack }: { onBack: () => void }) {
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">Frequently Asked Questions</p>
-            <p className="text-xs text-muted-foreground">Everything about how SnapVault works</p>
+            <p className="text-xs text-muted-foreground">Everything about how OrganizeShots works</p>
           </div>
         </div>
 
@@ -336,7 +336,7 @@ export default function Settings() {
     <div className="flex flex-col gap-5 pb-28 pt-4 px-4">
       <div>
         <h2 className="text-lg font-bold tracking-tight text-foreground">Settings</h2>
-        <p className="text-xs text-muted-foreground mt-0.5">Customise how SnapVault organises your screenshots</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Customise how OrganizeShots organises your screenshots</p>
       </div>
 
       {/* Appearance */}
@@ -461,7 +461,7 @@ export default function Settings() {
       <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-3 flex items-center justify-between">
         <div>
           <div className="text-sm font-medium text-foreground">App Version</div>
-          <div className="text-xs text-muted-foreground">SnapVault v1.0.0</div>
+          <div className="text-xs text-muted-foreground">OrganizeShots v1.0.0</div>
         </div>
         <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">v1.0.0</span>
       </div>

@@ -178,13 +178,13 @@ export function getCategoryCounts(entries: BrowserFileEntry[]): Record<string, n
   return counts;
 }
 
-export async function generateAndDownloadZip(
+/** Build the ZIP blob without triggering a download. Useful for pre-building so the size is known upfront. */
+export async function buildZipBlob(
   entries: BrowserFileEntry[],
   deletedFiles: Set<string>,
   overrides: Record<string, string>,
-  zipName: string,
   onProgress: (pct: number) => void
-): Promise<void> {
+): Promise<Blob> {
   const zip = new JSZip();
   for (const entry of entries) {
     if (deletedFiles.has(entry.originalName)) continue;
@@ -192,10 +192,14 @@ export async function generateAndDownloadZip(
     const folderName = category.replace(/[/\\:*?"<>|]/g, "_");
     zip.folder(folderName)!.file(entry.originalName, await entry.file.arrayBuffer());
   }
-  const blob = await zip.generateAsync(
+  return zip.generateAsync(
     { type: "blob", compression: "DEFLATE", compressionOptions: { level: 3 } },
     meta => onProgress(meta.percent)
   );
+}
+
+/** Trigger a browser download from a pre-built Blob. */
+export function downloadBlob(blob: Blob, zipName: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -204,4 +208,16 @@ export async function generateAndDownloadZip(
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/** Convenience: build then immediately download. */
+export async function generateAndDownloadZip(
+  entries: BrowserFileEntry[],
+  deletedFiles: Set<string>,
+  overrides: Record<string, string>,
+  zipName: string,
+  onProgress: (pct: number) => void
+): Promise<void> {
+  const blob = await buildZipBlob(entries, deletedFiles, overrides, onProgress);
+  downloadBlob(blob, zipName);
 }
