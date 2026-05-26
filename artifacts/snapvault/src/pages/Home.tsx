@@ -288,17 +288,8 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
 
       <footer className="border-t border-border px-6 py-5 mt-auto">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-2 font-semibold text-foreground/70">
-            <div className="w-5 h-5 rounded bg-primary flex items-center justify-center">
-              <svg viewBox="0 0 20 20" fill="none" className="w-3 h-3">
-                <path d="M10 1.5L3 4.5V10c0 4.2 3.1 7.5 7 8.5 3.9-1 7-4.3 7-8.5V4.5L10 1.5z" fill="white" fillOpacity="0.15"/>
-                <rect x="4.5" y="8" width="11" height="7" rx="1.5" fill="white"/>
-                <path d="M8.2 8l1-1.8h1.6l1 1.8z" fill="white"/>
-                <circle cx="10" cy="11.5" r="2.2" stroke="rgba(79,70,229,0.4)" strokeWidth="1.1" fill="rgba(79,70,229,0.08)"/>
-                <circle cx="10" cy="11.5" r="0.8" fill="rgba(79,70,229,0.45)"/>
-              </svg>
-            </div>
-            OrganizeShots
+          <div className="flex items-center">
+            <img src="/logo.png" alt="OrganizeShots" className="h-6 w-auto opacity-80" />
           </div>
           <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
         </div>
@@ -1243,17 +1234,8 @@ export default function Home() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shadow-sm shadow-primary/30">
-              <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-                <path d="M10 1.5L3 4.5V10c0 4.2 3.1 7.5 7 8.5 3.9-1 7-4.3 7-8.5V4.5L10 1.5z" fill="white" fillOpacity="0.15"/>
-                <rect x="4.5" y="8" width="11" height="7" rx="1.5" fill="white"/>
-                <path d="M8.2 8l1-1.8h1.6l1 1.8z" fill="white"/>
-                <circle cx="10" cy="11.5" r="2.2" stroke="rgba(79,70,229,0.4)" strokeWidth="1.1" fill="rgba(79,70,229,0.08)"/>
-                <circle cx="10" cy="11.5" r="0.8" fill="rgba(79,70,229,0.45)"/>
-              </svg>
-            </div>
-            <span className="font-extrabold text-base tracking-tight">OrganizeShots</span>
+          <div className="flex items-center shrink-0">
+            <img src="/logo.png" alt="OrganizeShots" className="h-8 w-auto" />
           </div>
 
           {step !== "upload" && (
