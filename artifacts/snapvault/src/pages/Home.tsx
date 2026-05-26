@@ -149,7 +149,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
               onClick={() => inputRef.current?.click()}
               className={[
                 "relative overflow-hidden rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer select-none",
-                dragging ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10" : "border-muted-foreground/40 hover:border-primary/60 hover:bg-muted/20",
+                dragging ? "border-primary bg-primary/5 scale-[1.01] shadow-xl shadow-primary/10" : "border-muted-foreground/40 dark:border-muted-foreground/65 hover:border-primary/60 hover:bg-muted/20",
               ].join(" ")}
             >
               <div className="absolute inset-0 opacity-[0.025] pointer-events-none"
