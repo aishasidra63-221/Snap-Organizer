@@ -126,7 +126,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
         <div className="relative max-w-2xl mx-auto space-y-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
             <ShieldCheck className="h-3.5 w-3.5" />
-            100% browser-based · No uploads · No AI · Private
+            100% browser-based · Private
           </div>
 
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.07]">
@@ -1233,8 +1233,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center shrink-0 -ml-4">
+        <div className="max-w-5xl mx-auto px-3 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center shrink-0">
             <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto" />
           </div>
 
