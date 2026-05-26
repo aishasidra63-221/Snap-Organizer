@@ -295,13 +295,16 @@ export async function buildZipBlob(
   entries: BrowserFileEntry[],
   deletedFiles: Set<string>,
   overrides: Record<string, string>,
-  onProgress: (pct: number) => void
+  onProgress: (pct: number) => void,
+  folderNameFn?: (category: string) => string
 ): Promise<Blob> {
   const zip = new JSZip();
   for (const entry of entries) {
     if (deletedFiles.has(entry.originalName)) continue;
     const category = overrides[entry.originalName] ?? entry.category;
-    const folderName = category.replace(/[/\\:*?"<>|]/g, "_");
+    const folderName = folderNameFn
+      ? folderNameFn(category)
+      : category.replace(/[/\\:*?"<>|]/g, "_");
     zip.folder(folderName)!.file(entry.originalName, await entry.file.arrayBuffer());
   }
   return zip.generateAsync(

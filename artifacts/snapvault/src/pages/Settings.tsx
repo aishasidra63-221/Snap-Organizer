@@ -306,14 +306,17 @@ function FAQPage({ onBack }: { onBack: () => void }) {
 type SubPage = "privacy" | "terms" | "faq" | null;
 
 const processingModes = ["Balanced", "Fast", "Thorough"];
-const folderOptions = ["Category Name", "Date + Category", "Custom"];
+type FolderNaming = "category" | "date" | "custom";
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const [ocrEnabled, setOcrEnabled] = useState(true);
   const [dedupEnabled, setDedupEnabled] = useState(true);
   const [processingMode, setProcessingMode] = useState("Balanced");
-  const [folderNaming, setFolderNaming] = useState("Category Name");
+  const [folderNaming, setFolderNaming] = useState<FolderNaming>(
+    (localStorage.getItem("folderNaming") as FolderNaming) || "category"
+  );
+  const [customPrefix, setCustomPrefix] = useState(localStorage.getItem("folderNamingPrefix") || "");
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [subPage, setSubPage] = useState<SubPage>(null);
 
@@ -404,29 +407,49 @@ export default function Settings() {
       {/* Organisation */}
       <div>
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Organisation</div>
-        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
-          <SettingsRow
-            icon={<Folder className="h-4 w-4" />}
-            label="Folder Naming"
-            desc="How category folders are named"
-            right={
-              <div className="flex flex-col gap-1 items-end">
-                {folderOptions.map((o) => (
-                  <button
-                    key={o}
-                    onClick={() => setFolderNaming(o)}
-                    className="px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-colors"
-                    style={{
-                      background: folderNaming === o ? "hsl(var(--primary))" : "hsl(var(--muted))",
-                      color: folderNaming === o ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
-                    }}
-                  >
-                    {o}
-                  </button>
-                ))}
-              </div>
-            }
-          />
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="px-4 py-3.5 flex items-center gap-3 border-b border-border/50">
+            <span className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0 text-muted-foreground">
+              <Folder className="h-4 w-4" />
+            </span>
+            <div>
+              <div className="text-sm font-medium text-foreground">Folder Naming</div>
+              <div className="text-xs text-muted-foreground">Controls how ZIP folders are named</div>
+            </div>
+          </div>
+          <div className="px-4 py-3 flex flex-col gap-1">
+            {([
+              { value: "category" as const, label: "Category Only" },
+              { value: "date"     as const, label: "Date + Category" },
+              { value: "custom"   as const, label: "Custom Prefix" },
+            ] as const).map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => { setFolderNaming(opt.value); localStorage.setItem("folderNaming", opt.value); }}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors w-full"
+                style={{ background: folderNaming === opt.value ? "hsl(var(--primary) / 0.08)" : "transparent" }}
+              >
+                <span
+                  className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+                  style={{ borderColor: folderNaming === opt.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.4)" }}
+                >
+                  {folderNaming === opt.value && (
+                    <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--primary))" }} />
+                  )}
+                </span>
+                <span className="text-sm font-medium text-foreground">{opt.label}</span>
+              </button>
+            ))}
+            {folderNaming === "custom" && (
+              <input
+                type="text"
+                placeholder="Enter prefix…"
+                value={customPrefix}
+                onChange={e => { setCustomPrefix(e.target.value); localStorage.setItem("folderNamingPrefix", e.target.value); }}
+                className="mt-1 px-3 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 w-full"
+              />
+            )}
+          </div>
         </div>
       </div>
 

@@ -953,6 +953,26 @@ function DoneStep({
 
   const defaultZipName = `OrganizeShots_Export_${new Date().toISOString().slice(0, 10)}`;
 
+  function getFolderName(category: string): string {
+    const style = (localStorage.getItem("folderNaming") ?? "category") as "category" | "date" | "custom";
+    const prefix = localStorage.getItem("folderNamingPrefix") ?? "";
+    const clean = category
+      .replace(/[/\\:*?"<>|]/g, " ")
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+    if (style === "date") {
+      const date = new Date().toISOString().slice(0, 10);
+      return `${date}_${clean}`;
+    }
+    if (style === "custom" && prefix.trim()) {
+      const safePrefix = prefix.trim().replace(/[/\\:*?"<>|]/g, "");
+      return `${safePrefix}_${clean}`;
+    }
+    return clean;
+  }
+
   useEffect(() => {
     let cancelled = false;
     setBuildProgress(0);
@@ -961,10 +981,10 @@ function DoneStep({
 
     buildZipBlob(entries, deletedFiles, overrides, pct => {
       if (!cancelled) setBuildProgress(pct);
-    }).then(blob => {
+    }, getFolderName).then(blob => {
       if (!cancelled) { setPrebuiltBlob(blob); setBuildDone(true); }
     }).catch(() => {
-      if (!cancelled) setBuildDone(true); // failed silently — user can still trigger on demand
+      if (!cancelled) setBuildDone(true);
     });
 
     return () => { cancelled = true; };
@@ -991,7 +1011,7 @@ function DoneStep({
         downloadBlob(prebuiltBlob, name); // instant — already built
       } else {
         // fallback: build now (shouldn't normally happen)
-        const blob = await buildZipBlob(entries, deletedFiles, overrides, () => {});
+        const blob = await buildZipBlob(entries, deletedFiles, overrides, () => {}, getFolderName);
         downloadBlob(blob, name);
       }
     } finally {
