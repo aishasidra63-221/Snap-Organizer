@@ -288,8 +288,11 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
 
       <footer className="border-t border-border px-6 py-5 mt-auto">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center">
-            <img src="/logo.jpg" alt="OrganizeShots" className="h-7 w-auto object-contain opacity-75" />
+          <div className="flex items-center gap-2 font-semibold text-foreground/70">
+            <div className="h-6 w-6 overflow-hidden shrink-0">
+              <img src="/logo-icon.png" alt="" className="h-6 w-auto max-w-none" />
+            </div>
+            OrganizeShots
           </div>
           <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
         </div>
@@ -1234,8 +1237,11 @@ export default function Home() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center shrink-0">
-            <img src="/logo.jpg" alt="OrganizeShots" className="h-9 w-auto object-contain" />
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="h-8 w-8 overflow-hidden shrink-0">
+              <img src="/logo-icon.png" alt="" className="h-8 w-auto max-w-none" />
+            </div>
+            <span className="font-extrabold text-base tracking-tight">OrganizeShots</span>
           </div>
 
           {step !== "upload" && (
