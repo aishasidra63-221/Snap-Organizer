@@ -5,6 +5,7 @@ import { useTheme } from "@/hooks/use-theme";
 import {
   Sun, Moon, ScanSearch, Copy, Folder, Cpu, ChevronRight,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
+  BookOpen, Upload, FolderOpen, Download, AlertTriangle, MoveRight,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -301,9 +302,145 @@ function FAQPage({ onBack }: { onBack: () => void }) {
   );
 }
 
+// ─── Guide / How It Works ─────────────────────────────────────────────────────
+
+const CATEGORIES_INFO = [
+  { emoji: "🔐", name: "OTP / Security",       desc: "Login codes, 2FA, password reset" },
+  { emoji: "💳", name: "Payments / Receipts",  desc: "UPI, bank transfers, receipts, invoices" },
+  { emoji: "💬", name: "WhatsApp / Chats",     desc: "Chat screenshots, message threads" },
+  { emoji: "📱", name: "Social Media",         desc: "Instagram, Twitter, TikTok, YouTube" },
+  { emoji: "📚", name: "Study / Notes",        desc: "Lectures, notes, exam results" },
+  { emoji: "🖼️", name: "Photos",              desc: "Camera photos, photo gallery" },
+  { emoji: "😂", name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
+  { emoji: "📄", name: "Documents",            desc: "IDs, certificates, scanned docs" },
+  { emoji: "❓", name: "Unknown / Others",     desc: "Couldn't identify — move manually" },
+];
+
+const STEPS = [
+  {
+    icon: <Upload className="h-5 w-5 text-primary" />,
+    title: "Screenshots Upload Karein",
+    desc: "Drag & drop karein ya 'Browse' dabao. PNG, JPG, WebP, HEIC sab supported hain. Ek baar mein 100 tak upload ho sakte hain.",
+  },
+  {
+    icon: <ScanSearch className="h-5 w-5 text-violet-500" />,
+    title: "App Automatic Process Karta Hai",
+    desc: "Pehle filename dekhi jaati hai, phir QR code scan hota hai, phir OCR (text reading) chalta hai. Yeh sab aapke device pe hota hai — koi server nahi.",
+  },
+  {
+    icon: <FolderOpen className="h-5 w-5 text-amber-500" />,
+    title: "Galat Folder? Move Karein",
+    desc: "Har screenshot ke neeche folder icon tap karein → sahi category choose karein. File turant move ho jaati hai.",
+  },
+  {
+    icon: <Download className="h-5 w-5 text-emerald-500" />,
+    title: "ZIP Download Karein",
+    desc: "'Download ZIP' dabao. Andar sab screenshots sorted folders mein milenge — seedha apne phone mein.",
+  },
+];
+
+function GuidePage({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
+      <SubPageHeader title="Guide — Kaise Use Karein" onBack={onBack} />
+      <div className="flex-1 overflow-y-auto px-4 py-5 pb-28 flex flex-col gap-5">
+
+        {/* Privacy banner */}
+        <div className="flex items-start gap-3 rounded-2xl bg-emerald-500/8 border border-emerald-500/20 px-4 py-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0 mt-0.5">
+            <Shield className="h-5 w-5 text-emerald-500" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">100% Private — Koi Server Nahi</p>
+            <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+              Aapke screenshots aapke device pe hi rehte hain. Browser band karo ya "Start Over" dabao — sab kuch delete ho jaata hai.
+            </p>
+          </div>
+        </div>
+
+        {/* Delete warning */}
+        <div className="flex items-start gap-3 rounded-2xl bg-amber-500/8 border border-amber-500/20 px-4 py-3.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">⚠️ Zaroor ZIP Download Karein</p>
+            <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+              Tab band karne se pehle ZIP download kar lein — warna sari files hamesha ke liye delete ho jaayengi. App koi backup nahi rakhta.
+            </p>
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div>
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">
+            4 Steps — Itna Hi Hai
+          </div>
+          <div className="flex flex-col gap-3">
+            {STEPS.map((step, i) => (
+              <div key={i} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex gap-3">
+                <div className="flex flex-col items-center gap-1 shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
+                    {step.icon}
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div className="w-0.5 flex-1 min-h-3 bg-border rounded-full" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 pt-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    <span className="text-muted-foreground mr-1.5">{i + 1}.</span>
+                    {step.title}
+                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Move tip */}
+        <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4">
+          <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+            <MoveRight className="h-4 w-4 text-primary" />
+            Galat Category Fix Kaise Karein?
+          </p>
+          <ol className="flex flex-col gap-1.5 text-xs text-muted-foreground leading-relaxed">
+            <li>1. Results screen pe screenshot dhundho</li>
+            <li>2. Neeche folder icon <span className="font-mono bg-muted px-1 rounded">📁</span> tap karo</li>
+            <li>3. Sahi category select karo — done!</li>
+          </ol>
+          <p className="text-xs text-muted-foreground mt-2.5 pt-2.5 border-t border-border/50">
+            <strong>Note:</strong> Thodi bahut galti ho sakti hai — AI nahi hai, text-based rules hain. Manual correction zaroori ho sakti hai.
+          </p>
+        </div>
+
+        {/* Categories */}
+        <div>
+          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">
+            Folders — Kya Kya Hai
+          </div>
+          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
+            {CATEGORIES_INFO.map((cat) => (
+              <div key={cat.name} className="flex items-center gap-3 px-4 py-3">
+                <span className="text-lg w-8 text-center shrink-0">{cat.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{cat.name}</p>
+                  <p className="text-xs text-muted-foreground">{cat.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Settings Page ───────────────────────────────────────────────────────
 
-type SubPage = "privacy" | "terms" | "faq" | null;
+type SubPage = "privacy" | "terms" | "faq" | "guide" | null;
 
 const processingModes = ["Balanced", "Fast", "Thorough"];
 type FolderNaming = "category" | "date" | "custom";
@@ -331,6 +468,7 @@ export default function Settings() {
   }
 
   // Sub-pages
+  if (subPage === "guide")   return <GuidePage onBack={() => setSubPage(null)} />;
   if (subPage === "privacy") return <PrivacyPolicyPage onBack={() => setSubPage(null)} />;
   if (subPage === "terms") return <TermsOfServicePage onBack={() => setSubPage(null)} />;
   if (subPage === "faq") return <FAQPage onBack={() => setSubPage(null)} />;
@@ -450,6 +588,26 @@ export default function Settings() {
               />
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Help & Guide */}
+      <div>
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Help</div>
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+          <button
+            onClick={() => setSubPage("guide")}
+            className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
+          >
+            <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <BookOpen className="h-4 w-4 text-primary" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground">Guide — Kaise Use Karein</div>
+              <div className="text-xs text-muted-foreground">Step-by-step, categories, privacy, warnings</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </button>
         </div>
       </div>
 
