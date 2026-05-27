@@ -2464,6 +2464,13 @@ const OCR_PRIORITY: Category[] = [
 export function categorizeByText(rawText: string): Category | null {
   const text = rawText.toLowerCase();
 
+  // Long text (> 600 chars) means it's likely a conversation / app UI screenshot
+  // that only mentions payment words in passing. Real receipts are concise, but
+  // even long bank statements have many payment keywords (bank name + transaction
+  // type + amount = score 8+). Raise the bar for Payments/Receipts to avoid
+  // false positives while keeping all genuine receipts classified correctly.
+  const isLongText = text.length > 600;
+
   // Collect every category whose minScore is met
   const matched = new Set<Category>();
   for (const rule of OCR_RULES) {
@@ -2472,7 +2479,9 @@ export function categorizeByText(rawText: string): Category | null {
       const hit = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
       if (hit) score += kw.weight;
     }
-    if (score >= rule.minScore) matched.add(rule.category);
+    const effectiveMinScore =
+      rule.category === "Payments / Receipts" && isLongText ? 5 : rule.minScore;
+    if (score >= effectiveMinScore) matched.add(rule.category);
   }
 
   if (!matched.size) return null;
