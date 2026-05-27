@@ -2455,10 +2455,10 @@ export function categorizeByFilename(filename: string): Category | null {
 // ─── OCR priority order (first match wins — do NOT change order) ──────────────
 const OCR_PRIORITY: Category[] = [
   "OTP / Security",
+  "Payments / Receipts",
   "WhatsApp / Chats",
   "Social Media",
   "Documents",
-  "Payments / Receipts",
   "Study / Notes",
   "Memes / Entertainment",
   "Photos",
