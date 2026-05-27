@@ -6,6 +6,8 @@ import {
   Sun, Moon, ScanSearch, Copy, Folder, Cpu, ChevronRight,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
   BookOpen, Upload, FolderOpen, Download, AlertTriangle, MoveRight,
+  Lock, CreditCard, MessageCircle, Share2, GraduationCap, Image,
+  Smile, CircleHelp, Camera,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -305,44 +307,44 @@ function FAQPage({ onBack }: { onBack: () => void }) {
 // ─── Guide / How It Works ─────────────────────────────────────────────────────
 
 const CATEGORIES_INFO = [
-  { emoji: "🔐", name: "OTP / Security",       desc: "Login codes, 2FA, password reset" },
-  { emoji: "💳", name: "Payments / Receipts",  desc: "UPI, bank transfers, receipts, invoices" },
-  { emoji: "💬", name: "WhatsApp / Chats",     desc: "Chat screenshots, message threads" },
-  { emoji: "📱", name: "Social Media",         desc: "Instagram, Twitter, TikTok, YouTube" },
-  { emoji: "📚", name: "Study / Notes",        desc: "Lectures, notes, exam results" },
-  { emoji: "🖼️", name: "Photos",              desc: "Camera photos, photo gallery" },
-  { emoji: "😂", name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
-  { emoji: "📄", name: "Documents",            desc: "IDs, certificates, scanned docs" },
-  { emoji: "❓", name: "Unknown / Others",     desc: "Couldn't identify — move manually" },
+  { icon: <Lock      className="h-4 w-4 text-violet-500"  />, color: "bg-violet-500/10",  name: "OTP / Security",         desc: "Login codes, 2FA, password reset" },
+  { icon: <CreditCard className="h-4 w-4 text-emerald-500" />, color: "bg-emerald-500/10", name: "Payments / Receipts",    desc: "UPI, bank transfers, receipts, invoices" },
+  { icon: <MessageCircle className="h-4 w-4 text-green-500" />, color: "bg-green-500/10",  name: "WhatsApp / Chats",       desc: "Chat screenshots, message threads" },
+  { icon: <Share2     className="h-4 w-4 text-blue-500"    />, color: "bg-blue-500/10",    name: "Social Media",           desc: "Instagram, Twitter, TikTok, YouTube" },
+  { icon: <GraduationCap className="h-4 w-4 text-amber-500" />, color: "bg-amber-500/10", name: "Study / Notes",          desc: "Lectures, notes, exam results" },
+  { icon: <Camera     className="h-4 w-4 text-pink-500"    />, color: "bg-pink-500/10",    name: "Photos",                 desc: "Camera photos, photo gallery" },
+  { icon: <Smile      className="h-4 w-4 text-orange-500"  />, color: "bg-orange-500/10",  name: "Memes / Entertainment",  desc: "Memes, jokes, viral content" },
+  { icon: <FileText   className="h-4 w-4 text-sky-500"     />, color: "bg-sky-500/10",     name: "Documents",              desc: "IDs, certificates, scanned docs" },
+  { icon: <CircleHelp className="h-4 w-4 text-muted-foreground" />, color: "bg-muted",     name: "Unknown / Others",       desc: "Could not identify — move manually" },
 ];
 
 const STEPS = [
   {
     icon: <Upload className="h-5 w-5 text-primary" />,
-    title: "Screenshots Upload Karein",
-    desc: "Drag & drop karein ya 'Browse' dabao. PNG, JPG, WebP, HEIC sab supported hain. Ek baar mein 100 tak upload ho sakte hain.",
+    title: "Upload Screenshots",
+    desc: "Drag & drop or click Browse. PNG, JPG, WebP, HEIC all supported. Up to 100 files at once.",
   },
   {
     icon: <ScanSearch className="h-5 w-5 text-violet-500" />,
-    title: "App Automatic Process Karta Hai",
-    desc: "Pehle filename dekhi jaati hai, phir QR code scan hota hai, phir OCR (text reading) chalta hai. Yeh sab aapke device pe hota hai — koi server nahi.",
+    title: "App Processes Automatically",
+    desc: "First checks filename, then scans for QR codes, then reads text with OCR. Everything runs on your device — no server.",
   },
   {
     icon: <FolderOpen className="h-5 w-5 text-amber-500" />,
-    title: "Galat Folder? Move Karein",
-    desc: "Har screenshot ke neeche folder icon tap karein → sahi category choose karein. File turant move ho jaati hai.",
+    title: "Wrong Folder? Move It",
+    desc: "Tap the folder icon on any screenshot → select the correct category. The file moves instantly.",
   },
   {
     icon: <Download className="h-5 w-5 text-emerald-500" />,
-    title: "ZIP Download Karein",
-    desc: "'Download ZIP' dabao. Andar sab screenshots sorted folders mein milenge — seedha apne phone mein.",
+    title: "Download ZIP",
+    desc: "Tap Download ZIP. Inside you'll find all screenshots neatly sorted into folders.",
   },
 ];
 
 function GuidePage({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
-      <SubPageHeader title="Guide — Kaise Use Karein" onBack={onBack} />
+      <SubPageHeader title="How It Works" onBack={onBack} />
       <div className="flex-1 overflow-y-auto px-4 py-5 pb-28 flex flex-col gap-5">
 
         {/* Privacy banner */}
@@ -351,9 +353,9 @@ function GuidePage({ onBack }: { onBack: () => void }) {
             <Shield className="h-5 w-5 text-emerald-500" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">100% Private — Koi Server Nahi</p>
+            <p className="text-sm font-semibold text-foreground">100% Private — No Server</p>
             <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-              Aapke screenshots aapke device pe hi rehte hain. Browser band karo ya "Start Over" dabao — sab kuch delete ho jaata hai.
+              Your screenshots stay on your device only. Close the tab or tap "Start Over" and everything is permanently deleted.
             </p>
           </div>
         </div>
@@ -364,9 +366,9 @@ function GuidePage({ onBack }: { onBack: () => void }) {
             <AlertTriangle className="h-5 w-5 text-amber-500" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">⚠️ Zaroor ZIP Download Karein</p>
+            <p className="text-sm font-semibold text-foreground">Download ZIP Before Closing</p>
             <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-              Tab band karne se pehle ZIP download kar lein — warna sari files hamesha ke liye delete ho jaayengi. App koi backup nahi rakhta.
+              All files are deleted when you close the tab. The app keeps no backup — download your ZIP first.
             </p>
           </div>
         </div>
@@ -374,7 +376,7 @@ function GuidePage({ onBack }: { onBack: () => void }) {
         {/* Steps */}
         <div>
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">
-            4 Steps — Itna Hi Hai
+            4 Simple Steps
           </div>
           <div className="flex flex-col gap-3">
             {STEPS.map((step, i) => (
@@ -403,27 +405,34 @@ function GuidePage({ onBack }: { onBack: () => void }) {
         <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4">
           <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
             <MoveRight className="h-4 w-4 text-primary" />
-            Galat Category Fix Kaise Karein?
+            How to Fix a Wrong Category
           </p>
           <ol className="flex flex-col gap-1.5 text-xs text-muted-foreground leading-relaxed">
-            <li>1. Results screen pe screenshot dhundho</li>
-            <li>2. Neeche folder icon <span className="font-mono bg-muted px-1 rounded">📁</span> tap karo</li>
-            <li>3. Sahi category select karo — done!</li>
+            <li>1. Find the screenshot in the results screen</li>
+            <li>2. Tap the folder icon
+              <span className="inline-flex items-center mx-1 bg-muted rounded px-1.5 py-0.5">
+                <Folder className="h-3 w-3" />
+              </span>
+              below it
+            </li>
+            <li>3. Select the correct category — done!</li>
           </ol>
           <p className="text-xs text-muted-foreground mt-2.5 pt-2.5 border-t border-border/50">
-            <strong>Note:</strong> Thodi bahut galti ho sakti hai — AI nahi hai, text-based rules hain. Manual correction zaroori ho sakti hai.
+            <strong>Note:</strong> Some mistakes can happen — the app uses text-based rules, not AI. Manual correction may be needed for tricky screenshots.
           </p>
         </div>
 
         {/* Categories */}
         <div>
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">
-            Folders — Kya Kya Hai
+            Smart Folders
           </div>
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
             {CATEGORIES_INFO.map((cat) => (
               <div key={cat.name} className="flex items-center gap-3 px-4 py-3">
-                <span className="text-lg w-8 text-center shrink-0">{cat.emoji}</span>
+                <span className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center shrink-0`}>
+                  {cat.icon}
+                </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground">{cat.name}</p>
                   <p className="text-xs text-muted-foreground">{cat.desc}</p>
