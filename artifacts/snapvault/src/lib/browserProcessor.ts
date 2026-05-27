@@ -1,7 +1,7 @@
 import jsQR from "jsqr";
 import { createWorker, createScheduler, PSM } from "tesseract.js";
 import JSZip from "jszip";
-import { categorizeByFilename, categorizeByText } from "./categorizer";
+import { categorizeByFilename, categorizeByText, ColorHint } from "./categorizer";
 
 type TesseractScheduler = ReturnType<typeof createScheduler>;
 type TesseractWorker = Awaited<ReturnType<typeof createWorker>>;
@@ -178,6 +178,69 @@ async function looksLikeScreenshot(file: File): Promise<boolean> {
   });
 }
 
+// ─── Color analysis — detect dominant UI colors for category boosting ─────────
+// Samples a 64×64 thumbnail and counts pixels matching known app color palettes.
+// Returns a set of ColorHints that categorizeByText() uses to boost scores.
+// Everything runs on-device — no pixels leave the browser.
+//
+// Detected patterns:
+//   whatsapp_green — #25D366 family (G dominant, R<120, B<140)
+//   social_blue    — Twitter/Facebook blue (B>180, B dominant)
+//   payment_green  — Broader success-screen green (EasyPaisa, JazzCash, etc.)
+//   dark_mode      — Average luminance < 70 (dark UI screenshot)
+async function analyzeColors(file: File): Promise<Set<ColorHint>> {
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const SIZE = 64;
+        const canvas = document.createElement("canvas");
+        canvas.width = SIZE;
+        canvas.height = SIZE;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, SIZE, SIZE);
+        const { data } = ctx.getImageData(0, 0, SIZE, SIZE);
+
+        const hints = new Set<ColorHint>();
+        let totalLuminance = 0;
+        let whatsappPx = 0, socialBluePx = 0, paymentGreenPx = 0;
+        const total = SIZE * SIZE;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2];
+          totalLuminance += 0.299 * r + 0.587 * g + 0.114 * b;
+
+          // WhatsApp green family: G dominant, muted R, muted B
+          if (g > 150 && g > r * 1.8 && g > b * 1.3 && r < 120 && b < 140) whatsappPx++;
+
+          // Social blue: strong blue channel dominant over R and G
+          if (b > 180 && b > r * 2.0 && b > g * 1.2) socialBluePx++;
+
+          // Broader payment-success green (EasyPaisa orange-green, JazzCash, etc.)
+          if (g > 130 && g > r * 1.4 && g > b * 1.1 && r < 160) paymentGreenPx++;
+        }
+
+        const threshold = total * 0.07; // 7% of pixels = strong signal
+        if (whatsappPx  > threshold) hints.add("whatsapp_green");
+        if (socialBluePx > threshold) hints.add("social_blue");
+        // payment_green only if NOT whatsapp (avoid boosting both)
+        if (paymentGreenPx > threshold && !hints.has("whatsapp_green")) hints.add("payment_green");
+        if (totalLuminance / total < 70) hints.add("dark_mode");
+
+        if (hints.size) console.log("[SnapVault Color]", [...hints]);
+        resolve(hints);
+      } catch {
+        resolve(new Set());
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(new Set()); };
+    img.src = url;
+  });
+}
+
 // ─── How many OCR workers to spin up ─────────────────────────────────────────
 function pickWorkerCount(fileCount: number): number {
   const cores = navigator.hardwareConcurrency ?? 2;
@@ -284,10 +347,14 @@ export async function processFiles(
     await Promise.all(
       ocrCandidates.map(async entry => {
         try {
-          const ocrInput = (await prepareForOcr(entry.file)) ?? entry.file;
-          const { data: { text } } = await scheduler.addJob("recognize", ocrInput);
+          // Run color analysis + OCR prep in parallel — both are canvas ops
+          const [ocrInput, colorHints] = await Promise.all([
+            prepareForOcr(entry.file),
+            analyzeColors(entry.file),
+          ]);
+          const { data: { text } } = await scheduler.addJob("recognize", ocrInput ?? entry.file);
           entry.ocrText = text;
-          const byText = categorizeByText(text);
+          const byText = categorizeByText(text, colorHints);
 
           if (byText) {
             if (screenshotPhotoIds.has(entry.id)) {

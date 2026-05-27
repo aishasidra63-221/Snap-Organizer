@@ -2460,7 +2460,23 @@ const OCR_PRIORITY: Category[] = [
 ];
 
 // ─── OCR text classifier ──────────────────────────────────────────────────────
-export function categorizeByText(rawText: string): Category | null {
+export type ColorHint = "whatsapp_green" | "social_blue" | "payment_green" | "dark_mode";
+
+// Color boosts applied to category scores when visual color analysis detects
+// dominant UI colors (e.g. WhatsApp green, Twitter blue). These add to the
+// keyword score so a visually-obvious screenshot can cross the minScore threshold
+// even if OCR only finds 1-2 weak keywords.
+const COLOR_BOOST: Record<ColorHint, Partial<Record<Category, number>>> = {
+  whatsapp_green: { "WhatsApp / Chats": 3 },
+  social_blue:    { "Social Media": 2 },
+  payment_green:  { "Payments / Receipts": 2 },
+  dark_mode:      { "Memes / Entertainment": 1 },
+};
+
+export function categorizeByText(
+  rawText: string,
+  colorHints?: Set<ColorHint>
+): Category | null {
   const text = rawText.toLowerCase();
 
   // Long text (> 600 chars) means it's likely a conversation / app UI screenshot
@@ -2480,6 +2496,15 @@ export function categorizeByText(rawText: string): Category | null {
       const hit = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
       if (hit) { score += kw.weight; hits.push({ text: kw.text, weight: kw.weight }); }
     }
+
+    // Apply color boosts — visual evidence supplements keyword scoring
+    if (colorHints) {
+      for (const hint of colorHints) {
+        const boost = COLOR_BOOST[hint][rule.category];
+        if (boost) { score += boost; hits.push({ text: `[color:${hint}]`, weight: boost }); }
+      }
+    }
+
     const effectiveMinScore =
       rule.category === "Payments / Receipts" && isLongText ? 5 : rule.minScore;
     if (score >= effectiveMinScore) {
