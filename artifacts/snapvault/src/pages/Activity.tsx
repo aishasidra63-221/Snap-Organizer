@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { CheckCircle2, XCircle, Zap, ScanSearch, Activity as ActivityIcon, Loader2, Clock } from "lucide-react";
-import { loadHistory, getAggregateStats, type JobHistoryEntry, type JobStatus } from "@/lib/jobHistory";
+import { CheckCircle2, XCircle, Zap, ScanSearch, Activity as ActivityIcon } from "lucide-react";
+import { loadHistory, getAggregateStats, type JobHistoryEntry } from "@/lib/jobHistory";
 
 function formatRelativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -13,54 +13,11 @@ function formatRelativeTime(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-const STATUS_CONFIG: Record<JobStatus, {
-  label: string;
-  icon: React.ReactNode;
-  color: string;
-  bg: string;
-  spin?: boolean;
-}> = {
-  processing: {
-    label: "Processing",
-    icon: <Loader2 className="h-4 w-4 animate-spin" />,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-  },
-  ready_for_review: {
-    label: "Ready for Review",
-    icon: <Clock className="h-4 w-4" />,
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
-  },
-  completed: {
-    label: "Completed",
-    icon: <CheckCircle2 className="h-4 w-4" />,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-  },
-};
-
-function JobStatusBadge({ status }: { status: JobStatus }) {
-  const cfg = STATUS_CONFIG[status];
-  return (
-    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${cfg.color}`}>
-      {cfg.icon}
-      {cfg.label}
-    </span>
-  );
-}
-
 export default function Activity({ isVisible = true }: { isVisible?: boolean }) {
   const [history, setHistory] = useState<JobHistoryEntry[]>([]);
 
   useEffect(() => {
-    if (!isVisible) return;
-    setHistory(loadHistory());
-
-    const hasActive = loadHistory().some(j => j.status === "processing" || j.status === "ready_for_review");
-    if (!hasActive) return;
-    const interval = setInterval(() => setHistory(loadHistory()), 1000);
-    return () => clearInterval(interval);
+    if (isVisible) setHistory(loadHistory());
   }, [isVisible]);
 
   const stats = getAggregateStats(history);
@@ -110,49 +67,46 @@ export default function Activity({ isVisible = true }: { isVisible?: boolean }) 
           </div>
         ) : (
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-            {history.slice(0, 20).map((job, i, arr) => {
-              const cfg = STATUS_CONFIG[job.status ?? "completed"];
-              return (
-                <div
-                  key={job.jobId}
-                  className={`flex items-start gap-3 px-4 py-3.5 ${i < arr.length - 1 ? "border-b border-border" : ""}`}
-                >
-                  <span className={`shrink-0 mt-0.5 ${cfg.color}`}>
-                    {cfg.icon}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <JobStatusBadge status={job.status ?? "completed"} />
-                      <div className="text-xs text-muted-foreground shrink-0">
-                        {formatRelativeTime(job.createdAt)}
-                      </div>
+            {history.slice(0, 20).map((job, i, arr) => (
+              <div
+                key={job.jobId}
+                className={`flex items-start gap-3 px-4 py-3.5 ${i < arr.length - 1 ? "border-b border-border" : ""}`}
+              >
+                <span className="shrink-0 mt-0.5">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="text-sm font-medium text-foreground">Completed</div>
+                    <div className="text-xs text-muted-foreground shrink-0">
+                      {formatRelativeTime(job.createdAt)}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {job.totalFiles} file{job.totalFiles !== 1 ? "s" : ""}
-                      {job.duplicateCount > 0 && ` · ${job.duplicateCount} duplicate${job.duplicateCount !== 1 ? "s" : ""}`}
-                      {job.ocrCount > 0 && ` · ${job.ocrCount} OCR`}
-                    </div>
-
-                    {/* Category breakdown mini bars */}
-                    {Object.keys(job.categoryCounts).length > 0 && (
-                      <div className="mt-2 flex gap-1 flex-wrap">
-                        {Object.entries(job.categoryCounts)
-                          .sort((a, b) => b[1] - a[1])
-                          .slice(0, 4)
-                          .map(([cat, count]) => (
-                            <span
-                              key={cat}
-                              className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium"
-                            >
-                              {cat.split(" / ")[0]} · {count}
-                            </span>
-                          ))}
-                      </div>
-                    )}
                   </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {job.totalFiles} file{job.totalFiles !== 1 ? "s" : ""}
+                    {job.duplicateCount > 0 && ` · ${job.duplicateCount} duplicate${job.duplicateCount !== 1 ? "s" : ""}`}
+                    {job.ocrCount > 0 && ` · ${job.ocrCount} OCR`}
+                  </div>
+
+                  {/* Category breakdown mini bars */}
+                  {Object.keys(job.categoryCounts).length > 0 && (
+                    <div className="mt-2 flex gap-1 flex-wrap">
+                      {Object.entries(job.categoryCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 4)
+                        .map(([cat, count]) => (
+                          <span
+                            key={cat}
+                            className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground font-medium"
+                          >
+                            {cat.split(" / ")[0]} · {count}
+                          </span>
+                        ))}
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>

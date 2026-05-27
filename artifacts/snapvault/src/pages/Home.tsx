@@ -33,7 +33,7 @@ import {
   type ProcessPhase,
   type ProcessUpdate,
 } from "@/lib/browserProcessor";
-import { appendToHistory, updateJob } from "@/lib/jobHistory";
+import { appendToHistory } from "@/lib/jobHistory";
 
 type Step = "upload" | "processing" | "review" | "done";
 
@@ -1164,7 +1164,6 @@ export default function Home() {
   const [processingError, setProcessingError] = useState<string | null>(null);
   const [confirmedOverrides, setConfirmedOverrides] = useState<Record<string, string>>({});
   const [confirmedDeletes, setConfirmedDeletes] = useState<Set<string>>(new Set());
-  const [currentJobId, setCurrentJobId] = useState<string | null>(null);
   const { theme, toggleTheme } = useTheme();
 
   // Start browser processing when step becomes "processing"
@@ -1175,30 +1174,18 @@ export default function Home() {
     const run = async () => {
       try {
         setProcessingError(null);
-        const jobId = crypto.randomUUID();
-        setCurrentJobId(jobId);
-        appendToHistory({
-          jobId,
-          status: "processing",
-          totalFiles: pendingFiles.length,
-          duplicateCount: 0,
-          ocrCount: 0,
-          createdAt: new Date().toISOString(),
-          categoryCounts: {},
-        });
-
         const result = await runBrowserProcess(pendingFiles, (update: ProcessUpdate) => {
           if (!cancelled) setProgress(prev => ({ ...prev, ...update }));
         });
-
         if (!cancelled) {
           setEntries(result);
           setStep("review");
-          updateJob(jobId, {
-            status: "ready_for_review",
+          appendToHistory({
+            jobId: crypto.randomUUID(),
             totalFiles: result.length,
             duplicateCount: result.filter(e => e.isDuplicate).length,
             ocrCount: result.filter(e => e.ocrText !== null && !e.isDuplicate).length,
+            createdAt: new Date().toISOString(),
             categoryCounts: getCategoryCounts(result),
           });
         }
@@ -1220,7 +1207,6 @@ export default function Home() {
   const handleConfirm = (overrides: Record<string, string>, deletes: Set<string>) => {
     setConfirmedOverrides(overrides);
     setConfirmedDeletes(deletes);
-    if (currentJobId) updateJob(currentJobId, { status: "completed" });
     setStep("done");
   };
 

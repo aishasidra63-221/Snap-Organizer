@@ -1,8 +1,5 @@
-export type JobStatus = "processing" | "ready_for_review" | "completed";
-
 export interface JobHistoryEntry {
   jobId: string;
-  status: JobStatus;
   totalFiles: number;
   duplicateCount: number;
   ocrCount: number;
@@ -16,9 +13,7 @@ const MAX = 50;
 export function loadHistory(): JobHistoryEntry[] {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as JobHistoryEntry[];
-    return parsed.map(j => ({ ...j, status: j.status ?? "completed" }));
+    return raw ? (JSON.parse(raw) as JobHistoryEntry[]) : [];
   } catch {
     return [];
   }
@@ -31,17 +26,6 @@ export function appendToHistory(entry: JobHistoryEntry): void {
     localStorage.setItem(LS_KEY, JSON.stringify(updated));
   } catch {
     // storage quota — silently skip
-  }
-}
-
-export function updateJob(jobId: string, updates: Partial<JobHistoryEntry>): void {
-  const history = loadHistory();
-  const idx = history.findIndex(j => j.jobId === jobId);
-  if (idx !== -1) {
-    history[idx] = { ...history[idx], ...updates };
-    try {
-      localStorage.setItem(LS_KEY, JSON.stringify(history));
-    } catch {}
   }
 }
 
