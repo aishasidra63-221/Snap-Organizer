@@ -1657,7 +1657,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "neet",                    weight: 2 },
       { text: "jee mains",               weight: 2 },
       { text: "jee advanced",            weight: 2 },
-      { text: "nda",                     weight: 2 },
+      { text: "nda",    pattern: /\bnda\b/i,    weight: 2 },
       { text: "cds",                     weight: 2 },
       { text: "ibps",                    weight: 2 },
       { text: "sbi po",                  weight: 2 },
@@ -1671,7 +1671,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "teacher exam",            weight: 2 },
       { text: "ctet",                    weight: 2 },
       { text: "tet",                     weight: 2 },
-      { text: "net",                     weight: 2 },
+      { text: "net",    pattern: /\bnet\b/i,    weight: 1 },
       { text: "set",    pattern: /\bset\b/i,    weight: 2 },
       { text: "phd entrance",            weight: 2 },
       { text: "law entrance",            weight: 2 },
@@ -1787,7 +1787,7 @@ const OCR_RULES: OcrRule[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   {
     category: "Documents",
-    minScore: 3,
+    minScore: 4,
     keywords: [
       // Aadhaar
       { text: "aadhaar",                 weight: 3 },
@@ -1843,7 +1843,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "maturity date",           weight: 3 },
       { text: "nominee",                 weight: 2 },
       { text: "insured name",            weight: 3 },
-      { text: "lic",                     weight: 2 },
+      { text: "lic",    pattern: /\blic\b/i,    weight: 2 },
       { text: "life insurance",          weight: 3 },
       { text: "health insurance",        weight: 3 },
       // Medical / Prescription
@@ -2049,8 +2049,8 @@ const OCR_RULES: OcrRule[] = [
       { text: "llp",                     weight: 2 },
       { text: "proprietorship",          weight: 2 },
       { text: "partnership deed",        weight: 2 },
-      { text: "mou",                     weight: 2 },
-      { text: "agreement",               weight: 2 },
+      { text: "mou",    pattern: /\bmou\b/i,    weight: 2 },
+      { text: "agreement", pattern: /\bagreement\b/i, weight: 2 },
       { text: "contract",                weight: 2 },
       { text: "legal notice",            weight: 2 },
       { text: "court order",             weight: 2 },
@@ -2113,7 +2113,6 @@ const OCR_RULES: OcrRule[] = [
       { text: "true copy",               weight: 1 },
       { text: "certified copy",          weight: 1 },
       { text: "annexure",                weight: 1 },
-      { text: "schedule",                weight: 1 },
       { text: "exhibit",                 weight: 1 },
       { text: "clause",                  weight: 1 },
       { text: "whereas",                 weight: 1 },
@@ -2147,7 +2146,7 @@ const OCR_RULES: OcrRule[] = [
   // ═══════════════════════════════════════════════════════════════════════════
   {
     category: "Memes / Entertainment",
-    minScore: 3,
+    minScore: 4,
     keywords: [
       // Classic meme formats
       { text: "when you",                weight: 2 },
@@ -2471,8 +2470,9 @@ export function categorizeByText(rawText: string): Category | null {
   // false positives while keeping all genuine receipts classified correctly.
   const isLongText = text.length > 600;
 
-  // Collect every category whose minScore is met
+  // Collect every category whose minScore is met, track raw scores for tiebreaking
   const matched = new Set<Category>();
+  const scoreMap = new Map<Category, number>();
   for (const rule of OCR_RULES) {
     let score = 0;
     const hits: { text: string; weight: number }[] = [];
@@ -2484,6 +2484,7 @@ export function categorizeByText(rawText: string): Category | null {
       rule.category === "Payments / Receipts" && isLongText ? 6 : rule.minScore;
     if (score >= effectiveMinScore) {
       matched.add(rule.category);
+      scoreMap.set(rule.category, score);
       console.log(`[SnapVault OCR] ✅ "${rule.category}" score=${score}/${effectiveMinScore} textLen=${text.length}`, hits);
     } else if (rule.category === "Payments / Receipts" && hits.length > 0) {
       console.log(`[SnapVault OCR] ❌ "Payments / Receipts" score=${score}/${effectiveMinScore} textLen=${text.length} — did NOT classify`, hits);
@@ -2492,13 +2493,20 @@ export function categorizeByText(rawText: string): Category | null {
 
   if (!matched.size) return null;
 
-  // Return the highest-priority match, not the highest-scoring one
-  for (const cat of OCR_PRIORITY) {
-    if (matched.has(cat)) return cat;
-  }
-
-  // Fallback: any match not in priority list (shouldn't happen)
-  return [...matched][0];
+  // Pick winner: highest raw score wins (stronger evidence beats priority).
+  // When scores tie, fall back to OCR_PRIORITY order (more important folder wins).
+  const scored = [...matched].map(cat => ({
+    cat,
+    score: scoreMap.get(cat) ?? 0,
+    rank: OCR_PRIORITY.indexOf(cat),
+  }));
+  scored.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const ra = a.rank === -1 ? 999 : a.rank;
+    const rb = b.rank === -1 ? 999 : b.rank;
+    return ra - rb;
+  });
+  return scored[0].cat;
 }
 
 /** Combined pipeline: filename → OCR text → Unknown */
