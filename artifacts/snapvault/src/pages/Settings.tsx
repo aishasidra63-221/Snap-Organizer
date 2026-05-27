@@ -306,145 +306,127 @@ function FAQPage({ onBack }: { onBack: () => void }) {
 
 // ─── Guide / How It Works ─────────────────────────────────────────────────────
 
-const CATEGORIES_INFO = [
-  { icon: Lock,          iconColor: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  name: "OTP / Security",        desc: "Login codes, 2FA, password reset" },
-  { icon: CreditCard,    iconColor: "#10b981", bg: "rgba(16,185,129,0.12)",  name: "Payments / Receipts",   desc: "UPI, bank transfers, receipts, invoices" },
-  { icon: MessageCircle, iconColor: "#22c55e", bg: "rgba(34,197,94,0.12)",   name: "WhatsApp / Chats",      desc: "Chat screenshots, message threads" },
-  { icon: Share2,        iconColor: "#3b82f6", bg: "rgba(59,130,246,0.12)",  name: "Social Media",          desc: "Instagram, Twitter, TikTok, YouTube" },
-  { icon: GraduationCap, iconColor: "#f59e0b", bg: "rgba(245,158,11,0.12)",  name: "Study / Notes",         desc: "Lectures, notes, exam results" },
-  { icon: Camera,        iconColor: "#ec4899", bg: "rgba(236,72,153,0.12)",  name: "Photos",                desc: "Camera photos, photo gallery" },
-  { icon: Smile,         iconColor: "#f97316", bg: "rgba(249,115,22,0.12)",  name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
-  { icon: FileText,      iconColor: "#0ea5e9", bg: "rgba(14,165,233,0.12)",  name: "Documents",             desc: "IDs, certificates, scanned docs" },
-  { icon: CircleHelp,    iconColor: "#94a3b8", bg: "rgba(148,163,184,0.12)", name: "Unknown / Others",      desc: "Could not identify — move manually" },
-];
-
-const STEPS = [
-  {
-    icon: <Upload className="h-5 w-5 text-primary" />,
-    title: "Upload Screenshots",
-    desc: "Drag & drop or click Browse. PNG, JPG, WebP, HEIC all supported. Up to 100 files at once.",
-  },
-  {
-    icon: <ScanSearch className="h-5 w-5 text-violet-500" />,
-    title: "App Processes Automatically",
-    desc: "First checks filename, then scans for QR codes, then reads text with OCR. Everything runs on your device — no server.",
-  },
-  {
-    icon: <FolderOpen className="h-5 w-5 text-amber-500" />,
-    title: "Wrong Folder? Move It",
-    desc: "Tap the folder icon on any screenshot → select the correct category. The file moves instantly.",
-  },
-  {
-    icon: <Download className="h-5 w-5 text-emerald-500" />,
-    title: "Download ZIP",
-    desc: "Tap Download ZIP. Inside you'll find all screenshots neatly sorted into folders.",
-  },
-];
-
 function GuidePage({ onBack }: { onBack: () => void }) {
+  const steps = [
+    { Icon: Upload,     color: "#6366f1", bg: "rgba(99,102,241,0.12)",  title: "Upload Screenshots",           desc: "Drag & drop or tap Browse. PNG, JPG, WebP, HEIC — up to 100 files at once." },
+    { Icon: ScanSearch, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  title: "App Processes Automatically",  desc: "Reads filenames, scans QR codes, then runs OCR text recognition — all on your device, no server." },
+    { Icon: FolderOpen, color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  title: "Wrong Folder? Move It",        desc: "Tap the folder icon on any screenshot and pick the correct category." },
+    { Icon: Download,   color: "#10b981", bg: "rgba(16,185,129,0.12)",  title: "Download ZIP",                 desc: "Tap Download ZIP — screenshots are neatly sorted into labelled folders inside." },
+  ];
+
+  const categories = [
+    { Icon: Lock,          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  name: "OTP / Security",        desc: "Login codes, 2FA, password reset" },
+    { Icon: CreditCard,    color: "#10b981", bg: "rgba(16,185,129,0.12)",  name: "Payments / Receipts",   desc: "UPI, bank transfers, receipts, invoices" },
+    { Icon: MessageCircle, color: "#22c55e", bg: "rgba(34,197,94,0.12)",   name: "WhatsApp / Chats",      desc: "Chat screenshots, message threads" },
+    { Icon: Share2,        color: "#3b82f6", bg: "rgba(59,130,246,0.12)",  name: "Social Media",          desc: "Instagram, Twitter, TikTok, YouTube" },
+    { Icon: GraduationCap, color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  name: "Study / Notes",         desc: "Lectures, notes, exam results" },
+    { Icon: Camera,        color: "#ec4899", bg: "rgba(236,72,153,0.12)",  name: "Photos",                desc: "Camera photos, gallery screenshots" },
+    { Icon: Smile,         color: "#f97316", bg: "rgba(249,115,22,0.12)",  name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
+    { Icon: FileText,      color: "#0ea5e9", bg: "rgba(14,165,233,0.12)",  name: "Documents",             desc: "IDs, certificates, scanned docs" },
+    { Icon: CircleHelp,    color: "#94a3b8", bg: "rgba(148,163,184,0.12)", name: "Unknown / Others",      desc: "Could not identify — move manually" },
+  ];
+
   return (
     <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
       <SubPageHeader title="How It Works" onBack={onBack} />
       <div className="flex-1 overflow-y-auto px-4 py-5 pb-28 flex flex-col gap-5">
 
         {/* Privacy banner */}
-        <div className="flex items-start gap-3 rounded-2xl bg-emerald-500/8 border border-emerald-500/20 px-4 py-3.5">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0 mt-0.5">
-            <Shield className="h-5 w-5 text-emerald-500" />
+        <div
+          className="flex items-start gap-3 rounded-2xl border px-4 py-3.5"
+          style={{ background: "rgba(16,185,129,0.08)", borderColor: "rgba(16,185,129,0.25)" }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+            style={{ background: "rgba(16,185,129,0.15)" }}
+          >
+            <Shield className="h-5 w-5" style={{ color: "#10b981" }} />
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">100% Private — No Server</p>
             <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-              Your screenshots stay on your device only. Close the tab or tap "Start Over" and everything is permanently deleted.
+              Your screenshots never leave your device. Close the tab and everything is permanently deleted.
             </p>
           </div>
         </div>
 
-        {/* Delete warning */}
-        <div className="flex items-start gap-3 rounded-2xl bg-amber-500/8 border border-amber-500/20 px-4 py-3.5">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0 mt-0.5">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
+        {/* Warning */}
+        <div
+          className="flex items-start gap-3 rounded-2xl border px-4 py-3.5"
+          style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.25)" }}
+        >
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+            style={{ background: "rgba(245,158,11,0.15)" }}
+          >
+            <AlertTriangle className="h-5 w-5" style={{ color: "#f59e0b" }} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Download ZIP Before Closing</p>
+            <p className="text-sm font-semibold text-foreground">Download Before Closing</p>
             <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-              All files are deleted when you close the tab. The app keeps no backup — download your ZIP first.
+              Files are wiped when you close the tab. The app keeps no backup — download your ZIP first.
             </p>
           </div>
         </div>
 
         {/* Steps */}
         <div>
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">
-            4 Simple Steps
-          </div>
-          <div className="flex flex-col gap-3">
-            {STEPS.map((step, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex gap-3">
-                <div className="flex flex-col items-center gap-1 shrink-0">
-                  <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center">
-                    {step.icon}
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div className="w-0.5 flex-1 min-h-3 bg-border rounded-full" />
-                  )}
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">4 Steps</p>
+          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
+            {steps.map(({ Icon, color, bg, title, desc }, i) => (
+              <div key={i} className="flex items-start gap-3 px-4 py-3.5">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                  style={{ background: bg }}
+                >
+                  <Icon className="h-4 w-4" style={{ color }} />
                 </div>
-                <div className="flex-1 min-w-0 pt-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-foreground">
-                    <span className="text-muted-foreground mr-1.5">{i + 1}.</span>
-                    {step.title}
+                    <span className="text-muted-foreground text-xs mr-1">{i + 1}.</span>
+                    {title}
                   </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed mt-1">{step.desc}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Move tip */}
+        {/* Fix wrong category tip */}
         <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4">
-          <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+          <p className="text-sm font-semibold text-foreground mb-2.5 flex items-center gap-2">
             <MoveRight className="h-4 w-4 text-primary" />
-            How to Fix a Wrong Category
+            Fixing a Wrong Category
           </p>
-          <ol className="flex flex-col gap-1.5 text-xs text-muted-foreground leading-relaxed">
-            <li>1. Find the screenshot in the results screen</li>
-            <li>2. Tap the folder icon
-              <span className="inline-flex items-center mx-1 bg-muted rounded px-1.5 py-0.5">
-                <Folder className="h-3 w-3" />
-              </span>
-              below it
-            </li>
-            <li>3. Select the correct category — done!</li>
-          </ol>
-          <p className="text-xs text-muted-foreground mt-2.5 pt-2.5 border-t border-border/50">
-            <strong>Note:</strong> Some mistakes can happen — the app uses text-based rules, not AI. Manual correction may be needed for tricky screenshots.
+          <div className="flex flex-col gap-1.5 text-xs text-muted-foreground leading-relaxed">
+            <p>1. Find the screenshot in the results screen.</p>
+            <p>2. Tap the <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-muted rounded font-medium"><Folder className="h-3 w-3" /> folder</span> icon below it.</p>
+            <p>3. Pick the correct category — it moves instantly.</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3 pt-2.5 border-t border-border/60">
+            <strong className="text-foreground">Note:</strong> The app uses keyword rules, not AI — occasional mistakes are normal.
           </p>
         </div>
 
-        {/* Categories */}
+        {/* Smart Folders */}
         <div>
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">
-            Smart Folders
-          </div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Smart Folders</p>
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
-            {CATEGORIES_INFO.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <div key={cat.name} className="flex items-center gap-3 px-4 py-3">
-                  <span
-                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: cat.bg }}
-                  >
-                    <Icon className="h-4 w-4" style={{ color: cat.iconColor }} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{cat.name}</p>
-                    <p className="text-xs text-muted-foreground">{cat.desc}</p>
-                  </div>
+            {categories.map(({ Icon, color, bg, name, desc }) => (
+              <div key={name} className="flex items-center gap-3 px-4 py-3">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                  style={{ background: bg }}
+                >
+                  <Icon className="h-4 w-4" style={{ color }} />
                 </div>
-              );
-            })}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground">{name}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
