@@ -1235,7 +1235,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-3 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center shrink-0">
-            <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto" />
+            <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto dark:invert dark:brightness-90" />
           </div>
 
           {step !== "upload" && (
