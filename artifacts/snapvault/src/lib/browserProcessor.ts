@@ -1,14 +1,17 @@
 import jsQR from "jsqr";
-import { createWorker, createScheduler, Scheduler, Worker } from "tesseract.js";
+import { createWorker, createScheduler, PSM } from "tesseract.js";
 import JSZip from "jszip";
 import { categorizeByFilename, categorizeByText } from "./categorizer";
 
+type TesseractScheduler = ReturnType<typeof createScheduler>;
+type TesseractWorker = Awaited<ReturnType<typeof createWorker>>;
+
 // ─── Worker Pool Cache (reuse across calls — avoids re-loading model) ─────────
-let cachedScheduler: Scheduler | null = null;
-let cachedWorkers: Worker[] = [];
+let cachedScheduler: TesseractScheduler | null = null;
+let cachedWorkers: TesseractWorker[] = [];
 let cachedWorkerCount = 0;
 
-async function getScheduler(needed: number): Promise<Scheduler> {
+async function getScheduler(needed: number): Promise<TesseractScheduler> {
   const target = Math.max(1, Math.min(navigator.hardwareConcurrency ?? 2, 6, needed));
 
   if (cachedScheduler && cachedWorkerCount >= target) {
@@ -23,15 +26,12 @@ async function getScheduler(needed: number): Promise<Scheduler> {
 
   cachedScheduler = createScheduler();
   const workerInits = Array.from({ length: target }, () =>
-    createWorker("eng", 1, {
-      logger: () => {},
-      workerPath: undefined,
-      corePath: undefined,
-      langPath: undefined,
-    } as Parameters<typeof createWorker>[2])
+    createWorker("eng", 1, { logger: () => {} } as Parameters<typeof createWorker>[2])
   );
   cachedWorkers = await Promise.all(workerInits);
-  await Promise.all(cachedWorkers.map(w => (w as any).setParameters({ tessedit_pageseg_mode: "11" })));
+  await Promise.all(
+    cachedWorkers.map(w => w.setParameters({ tessedit_pageseg_mode: PSM.SPARSE_TEXT }))
+  );
   cachedWorkers.forEach(w => cachedScheduler!.addWorker(w));
   cachedWorkerCount = target;
   return cachedScheduler;
