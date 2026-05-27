@@ -1,7 +1,41 @@
 import jsQR from "jsqr";
-import { createWorker, createScheduler } from "tesseract.js";
+import { createWorker, createScheduler, Scheduler, Worker } from "tesseract.js";
 import JSZip from "jszip";
 import { categorizeByFilename, categorizeByText } from "./categorizer";
+
+// ─── Worker Pool Cache (reuse across calls — avoids re-loading model) ─────────
+let cachedScheduler: Scheduler | null = null;
+let cachedWorkers: Worker[] = [];
+let cachedWorkerCount = 0;
+
+async function getScheduler(needed: number): Promise<Scheduler> {
+  const target = Math.max(1, Math.min(navigator.hardwareConcurrency ?? 2, 6, needed));
+
+  if (cachedScheduler && cachedWorkerCount >= target) {
+    return cachedScheduler;
+  }
+
+  if (cachedScheduler) {
+    await cachedScheduler.terminate();
+    cachedWorkers = [];
+    cachedWorkerCount = 0;
+  }
+
+  cachedScheduler = createScheduler();
+  const workerInits = Array.from({ length: target }, () =>
+    createWorker("eng", 1, {
+      logger: () => {},
+      workerPath: undefined,
+      corePath: undefined,
+      langPath: undefined,
+    } as Parameters<typeof createWorker>[2])
+  );
+  cachedWorkers = await Promise.all(workerInits);
+  await Promise.all(cachedWorkers.map(w => (w as any).setParameters({ tessedit_pageseg_mode: "11" })));
+  cachedWorkers.forEach(w => cachedScheduler!.addWorker(w));
+  cachedWorkerCount = target;
+  return cachedScheduler;
+}
 
 export interface BrowserFileEntry {
   id: string;
@@ -64,18 +98,19 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
-// ─── SPEED FIX: Crop top 70% + downscale to max 1200px before OCR ────────────
+// ─── SPEED FIX: Crop top 70% + downscale to max 800px before OCR ─────────────
 // Screenshots have headers, app names, amounts at the top.
 // Payment confirmations (easypaisa, UPI etc.) often have large icons/graphics
 // at the top (~40-50%), pushing the actual text further down. Using 70% gives
 // enough coverage for all app layouts while still cutting 30% of pixels.
+// 800px wide is plenty for Tesseract to read UI text accurately.
 async function prepareForOcr(file: File): Promise<HTMLCanvasElement | null> {
   return new Promise(resolve => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
       try {
-        const MAX_WIDTH = 1200;
+        const MAX_WIDTH = 800;
         const cropHeight = Math.round(img.height * 0.7); // top 70%
         const scale = Math.min(1, MAX_WIDTH / img.width);
         const canvas = document.createElement("canvas");
@@ -239,12 +274,9 @@ export async function processFiles(
       workerCount: numWorkers,
     });
 
-    const scheduler = createScheduler();
-    const workerInits = Array.from({ length: numWorkers }, () =>
-      createWorker("eng", 1, { logger: () => {} } as Parameters<typeof createWorker>[2])
-    );
-    const workers = await Promise.all(workerInits);
-    workers.forEach(w => scheduler.addWorker(w));
+    // SPEED FIX: reuse cached worker pool — avoids re-downloading/initialising
+    // the Tesseract LSTM model on every processFiles() call.
+    const scheduler = await getScheduler(ocrCandidates.length);
 
     let ocrDone = 0;
     const screenshotPhotoIds = new Set(screenshotPhotos.map(e => e.id));
@@ -252,7 +284,6 @@ export async function processFiles(
     await Promise.all(
       ocrCandidates.map(async entry => {
         try {
-          // SPEED FIX: use cropped canvas instead of raw file
           const ocrInput = (await prepareForOcr(entry.file)) ?? entry.file;
           const { data: { text } } = await scheduler.addJob("recognize", ocrInput);
           entry.ocrText = text;
@@ -260,11 +291,6 @@ export async function processFiles(
 
           if (byText) {
             if (screenshotPhotoIds.has(entry.id)) {
-              // For filename-categorised "Photos": only override when OCR is
-              // confident (score can be inferred — any non-null result from
-              // categorizeByText already met minScore, which is ≥ 3).
-              // We additionally require it's NOT "Photos" itself to avoid
-              // a no-op override.
               if (byText !== "Photos") {
                 entry.category = byText;
               }
@@ -278,8 +304,7 @@ export async function processFiles(
         onUpdate({ processedFiles: ocrDone, ocrDone, ocrTotal: ocrCandidates.length });
       })
     );
-
-    await scheduler.terminate();
+    // Note: do NOT terminate — workers are cached for reuse next call
   }
 
   return entries;
