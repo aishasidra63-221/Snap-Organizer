@@ -561,12 +561,9 @@ const OCR_RULES: OcrRule[] = [
       { text: "account statement",       weight: 3 },
       { text: "total amount",            weight: 2 },
       { text: "grand total",             weight: 2 },
-      { text: "subtotal",                weight: 1 },
-      { text: "amount:",                 weight: 1 },
-      { text: "total:",                  weight: 1 },
       { text: "billing address",         weight: 2 },
-      { text: "receipt",                 weight: 2 },
-      { text: "invoice",                 weight: 2 },
+      { text: "receipt",                 weight: 1 },
+      { text: "invoice",                 weight: 1 },
       // ── Global digital wallets & payment apps ──
       { text: "venmo",                   weight: 3 },
       { text: "cash app",                weight: 3 },
@@ -634,7 +631,6 @@ const OCR_RULES: OcrRule[] = [
       { text: "picpay",                  weight: 3 },
       { text: "rappi pay",               weight: 3 },
       // ── Global currencies ──
-      { text: "$",                       weight: 1 },
       { text: "usd",                     weight: 1 },
       { text: "€",                       weight: 1 },
       { text: "eur",                     weight: 1 },
