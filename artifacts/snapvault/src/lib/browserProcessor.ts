@@ -64,10 +64,11 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
-// ─── SPEED FIX: Crop top 40% + downscale to max 1200px before OCR ────────────
-// Screenshots have headers, app names, amounts at the top — bottom half is
-// mostly content that doesn't help with categorisation. Cropping reduces
-// pixels by ~60% which makes Tesseract 3-4x faster with no accuracy loss.
+// ─── SPEED FIX: Crop top 70% + downscale to max 1200px before OCR ────────────
+// Screenshots have headers, app names, amounts at the top.
+// Payment confirmations (easypaisa, UPI etc.) often have large icons/graphics
+// at the top (~40-50%), pushing the actual text further down. Using 70% gives
+// enough coverage for all app layouts while still cutting 30% of pixels.
 async function prepareForOcr(file: File): Promise<HTMLCanvasElement | null> {
   return new Promise(resolve => {
     const img = new Image();
@@ -75,7 +76,7 @@ async function prepareForOcr(file: File): Promise<HTMLCanvasElement | null> {
     img.onload = () => {
       try {
         const MAX_WIDTH = 1200;
-        const cropHeight = Math.round(img.height * 0.4); // top 40% only
+        const cropHeight = Math.round(img.height * 0.7); // top 70%
         const scale = Math.min(1, MAX_WIDTH / img.width);
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(img.width * scale);
