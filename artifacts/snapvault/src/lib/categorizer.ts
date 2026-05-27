@@ -922,7 +922,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "available balance",         weight: 1 },
       { text: "processing fee",            weight: 1 },
       { text: "convenience fee",           weight: 1 },
-      { text: "gst",                       weight: 1 },
+      { text: "gst",    pattern: /\bgst\b/i,    weight: 1 },
       { text: "igst",                      weight: 1 },
       { text: "cgst",                      weight: 1 },
       { text: "sgst",                      weight: 1 },
@@ -1226,7 +1226,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "mention",                                     weight: 1 },
       { text: "direct message",                              weight: 1 },
       { text: "tip",                                         weight: 1 },
-      { text: "cc",                                          weight: 1 },
+      { text: "cc",     pattern: /\bcc\b/i,     weight: 1 },
       { text: "bcc",                                         weight: 1 },
       { text: "subject",                                     weight: 1 },
       { text: "google meet",                                 weight: 1 },
@@ -1238,7 +1238,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "forwarded",                                   weight: 1 },
       { text: "delivered",                                   weight: 1 },
       { text: "seen",                                        weight: 1 },
-      { text: "read",                                        weight: 1 },
+      { text: "message read",                                weight: 1 },
       { text: "sent",                                        weight: 1 },
       { text: "online",                                      weight: 1 },
       { text: "reply",                                       weight: 1 },
@@ -2481,7 +2481,7 @@ export function categorizeByText(rawText: string): Category | null {
       if (hit) { score += kw.weight; hits.push({ text: kw.text, weight: kw.weight }); }
     }
     const effectiveMinScore =
-      rule.category === "Payments / Receipts" && isLongText ? 5 : rule.minScore;
+      rule.category === "Payments / Receipts" && isLongText ? 6 : rule.minScore;
     if (score >= effectiveMinScore) {
       matched.add(rule.category);
       console.log(`[SnapVault OCR] ✅ "${rule.category}" score=${score}/${effectiveMinScore} textLen=${text.length}`, hits);
