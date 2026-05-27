@@ -2475,13 +2475,19 @@ export function categorizeByText(rawText: string): Category | null {
   const matched = new Set<Category>();
   for (const rule of OCR_RULES) {
     let score = 0;
+    const hits: { text: string; weight: number }[] = [];
     for (const kw of rule.keywords) {
       const hit = kw.pattern ? kw.pattern.test(text) : text.includes(kw.text);
-      if (hit) score += kw.weight;
+      if (hit) { score += kw.weight; hits.push({ text: kw.text, weight: kw.weight }); }
     }
     const effectiveMinScore =
       rule.category === "Payments / Receipts" && isLongText ? 5 : rule.minScore;
-    if (score >= effectiveMinScore) matched.add(rule.category);
+    if (score >= effectiveMinScore) {
+      matched.add(rule.category);
+      console.log(`[SnapVault OCR] ✅ "${rule.category}" score=${score}/${effectiveMinScore} textLen=${text.length}`, hits);
+    } else if (rule.category === "Payments / Receipts" && hits.length > 0) {
+      console.log(`[SnapVault OCR] ❌ "Payments / Receipts" score=${score}/${effectiveMinScore} textLen=${text.length} — did NOT classify`, hits);
+    }
   }
 
   if (!matched.size) return null;
