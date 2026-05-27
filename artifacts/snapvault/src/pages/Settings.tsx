@@ -307,15 +307,15 @@ function FAQPage({ onBack }: { onBack: () => void }) {
 // ─── Guide / How It Works ─────────────────────────────────────────────────────
 
 const CATEGORIES_INFO = [
-  { icon: <Lock      className="h-4 w-4 text-violet-500"  />, color: "bg-violet-500/10",  name: "OTP / Security",         desc: "Login codes, 2FA, password reset" },
-  { icon: <CreditCard className="h-4 w-4 text-emerald-500" />, color: "bg-emerald-500/10", name: "Payments / Receipts",    desc: "UPI, bank transfers, receipts, invoices" },
-  { icon: <MessageCircle className="h-4 w-4 text-green-500" />, color: "bg-green-500/10",  name: "WhatsApp / Chats",       desc: "Chat screenshots, message threads" },
-  { icon: <Share2     className="h-4 w-4 text-blue-500"    />, color: "bg-blue-500/10",    name: "Social Media",           desc: "Instagram, Twitter, TikTok, YouTube" },
-  { icon: <GraduationCap className="h-4 w-4 text-amber-500" />, color: "bg-amber-500/10", name: "Study / Notes",          desc: "Lectures, notes, exam results" },
-  { icon: <Camera     className="h-4 w-4 text-pink-500"    />, color: "bg-pink-500/10",    name: "Photos",                 desc: "Camera photos, photo gallery" },
-  { icon: <Smile      className="h-4 w-4 text-orange-500"  />, color: "bg-orange-500/10",  name: "Memes / Entertainment",  desc: "Memes, jokes, viral content" },
-  { icon: <FileText   className="h-4 w-4 text-sky-500"     />, color: "bg-sky-500/10",     name: "Documents",              desc: "IDs, certificates, scanned docs" },
-  { icon: <CircleHelp className="h-4 w-4 text-muted-foreground" />, color: "bg-muted",     name: "Unknown / Others",       desc: "Could not identify — move manually" },
+  { icon: Lock,          iconColor: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  name: "OTP / Security",        desc: "Login codes, 2FA, password reset" },
+  { icon: CreditCard,    iconColor: "#10b981", bg: "rgba(16,185,129,0.12)",  name: "Payments / Receipts",   desc: "UPI, bank transfers, receipts, invoices" },
+  { icon: MessageCircle, iconColor: "#22c55e", bg: "rgba(34,197,94,0.12)",   name: "WhatsApp / Chats",      desc: "Chat screenshots, message threads" },
+  { icon: Share2,        iconColor: "#3b82f6", bg: "rgba(59,130,246,0.12)",  name: "Social Media",          desc: "Instagram, Twitter, TikTok, YouTube" },
+  { icon: GraduationCap, iconColor: "#f59e0b", bg: "rgba(245,158,11,0.12)",  name: "Study / Notes",         desc: "Lectures, notes, exam results" },
+  { icon: Camera,        iconColor: "#ec4899", bg: "rgba(236,72,153,0.12)",  name: "Photos",                desc: "Camera photos, photo gallery" },
+  { icon: Smile,         iconColor: "#f97316", bg: "rgba(249,115,22,0.12)",  name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
+  { icon: FileText,      iconColor: "#0ea5e9", bg: "rgba(14,165,233,0.12)",  name: "Documents",             desc: "IDs, certificates, scanned docs" },
+  { icon: CircleHelp,    iconColor: "#94a3b8", bg: "rgba(148,163,184,0.12)", name: "Unknown / Others",      desc: "Could not identify — move manually" },
 ];
 
 const STEPS = [
@@ -428,17 +428,23 @@ function GuidePage({ onBack }: { onBack: () => void }) {
             Smart Folders
           </div>
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
-            {CATEGORIES_INFO.map((cat) => (
-              <div key={cat.name} className="flex items-center gap-3 px-4 py-3">
-                <span className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center shrink-0`}>
-                  {cat.icon}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{cat.name}</p>
-                  <p className="text-xs text-muted-foreground">{cat.desc}</p>
+            {CATEGORIES_INFO.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <div key={cat.name} className="flex items-center gap-3 px-4 py-3">
+                  <span
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: cat.bg }}
+                  >
+                    <Icon className="h-4 w-4" style={{ color: cat.iconColor }} />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{cat.name}</p>
+                    <p className="text-xs text-muted-foreground">{cat.desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -612,8 +618,8 @@ export default function Settings() {
               <BookOpen className="h-4 w-4 text-primary" />
             </span>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground">Guide — Kaise Use Karein</div>
-              <div className="text-xs text-muted-foreground">Step-by-step, categories, privacy, warnings</div>
+              <div className="text-sm font-medium text-foreground">Guide</div>
+              <div className="text-xs text-muted-foreground">How to use, folders, privacy & warnings</div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
           </button>
@@ -656,21 +662,22 @@ export default function Settings() {
         <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">v1.0.0</span>
       </div>
 
-      {/* Danger Zone */}
+      {/* Reset */}
       <div>
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Danger Zone</div>
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 overflow-hidden">
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Reset</div>
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
           <button
             onClick={() => setShowClearDialog(true)}
-            className="flex items-center gap-3 px-4 py-4 w-full hover:bg-destructive/10 transition-colors text-left"
+            className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
           >
-            <span className="w-9 h-9 rounded-xl bg-destructive/15 flex items-center justify-center shrink-0">
-              <Trash2 className="h-4 w-4 text-destructive" />
+            <span className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+              <Trash2 className="h-4 w-4 text-red-500" />
             </span>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-semibold text-destructive">Clear All Data</div>
-              <div className="text-xs text-destructive/70">Remove all screenshots and processed data</div>
+              <div className="text-sm font-semibold text-foreground">Clear All Data</div>
+              <div className="text-xs text-muted-foreground">Wipe all sessions, screenshots & settings</div>
             </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
           </button>
         </div>
       </div>
@@ -678,19 +685,19 @@ export default function Settings() {
       <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Clear all data?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove all uploaded screenshots and processed data from your browser. This cannot be undone.
+              This removes all uploaded screenshots, processed batches, and saved settings from your browser. Any un-downloaded ZIPs will be lost permanently. This cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleClearAll}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-500 text-white hover:bg-red-600"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Clear All Data
+              Yes, Clear Everything
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
