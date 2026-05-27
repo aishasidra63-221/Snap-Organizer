@@ -438,8 +438,8 @@ const OCR_RULES: OcrRule[] = [
       { text: "meezan bank",             weight: 3 },
       { text: "hbl",                     weight: 2 },
       { text: "habib bank",              weight: 3 },
-      { text: "ubl",                     weight: 2 },
-      { text: "united bank",             weight: 2 },
+      { text: "ubl",    pattern: /\bubl\b/i,    weight: 3 },
+      { text: "united bank",             weight: 3 },
       { text: "mcb bank",                weight: 3 },
       { text: "bank alfalah",            weight: 3 },
       { text: "allied bank",             weight: 3 },
@@ -495,7 +495,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "₹",                       weight: 2 },
       { text: "rs.",                     weight: 2 },
       { text: "inr",                     weight: 1 },
-      { text: "pkr",                     weight: 2 },
+      { text: "pkr",    pattern: /\bpkr\b/i,    weight: 3 },
       { text: "fee / charge",            weight: 2 },
       { text: "no charge",               weight: 1 },
       { text: "sent to",                 weight: 1 },
@@ -645,7 +645,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "bdt",                     weight: 2 },
       { text: "egp",                     weight: 2 },
       { text: "ngn",                     weight: 2 },
-      { text: "kes",                     weight: 2 },
+      { text: "kes",    pattern: /\bkes\b/i,    weight: 3 },
       { text: "try",                     weight: 1 },
       { text: "idr",                     weight: 1 },
       { text: "thb",                     weight: 1 },
@@ -2288,7 +2288,7 @@ const OCR_RULES: OcrRule[] = [
       { text: "prank video",             weight: 3 },
       { text: "trolling",                weight: 3 },
       { text: "savage reply",            weight: 3 },
-      { text: "ratio",                   weight: 3 },
+      { text: "ratio",  pattern: /\bratio\b/i,  weight: 1 },
       { text: "cope",                    weight: 3 },
       { text: "based",  pattern: /\bbased\b/i,  weight: 1 },
       { text: "cringe",                  weight: 3 },
@@ -2481,7 +2481,7 @@ export function categorizeByText(rawText: string): Category | null {
       if (hit) { score += kw.weight; hits.push({ text: kw.text, weight: kw.weight }); }
     }
     const effectiveMinScore =
-      rule.category === "Payments / Receipts" && isLongText ? 6 : rule.minScore;
+      rule.category === "Payments / Receipts" && isLongText ? 5 : rule.minScore;
     if (score >= effectiveMinScore) {
       matched.add(rule.category);
       scoreMap.set(rule.category, score);
