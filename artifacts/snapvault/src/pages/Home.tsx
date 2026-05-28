@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -286,12 +287,21 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
         </div>
       </section>
 
-      <footer className="border-t border-border px-6 py-5 mt-auto">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center">
-            <img src="/logo.png" alt="OrganizeShots" className="h-6 w-auto opacity-80" />
+      <footer className="border-t border-border px-6 py-6 mt-auto">
+        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="OrganizeShots" className="h-5 w-auto opacity-80" />
+            <span className="font-semibold text-foreground">OrganizeShots</span>
           </div>
-          <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
+          <p className="text-center">100% in-browser · No server · No cloud · No AI · Private by default</p>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+            <button onClick={() => navigate("/settings/privacy")} className="hover:text-foreground transition-colors">Privacy Policy</button>
+            <button onClick={() => navigate("/settings/terms")} className="hover:text-foreground transition-colors">Terms & Conditions</button>
+            <button onClick={() => navigate("/settings/faq")} className="hover:text-foreground transition-colors">FAQ</button>
+            <button onClick={() => navigate("/blog")} className="hover:text-foreground transition-colors">Blog</button>
+            <button onClick={() => navigate("/settings/guide")} className="hover:text-foreground transition-colors">Guide</button>
+          </div>
+          <p className="text-[10px] opacity-60">© {new Date().getFullYear()} OrganizeShots. All rights reserved.</p>
         </div>
       </footer>
     </div>
@@ -1157,6 +1167,7 @@ const DEFAULT_PROGRESS: ProcessingState = {
 };
 
 export default function Home() {
+  const [, navigate] = useLocation();
   const [step, setStep] = useState<Step>("upload");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [entries, setEntries] = useState<BrowserFileEntry[]>([]);

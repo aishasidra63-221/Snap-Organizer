@@ -422,10 +422,22 @@ export default function Settings() {
   const [customPrefix, setCustomPrefix] = useState(localStorage.getItem("folderNamingPrefix") || "");
   const [folderNamingOpen, setFolderNamingOpen] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
-  const [subPage, setSubPage] = useState<SubPage>(null);
 
   const queryClient = useQueryClient();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
+
+  const subPageFromUrl: SubPage = (() => {
+    if (location.startsWith("/settings/privacy")) return "privacy";
+    if (location.startsWith("/settings/terms")) return "terms";
+    if (location.startsWith("/settings/faq")) return "faq";
+    if (location.startsWith("/settings/guide")) return "guide";
+    return null;
+  })();
+
+  function goToSubPage(page: SubPage) {
+    if (page) navigate(`/settings/${page}`);
+    else navigate("/settings");
+  }
 
   function handleClearAll() {
     queryClient.clear();
@@ -435,10 +447,10 @@ export default function Settings() {
   }
 
   // Sub-pages
-  if (subPage === "guide")   return <GuidePage onBack={() => setSubPage(null)} />;
-  if (subPage === "privacy") return <PrivacyPolicyPage onBack={() => setSubPage(null)} />;
-  if (subPage === "terms") return <TermsOfServicePage onBack={() => setSubPage(null)} />;
-  if (subPage === "faq") return <FAQPage onBack={() => setSubPage(null)} />;
+  if (subPageFromUrl === "guide")   return <GuidePage onBack={() => navigate("/settings")} />;
+  if (subPageFromUrl === "privacy") return <PrivacyPolicyPage onBack={() => navigate("/settings")} />;
+  if (subPageFromUrl === "terms") return <TermsOfServicePage onBack={() => navigate("/settings")} />;
+  if (subPageFromUrl === "faq") return <FAQPage onBack={() => navigate("/settings")} />;
 
   return (
     <div className="flex flex-col gap-5 pb-28 pt-4 px-4">
@@ -549,7 +561,7 @@ export default function Settings() {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Help</div>
         <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
           <button
-            onClick={() => setSubPage("guide")}
+            onClick={() => goToSubPage("guide")}
             className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
           >
             <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -588,7 +600,7 @@ export default function Settings() {
           ].map((item) => (
             <button
               key={item.key}
-              onClick={() => setSubPage(item.key)}
+              onClick={() => goToSubPage(item.key)}
               className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
             >
               <span className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
