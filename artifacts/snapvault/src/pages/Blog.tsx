@@ -2,6 +2,9 @@ import { useState } from "react";
 import { ArrowLeft, Clock, Calendar, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
+function blogImg(name: string) { return `${BASE}/blog/${name}`; }
+
 // ─── Blog Posts Data ──────────────────────────────────────────────────────────
 
 interface BlogPost {
@@ -11,7 +14,7 @@ interface BlogPost {
   date: string;
   readTime: string;
   category: string;
-  emoji: string;
+  image: string;
   gradient: string;
   content: React.ReactNode;
 }
@@ -24,7 +27,7 @@ const posts: BlogPost[] = [
     date: "May 28, 2026",
     readTime: "5 min read",
     category: "Guide",
-    emoji: "📂",
+    image: blogImg("blog-organize.png"),
     gradient: "from-violet-500/20 to-purple-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -60,7 +63,7 @@ const posts: BlogPost[] = [
     date: "May 25, 2026",
     readTime: "4 min read",
     category: "Comparison",
-    emoji: "📱",
+    image: blogImg("blog-best-manager.png"),
     gradient: "from-blue-500/20 to-cyan-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -94,7 +97,7 @@ const posts: BlogPost[] = [
     date: "May 22, 2026",
     readTime: "3 min read",
     category: "Tips",
-    emoji: "🗑️",
+    image: blogImg("blog-duplicates.png"),
     gradient: "from-rose-500/20 to-pink-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -133,7 +136,7 @@ const posts: BlogPost[] = [
     date: "May 19, 2026",
     readTime: "3 min read",
     category: "Use Case",
-    emoji: "🔐",
+    image: blogImg("blog-otp.png"),
     gradient: "from-amber-500/20 to-yellow-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -164,7 +167,7 @@ const posts: BlogPost[] = [
     date: "May 15, 2026",
     readTime: "4 min read",
     category: "Use Case",
-    emoji: "💳",
+    image: blogImg("blog-payments.png"),
     gradient: "from-emerald-500/20 to-green-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -201,7 +204,7 @@ const posts: BlogPost[] = [
     date: "May 10, 2026",
     readTime: "3 min read",
     category: "How It Works",
-    emoji: "🔍",
+    image: blogImg("blog-ocr.png"),
     gradient: "from-sky-500/20 to-blue-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -239,8 +242,8 @@ function BlogCard({ post, onClick }: { post: BlogPost; onClick: () => void }) {
       className="w-full text-left rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
     >
       {/* Thumbnail */}
-      <div className={`w-full bg-gradient-to-br ${post.gradient} flex items-center justify-center`} style={{ height: 140 }}>
-        <span style={{ fontSize: 56 }}>{post.emoji}</span>
+      <div className="w-full overflow-hidden" style={{ height: 160 }}>
+        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
       </div>
 
       {/* Content */}
@@ -284,8 +287,8 @@ function ArticleView({ post, onBack }: { post: BlogPost; onBack: () => void }) {
 
       <article className="px-5 py-6 pb-28 max-w-2xl mx-auto w-full flex flex-col gap-5">
         {/* Hero */}
-        <div className={`w-full rounded-2xl bg-gradient-to-br ${post.gradient} flex items-center justify-center shadow-sm`} style={{ height: 200 }}>
-          <span style={{ fontSize: 80 }}>{post.emoji}</span>
+        <div className="w-full rounded-2xl overflow-hidden shadow-sm" style={{ height: 200 }}>
+          <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
         </div>
 
         {/* Meta */}
@@ -353,9 +356,9 @@ export default function Blog() {
           onClick={() => setOpenPost(posts[0])}
           className="w-full text-left rounded-2xl border border-primary/30 bg-card overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
         >
-          <div className={`w-full bg-gradient-to-br ${posts[0].gradient} flex items-center justify-center relative`} style={{ height: 180 }}>
-            <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest text-primary bg-primary/15 backdrop-blur px-2 py-1 rounded-full border border-primary/20">Featured</span>
-            <span style={{ fontSize: 72 }}>{posts[0].emoji}</span>
+          <div className="w-full overflow-hidden relative" style={{ height: 200 }}>
+            <img src={posts[0].image} alt={posts[0].title} className="w-full h-full object-cover" />
+            <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-widest text-white bg-primary backdrop-blur px-2 py-1 rounded-full shadow">Featured</span>
           </div>
           <div className="px-4 py-4 flex flex-col gap-2">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-primary">{posts[0].category}</span>

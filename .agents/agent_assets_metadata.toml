@@ -11,13 +11,13 @@ title = "generated_image"
 id = "mywXnrkYNJXz_N3Xvtzbk"
 uri = "file://artifacts/snapvault/public/blog/blog-ocr.png"
 type = "image"
-title = "generated_image"
+title = "OCR screenshot reading"
 
 [[generated]]
 id = "h-YHfGAvpTunDIIL-1Pzd"
 uri = "file://artifacts/snapvault/public/blog/blog-payments.png"
 type = "image"
-title = "generated_image"
+title = "payment receipt screenshots"
 
 [[generated]]
 id = "wIIzBAEaTe4umM25wrnaq"
@@ -29,10 +29,28 @@ title = "generated_image"
 id = "2b3CVJRlS9nAoLnEz1Lux"
 uri = "file://artifacts/snapvault/public/blog/blog-otp.png"
 type = "image"
-title = "generated_image"
+title = "OTP screenshot organizer"
 
 [[generated]]
 id = "NvNliiAVTZbzpRRgfqbt-"
 uri = "file://artifacts/snapvault/public/blog/blog-organized.png"
 type = "image"
 title = "generated_image"
+
+[[generated]]
+id = "ccRqZMAywwtqPMFY8AWXZ"
+uri = "file://artifacts/snapvault/public/blog/blog-organize.png"
+type = "image"
+title = "organize screenshots automatically"
+
+[[generated]]
+id = "ugKuOnqllNNxqT7sWlD90"
+uri = "file://artifacts/snapvault/public/blog/blog-best-manager.png"
+type = "image"
+title = "best screenshot manager app"
+
+[[generated]]
+id = "j_qLHuD6LYPQ-eEyd3j2b"
+uri = "file://artifacts/snapvault/public/blog/blog-duplicates.png"
+type = "image"
+title = "delete duplicate screenshots"
