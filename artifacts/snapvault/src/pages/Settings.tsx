@@ -3,8 +3,10 @@ import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
 import {
-  Sun, Moon, Copy, Folder, ChevronRight,
-  Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
+  Sun, Moon, Copy, Folder, ChevronRight, ChevronDown, BookOpen,
+  Trash2, ArrowLeft, Shield, FileText, HelpCircle,
+  Upload, ScanSearch, FolderOpen, Download, AlertTriangle, MoveRight,
+  Lock, CreditCard, MessageCircle, Share2, GraduationCap, Camera, Smile, CircleHelp,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -301,9 +303,113 @@ function FAQPage({ onBack }: { onBack: () => void }) {
   );
 }
 
+// ─── Guide Page ───────────────────────────────────────────────────────────────
+
+function GuidePage({ onBack }: { onBack: () => void }) {
+  const steps: { Icon: React.ElementType; color: string; bg: string; title: string; desc: string }[] = [
+    { Icon: Upload,     color: "#6366f1", bg: "rgba(99,102,241,0.12)",  title: "Upload Screenshots",          desc: "Drag & drop or tap Browse. PNG, JPG, WebP, HEIC — up to 100 files at once." },
+    { Icon: ScanSearch, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", title: "App Processes Automatically", desc: "Reads the filename, scans for QR codes, then runs OCR — all on your device, nothing goes to any server." },
+    { Icon: FolderOpen, color: "#f59e0b", bg: "rgba(245,158,11,0.12)", title: "Fix Any Wrong Folders",       desc: "Tap the folder icon on any screenshot and pick the correct category — it moves instantly." },
+    { Icon: Download,   color: "#10b981", bg: "rgba(16,185,129,0.12)", title: "Download ZIP",                desc: "Tap Download ZIP — all screenshots sorted into labelled folders inside." },
+  ];
+  const cats: { Icon: React.ElementType; color: string; bg: string; name: string; desc: string }[] = [
+    { Icon: Lock,          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  name: "OTP / Security",        desc: "Login codes, 2FA, password reset" },
+    { Icon: CreditCard,    color: "#10b981", bg: "rgba(16,185,129,0.12)",  name: "Payments / Receipts",   desc: "UPI, bank transfers, receipts, invoices" },
+    { Icon: MessageCircle, color: "#22c55e", bg: "rgba(34,197,94,0.12)",   name: "WhatsApp / Chats",      desc: "Chat screenshots, message threads" },
+    { Icon: Share2,        color: "#3b82f6", bg: "rgba(59,130,246,0.12)",  name: "Social Media",          desc: "Instagram, Twitter, TikTok, YouTube" },
+    { Icon: GraduationCap, color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  name: "Study / Notes",         desc: "Lectures, notes, exam results" },
+    { Icon: Camera,        color: "#ec4899", bg: "rgba(236,72,153,0.12)",  name: "Photos",                desc: "Camera photos, gallery screenshots" },
+    { Icon: Smile,         color: "#f97316", bg: "rgba(249,115,22,0.12)",  name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
+    { Icon: FileText,      color: "#0ea5e9", bg: "rgba(14,165,233,0.12)",  name: "Documents",             desc: "IDs, certificates, scanned docs" },
+    { Icon: CircleHelp,    color: "#94a3b8", bg: "rgba(148,163,184,0.12)", name: "Unknown / Others",      desc: "Could not identify — move manually" },
+  ];
+
+  return (
+    <div className="flex flex-col bg-background min-h-[calc(100vh-56px)]">
+      <SubPageHeader title="Guide" onBack={onBack} />
+      <div className="overflow-y-auto flex-1 px-4 py-4 pb-28 flex flex-col gap-4">
+
+        {/* Privacy */}
+        <div className="rounded-2xl border px-4 py-4 flex gap-3 items-start" style={{ background: "rgba(16,185,129,0.08)", borderColor: "rgba(16,185,129,0.22)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
+            <Shield className="h-5 w-5" style={{ color: "#10b981" }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">100% Private — No Server</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Your screenshots never leave your device. OCR, categorisation, and ZIP all run inside your browser only.</p>
+          </div>
+        </div>
+
+        {/* Warning */}
+        <div className="rounded-2xl border px-4 py-4 flex gap-3 items-start" style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.22)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
+            <AlertTriangle className="h-5 w-5" style={{ color: "#f59e0b" }} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">Download ZIP Before Closing</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Everything is deleted when you close or refresh the tab. Always download your ZIP first.</p>
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">How to Use</p>
+          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+            {steps.map(({ Icon, color, bg, title, desc }, i) => (
+              <div key={i} className="flex items-start gap-3 px-4 py-3.5">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: bg }}>
+                  <Icon className="h-4 w-4" style={{ color }} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    <span className="text-muted-foreground text-xs mr-1">{i + 1}.</span>{title}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Fix tip */}
+        <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4">
+          <p className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
+            <MoveRight className="h-4 w-4 text-primary" /> Fixing a Wrong Category
+          </p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Find the screenshot in the results → tap the <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-muted rounded font-medium mx-0.5"><Folder className="h-3 w-3" /> folder</span> icon → pick the correct category. Done.
+          </p>
+          <p className="text-xs text-muted-foreground mt-2.5 pt-2.5 border-t border-border/60">
+            <strong className="text-foreground">Note:</strong> The app uses keyword rules, not AI — occasional mistakes are normal.
+          </p>
+        </div>
+
+        {/* Folders */}
+        <div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">Smart Folders</p>
+          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+            {cats.map(({ Icon, color, bg, name, desc }) => (
+              <div key={name} className="flex items-center gap-3 px-4 py-3">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
+                  <Icon className="h-4 w-4" style={{ color }} />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{name}</p>
+                  <p className="text-xs text-muted-foreground">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Settings Page ───────────────────────────────────────────────────────
 
-type SubPage = "privacy" | "terms" | "faq" | null;
+type SubPage = "privacy" | "terms" | "faq" | "guide" | null;
 
 type FolderNaming = "category" | "date" | "custom";
 
@@ -314,6 +420,7 @@ export default function Settings() {
     (localStorage.getItem("folderNaming") as FolderNaming) || "category"
   );
   const [customPrefix, setCustomPrefix] = useState(localStorage.getItem("folderNamingPrefix") || "");
+  const [folderNamingOpen, setFolderNamingOpen] = useState(false);
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [subPage, setSubPage] = useState<SubPage>(null);
 
@@ -328,6 +435,7 @@ export default function Settings() {
   }
 
   // Sub-pages
+  if (subPage === "guide")   return <GuidePage onBack={() => setSubPage(null)} />;
   if (subPage === "privacy") return <PrivacyPolicyPage onBack={() => setSubPage(null)} />;
   if (subPage === "terms") return <TermsOfServicePage onBack={() => setSubPage(null)} />;
   if (subPage === "faq") return <FAQPage onBack={() => setSubPage(null)} />;
@@ -377,48 +485,82 @@ export default function Settings() {
       <div>
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Organisation</div>
         <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-          <div className="px-4 py-3.5 flex items-center gap-3 border-b border-border/50">
+          {/* Accordion header */}
+          <button
+            onClick={() => setFolderNamingOpen(o => !o)}
+            className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
+          >
             <span className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0 text-muted-foreground">
               <Folder className="h-4 w-4" />
             </span>
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-foreground">Folder Naming</div>
-              <div className="text-xs text-muted-foreground">Controls how ZIP folders are named</div>
+              <div className="text-xs text-muted-foreground">
+                {folderNaming === "category" ? "Category Only" : folderNaming === "date" ? "Date + Category" : "Custom Prefix"}
+              </div>
             </div>
-          </div>
-          <div className="px-4 py-3 flex flex-col gap-1">
-            {([
-              { value: "category" as const, label: "Category Only" },
-              { value: "date"     as const, label: "Date + Category" },
-              { value: "custom"   as const, label: "Custom Prefix" },
-            ] as const).map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => { setFolderNaming(opt.value); localStorage.setItem("folderNaming", opt.value); }}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors w-full"
-                style={{ background: folderNaming === opt.value ? "hsl(var(--primary) / 0.08)" : "transparent" }}
-              >
-                <span
-                  className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-                  style={{ borderColor: folderNaming === opt.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.4)" }}
+            <ChevronDown
+              className="h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200"
+              style={{ transform: folderNamingOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+            />
+          </button>
+
+          {/* Accordion body */}
+          {folderNamingOpen && (
+            <div className="border-t border-border/60 px-4 py-3 flex flex-col gap-1">
+              {([
+                { value: "category" as const, label: "Category Only" },
+                { value: "date"     as const, label: "Date + Category" },
+                { value: "custom"   as const, label: "Custom Prefix" },
+              ] as const).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => { setFolderNaming(opt.value); localStorage.setItem("folderNaming", opt.value); }}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors w-full"
+                  style={{ background: folderNaming === opt.value ? "hsl(var(--primary) / 0.08)" : "transparent" }}
                 >
-                  {folderNaming === opt.value && (
-                    <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--primary))" }} />
-                  )}
-                </span>
-                <span className="text-sm font-medium text-foreground">{opt.label}</span>
-              </button>
-            ))}
-            {folderNaming === "custom" && (
-              <input
-                type="text"
-                placeholder="Enter prefix…"
-                value={customPrefix}
-                onChange={e => { setCustomPrefix(e.target.value); localStorage.setItem("folderNamingPrefix", e.target.value); }}
-                className="mt-1 px-3 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 w-full"
-              />
-            )}
-          </div>
+                  <span
+                    className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
+                    style={{ borderColor: folderNaming === opt.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground) / 0.4)" }}
+                  >
+                    {folderNaming === opt.value && (
+                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--primary))" }} />
+                    )}
+                  </span>
+                  <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                </button>
+              ))}
+              {folderNaming === "custom" && (
+                <input
+                  type="text"
+                  placeholder="Enter prefix…"
+                  value={customPrefix}
+                  onChange={e => { setCustomPrefix(e.target.value); localStorage.setItem("folderNamingPrefix", e.target.value); }}
+                  className="mt-1 px-3 py-2.5 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 w-full"
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Help */}
+      <div>
+        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Help</div>
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+          <button
+            onClick={() => setSubPage("guide")}
+            className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
+          >
+            <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <BookOpen className="h-4 w-4 text-primary" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground">Guide</div>
+              <div className="text-xs text-muted-foreground">How to use, smart folders, privacy</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </button>
         </div>
       </div>
 
