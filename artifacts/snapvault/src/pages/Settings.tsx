@@ -304,129 +304,147 @@ function FAQPage({ onBack }: { onBack: () => void }) {
   );
 }
 
-// ─── Guide / How It Works ─────────────────────────────────────────────────────
+// ─── Guide Page ───────────────────────────────────────────────────────────────
 
 function GuidePage({ onBack }: { onBack: () => void }) {
-  const steps = [
-    { Icon: Upload,     color: "#6366f1", bg: "rgba(99,102,241,0.12)",  title: "Upload Screenshots",           desc: "Drag & drop or tap Browse. PNG, JPG, WebP, HEIC — up to 100 files at once." },
-    { Icon: ScanSearch, color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  title: "App Processes Automatically",  desc: "Reads filenames, scans QR codes, then runs OCR text recognition — all on your device, no server." },
-    { Icon: FolderOpen, color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  title: "Wrong Folder? Move It",        desc: "Tap the folder icon on any screenshot and pick the correct category." },
-    { Icon: Download,   color: "#10b981", bg: "rgba(16,185,129,0.12)",  title: "Download ZIP",                 desc: "Tap Download ZIP — screenshots are neatly sorted into labelled folders inside." },
-  ];
-
-  const categories = [
-    { Icon: Lock,          color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  name: "OTP / Security",        desc: "Login codes, 2FA, password reset" },
-    { Icon: CreditCard,    color: "#10b981", bg: "rgba(16,185,129,0.12)",  name: "Payments / Receipts",   desc: "UPI, bank transfers, receipts, invoices" },
-    { Icon: MessageCircle, color: "#22c55e", bg: "rgba(34,197,94,0.12)",   name: "WhatsApp / Chats",      desc: "Chat screenshots, message threads" },
-    { Icon: Share2,        color: "#3b82f6", bg: "rgba(59,130,246,0.12)",  name: "Social Media",          desc: "Instagram, Twitter, TikTok, YouTube" },
-    { Icon: GraduationCap, color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  name: "Study / Notes",         desc: "Lectures, notes, exam results" },
-    { Icon: Camera,        color: "#ec4899", bg: "rgba(236,72,153,0.12)",  name: "Photos",                desc: "Camera photos, gallery screenshots" },
-    { Icon: Smile,         color: "#f97316", bg: "rgba(249,115,22,0.12)",  name: "Memes / Entertainment", desc: "Memes, jokes, viral content" },
-    { Icon: FileText,      color: "#0ea5e9", bg: "rgba(14,165,233,0.12)",  name: "Documents",             desc: "IDs, certificates, scanned docs" },
-    { Icon: CircleHelp,    color: "#94a3b8", bg: "rgba(148,163,184,0.12)", name: "Unknown / Others",      desc: "Could not identify — move manually" },
-  ];
-
   return (
-    <div className="min-h-[calc(100vh-56px)] flex flex-col bg-background">
-      <SubPageHeader title="How It Works" onBack={onBack} />
-      <div className="flex-1 overflow-y-auto px-4 py-5 pb-28 flex flex-col gap-5">
+    <div className="flex flex-col bg-background min-h-[calc(100vh-56px)]">
+      <SubPageHeader title="Guide" onBack={onBack} />
 
-        {/* Privacy banner */}
-        <div
-          className="flex items-start gap-3 rounded-2xl border px-4 py-3.5"
-          style={{ background: "rgba(16,185,129,0.08)", borderColor: "rgba(16,185,129,0.25)" }}
-        >
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-            style={{ background: "rgba(16,185,129,0.15)" }}
-          >
+      <div className="overflow-y-auto flex-1 px-4 py-4 pb-28 flex flex-col gap-4">
+
+        {/* Privacy Notice */}
+        <div className="rounded-2xl px-4 py-4 flex gap-3 items-start border" style={{ background: "rgba(16,185,129,0.08)", borderColor: "rgba(16,185,129,0.22)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
             <Shield className="h-5 w-5" style={{ color: "#10b981" }} />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">100% Private — No Server</p>
-            <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-              Your screenshots never leave your device. Close the tab and everything is permanently deleted.
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">100% Private — No Server Upload</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Your screenshots are never sent anywhere. Everything — OCR, categorisation, ZIP — happens inside your browser on your device only.
             </p>
           </div>
         </div>
 
         {/* Warning */}
-        <div
-          className="flex items-start gap-3 rounded-2xl border px-4 py-3.5"
-          style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.25)" }}
-        >
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-            style={{ background: "rgba(245,158,11,0.15)" }}
-          >
+        <div className="rounded-2xl px-4 py-4 flex gap-3 items-start border" style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.22)" }}>
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
             <AlertTriangle className="h-5 w-5" style={{ color: "#f59e0b" }} />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">Download Before Closing</p>
-            <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-              Files are wiped when you close the tab. The app keeps no backup — download your ZIP first.
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">Download ZIP Before Closing the Tab</p>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              All files are deleted the moment you close or refresh the tab. The app stores nothing permanently — always download your ZIP first.
             </p>
           </div>
         </div>
 
-        {/* Steps */}
+        {/* How to use */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">4 Steps</p>
-          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
-            {steps.map(({ Icon, color, bg, title, desc }, i) => (
-              <div key={i} className="flex items-start gap-3 px-4 py-3.5">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: bg }}
-                >
-                  <Icon className="h-4 w-4" style={{ color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
-                    <span className="text-muted-foreground text-xs mr-1">{i + 1}.</span>
-                    {title}
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{desc}</p>
-                </div>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">How to Use</p>
+          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+
+            <div className="flex items-start gap-3 px-4 py-3.5">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(99,102,241,0.12)" }}>
+                <Upload className="h-4 w-4" style={{ color: "#6366f1" }} />
               </div>
-            ))}
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">1.</span>Upload Screenshots</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">Drag &amp; drop files onto the home screen, or tap <strong>Browse</strong>. Supports PNG, JPG, WebP, HEIC — up to 100 files at once.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 px-4 py-3.5">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(139,92,246,0.12)" }}>
+                <ScanSearch className="h-4 w-4" style={{ color: "#8b5cf6" }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">2.</span>App Processes Automatically</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">The app reads the filename, scans for QR codes, then runs OCR to read any text. It uses all of that to pick the best folder — no input needed from you.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 px-4 py-3.5">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(245,158,11,0.12)" }}>
+                <FolderOpen className="h-4 w-4" style={{ color: "#f59e0b" }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">3.</span>Fix Any Wrong Folders</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">Tap the <span className="inline-flex items-center gap-0.5 mx-0.5 px-1.5 py-0.5 bg-muted rounded text-xs font-medium"><Folder className="h-3 w-3 inline" /> folder</span> icon on any screenshot. Select the correct category — it moves instantly.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 px-4 py-3.5">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(16,185,129,0.12)" }}>
+                <Download className="h-4 w-4" style={{ color: "#10b981" }} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">4.</span>Download ZIP</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">Tap <strong>Download ZIP</strong>. Inside the ZIP you'll find separate folders for each category, with all your screenshots neatly sorted.</p>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        {/* Fix wrong category tip */}
+        {/* Accuracy note */}
         <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4">
-          <p className="text-sm font-semibold text-foreground mb-2.5 flex items-center gap-2">
-            <MoveRight className="h-4 w-4 text-primary" />
-            Fixing a Wrong Category
-          </p>
-          <div className="flex flex-col gap-1.5 text-xs text-muted-foreground leading-relaxed">
-            <p>1. Find the screenshot in the results screen.</p>
-            <p>2. Tap the <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-muted rounded font-medium"><Folder className="h-3 w-3" /> folder</span> icon below it.</p>
-            <p>3. Pick the correct category — it moves instantly.</p>
-          </div>
-          <p className="text-xs text-muted-foreground mt-3 pt-2.5 border-t border-border/60">
-            <strong className="text-foreground">Note:</strong> The app uses keyword rules, not AI — occasional mistakes are normal.
+          <p className="text-sm font-bold text-foreground mb-1.5">About Accuracy</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            The app uses keyword and pattern matching — not AI. It is very accurate for OTP codes, payment receipts, and WhatsApp chats. Memes and social posts can occasionally be mis-categorised. Use the folder icon to correct any mistakes before downloading.
           </p>
         </div>
 
         {/* Smart Folders */}
         <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3 px-1">Smart Folders</p>
-          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border/60">
-            {categories.map(({ Icon, color, bg, name, desc }) => (
-              <div key={name} className="flex items-center gap-3 px-4 py-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: bg }}
-                >
-                  <Icon className="h-4 w-4" style={{ color }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{name}</p>
-                  <p className="text-xs text-muted-foreground">{desc}</p>
-                </div>
-              </div>
-            ))}
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">Smart Folders</p>
+          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(139,92,246,0.12)" }}><Lock className="h-4 w-4" style={{ color: "#8b5cf6" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">OTP / Security</p><p className="text-xs text-muted-foreground">Login codes, 2FA, password reset</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.12)" }}><CreditCard className="h-4 w-4" style={{ color: "#10b981" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Payments / Receipts</p><p className="text-xs text-muted-foreground">UPI, bank transfers, receipts, invoices</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.12)" }}><MessageCircle className="h-4 w-4" style={{ color: "#22c55e" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">WhatsApp / Chats</p><p className="text-xs text-muted-foreground">Chat screenshots, message threads</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(59,130,246,0.12)" }}><Share2 className="h-4 w-4" style={{ color: "#3b82f6" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Social Media</p><p className="text-xs text-muted-foreground">Instagram, Twitter, TikTok, YouTube</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.12)" }}><GraduationCap className="h-4 w-4" style={{ color: "#f59e0b" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Study / Notes</p><p className="text-xs text-muted-foreground">Lectures, notes, exam results</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(236,72,153,0.12)" }}><Camera className="h-4 w-4" style={{ color: "#ec4899" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Photos</p><p className="text-xs text-muted-foreground">Camera photos, gallery screenshots</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(249,115,22,0.12)" }}><Smile className="h-4 w-4" style={{ color: "#f97316" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Memes / Entertainment</p><p className="text-xs text-muted-foreground">Memes, jokes, viral content</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(14,165,233,0.12)" }}><FileText className="h-4 w-4" style={{ color: "#0ea5e9" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Documents</p><p className="text-xs text-muted-foreground">IDs, certificates, scanned docs</p></div>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 py-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(148,163,184,0.12)" }}><CircleHelp className="h-4 w-4" style={{ color: "#94a3b8" }} /></div>
+              <div><p className="text-sm font-medium text-foreground">Unknown / Others</p><p className="text-xs text-muted-foreground">Could not identify — move manually</p></div>
+            </div>
+
           </div>
         </div>
 
