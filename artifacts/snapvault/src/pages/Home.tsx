@@ -728,7 +728,7 @@ function StartOverConfirmToast({
 }) {
   return (
     <div
-      className="fixed bottom-6 left-1/2 z-50 pointer-events-none"
+      className="fixed bottom-24 left-1/2 z-[100] pointer-events-none"
       style={{ transform: "translateX(-50%)" }}
     >
       <div
