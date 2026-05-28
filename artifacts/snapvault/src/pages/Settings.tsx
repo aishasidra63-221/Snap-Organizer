@@ -125,7 +125,7 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground px-1">Last updated: May 2026 · OrganizeShots v1.0.0</p>
+        <p className="text-xs text-muted-foreground px-1">Last updated: May 2026 · OrganizeShots v2.1.0</p>
 
         {sections.map((s) => (
           <div key={s.title} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex flex-col gap-1.5">
@@ -194,7 +194,7 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground px-1">Last updated: May 2026 · OrganizeShots v1.0.0</p>
+        <p className="text-xs text-muted-foreground px-1">Last updated: May 2026 · OrganizeShots v2.1.0</p>
 
         {sections.map((s) => (
           <div key={s.title} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex flex-col gap-1.5">
@@ -623,10 +623,10 @@ export default function Settings() {
       {/* App version */}
       <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-3 flex items-center justify-between">
         <div>
-          <div className="text-sm font-medium text-foreground">App Version</div>
-          <div className="text-xs text-muted-foreground">OrganizeShots v1.0.0</div>
+          <div className="text-sm font-medium text-foreground">Web Version</div>
+          <div className="text-xs text-muted-foreground">OrganizeShots v2.1.0</div>
         </div>
-        <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">v1.0.0</span>
+        <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-lg">v2.1.0</span>
       </div>
 
       {/* Reset */}
