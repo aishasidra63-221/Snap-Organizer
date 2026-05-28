@@ -1234,8 +1234,9 @@ export default function Home() {
     <div className="min-h-screen bg-background pb-24">
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-3 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center shrink-0">
-            <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto" />
+          <div className="flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="OrganizeShots" className="h-8 w-auto" />
+            <span className="font-semibold text-base text-foreground">OrganizeShots</span>
           </div>
 
           {step !== "upload" && (
