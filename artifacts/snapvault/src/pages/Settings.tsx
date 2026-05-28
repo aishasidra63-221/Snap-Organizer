@@ -70,40 +70,44 @@ function SubPageHeader({ title, onBack }: { title: string; onBack: () => void })
 function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
   const sections = [
     {
-      title: "No Data Leaves Your Device",
-      body: "OrganizeShots processes all your screenshots locally — on your own device and browser. We do not upload your images to any external server, cloud, or third-party service. Your screenshots never leave your control.",
+      title: "100% Browser-Based — No Server, No Cloud",
+      body: "OrganizeShots runs entirely inside your web browser. Your screenshots are never uploaded to any server, cloud, or third-party service. All processing — including OCR and categorisation — happens locally on your device. We have no server that receives your files.",
     },
     {
-      title: "What We Process",
-      body: "When you upload screenshots, OrganizeShots temporarily stores them in memory to run OCR (text recognition) and categorisation. This data exists only for the duration of your session and is automatically cleared when you close the tab or click 'Start Over'.",
+      title: "What Happens to Your Images",
+      body: "When you select screenshots, they are loaded into your browser's memory only. OrganizeShots processes them in-browser to detect text and sort them into smart folders. Once you close the tab, refresh the page, or click 'Start Over', all images are immediately removed from memory.",
     },
     {
       title: "OCR & Text Recognition",
-      body: "OrganizeShots reads text from your screenshots using Tesseract.js — an open-source OCR engine that runs entirely in your browser or on the local server. Extracted text is used only to determine which folder a screenshot belongs to, and is never stored permanently or shared.",
+      body: "OrganizeShots uses Tesseract.js — an open-source OCR engine — to read text from your screenshots. This runs 100% inside your browser using WebAssembly. No text or image data is ever sent to an external server or AI service.",
     },
     {
-      title: "No Accounts, No Tracking",
-      body: "OrganizeShots requires no account, login, or registration. We do not track your usage, install analytics cookies, or collect any personally identifiable information. There are no third-party trackers embedded in the app.",
+      title: "No Accounts, No Sign-In",
+      body: "OrganizeShots requires no account, login, email, or registration of any kind. You can use the full app completely anonymously.",
     },
     {
-      title: "Local Storage",
-      body: "Your theme preference (dark/light mode) and other UI settings are saved to your browser's localStorage. This data never leaves your device. You can clear it at any time from Settings → Clear All Data.",
+      title: "No Analytics, No Tracking, No Ads",
+      body: "We do not use Google Analytics, Facebook Pixel, or any other tracking or advertising tools. There are no third-party scripts, cookies, or trackers embedded in this app. We have zero interest in your behaviour data.",
     },
     {
-      title: "Temporary Server Storage",
-      body: "Uploaded screenshots are stored temporarily in a secure temp directory on the server during processing. Once you download your ZIP or click 'Start Over', all temporary files are deleted. The server does not retain copies of your images after the session ends.",
+      title: "Local Storage (Settings Only)",
+      body: "Your preferences — such as dark/light mode and folder naming settings — are saved to your browser's localStorage so the app remembers your choices. This data never leaves your device and is never transmitted anywhere. You can clear it anytime from Settings → Clear All Data.",
+    },
+    {
+      title: "SHA-256 Deduplication",
+      body: "OrganizeShots uses SHA-256 hashing to detect duplicate screenshots. This hashing runs entirely in your browser. The hash values are never stored permanently or sent anywhere.",
     },
     {
       title: "Children's Privacy",
-      body: "OrganizeShots is not directed at children under 13 and does not knowingly collect any information from minors. If you believe a child has used the service, no personal data is collected regardless.",
+      body: "OrganizeShots does not collect any personal data from anyone, including children. The app is safe for all ages — there is nothing to collect.",
     },
     {
       title: "Changes to This Policy",
-      body: "If this privacy policy changes, we will update the policy text in the app. Continued use of OrganizeShots after any change constitutes acceptance of the updated policy.",
+      body: "If this privacy policy changes, the updated text will appear in the app. Continued use of OrganizeShots after any change means you accept the updated policy.",
     },
     {
       title: "Contact",
-      body: "If you have any privacy questions or concerns, you can reach us through the app's support channel. We aim to respond within 48 hours.",
+      body: "If you have any privacy questions or concerns, please reach out via the app's support channel. We aim to respond within 48 hours.",
     },
   ];
 
@@ -121,7 +125,7 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground px-1">Last updated: May 2025 · OrganizeShots v1.0.0</p>
+        <p className="text-xs text-muted-foreground px-1">Last updated: May 2026 · OrganizeShots v1.0.0</p>
 
         {sections.map((s) => (
           <div key={s.title} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex flex-col gap-1.5">
