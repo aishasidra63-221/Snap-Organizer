@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
 import {
-  Sun, Moon, ScanSearch, Copy, Folder, ChevronRight,
+  Sun, Moon, Copy, Folder, ChevronRight,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
 } from "lucide-react";
 import {
@@ -309,7 +309,6 @@ type FolderNaming = "category" | "date" | "custom";
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const [ocrEnabled, setOcrEnabled] = useState(true);
   const [dedupEnabled, setDedupEnabled] = useState(true);
   const [folderNaming, setFolderNaming] = useState<FolderNaming>(
     (localStorage.getItem("folderNaming") as FolderNaming) || "category"
@@ -364,13 +363,7 @@ export default function Settings() {
       {/* Processing */}
       <div>
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Processing</div>
-        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
-          <SettingsRow
-            icon={<ScanSearch className="h-4 w-4" />}
-            label="OCR Text Recognition"
-            desc="Scan screenshots for readable text"
-            right={<Toggle checked={ocrEnabled} onChange={setOcrEnabled} />}
-          />
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
           <SettingsRow
             icon={<Copy className="h-4 w-4" />}
             label="Duplicate Detection"
