@@ -329,10 +329,10 @@ function GuidePage({ onBack }: { onBack: () => void }) {
       <SubPageHeader title="Guide" onBack={onBack} />
       <div className="overflow-y-auto flex-1 px-4 py-4 pb-28 flex flex-col gap-4">
 
-        {/* Privacy */}
-        <div className="rounded-2xl border px-4 py-4 flex gap-3 items-start" style={{ background: "rgba(16,185,129,0.08)", borderColor: "rgba(16,185,129,0.22)" }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
-            <Shield className="h-5 w-5" style={{ color: "#10b981" }} />
+        {/* Privacy — left-border card, no rgba background */}
+        <div className="rounded-2xl bg-card border border-border border-l-4 border-l-emerald-500 px-4 py-4 flex gap-3 items-start shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+            <Shield className="h-5 w-5 text-emerald-500" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-foreground">100% Private — No Server</p>
@@ -340,10 +340,10 @@ function GuidePage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {/* Warning */}
-        <div className="rounded-2xl border px-4 py-4 flex gap-3 items-start" style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.22)" }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
-            <AlertTriangle className="h-5 w-5" style={{ color: "#f59e0b" }} />
+        {/* Warning — left-border card */}
+        <div className="rounded-2xl bg-card border border-border border-l-4 border-l-amber-500 px-4 py-4 flex gap-3 items-start shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-foreground">Download ZIP Before Closing</p>
@@ -377,14 +377,14 @@ function GuidePage({ onBack }: { onBack: () => void }) {
             <MoveRight className="h-4 w-4 text-primary" /> Fixing a Wrong Category
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Find the screenshot in the results → tap the <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-muted rounded font-medium mx-0.5"><Folder className="h-3 w-3" /> folder</span> icon → pick the correct category. Done.
+            Find the screenshot → tap the <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-muted rounded font-medium mx-0.5"><Folder className="h-3 w-3" /> folder</span> icon → pick the correct category.
           </p>
-          <p className="text-xs text-muted-foreground mt-2.5 pt-2.5 border-t border-border/60">
+          <p className="text-xs text-muted-foreground mt-2.5 pt-2.5 border-t border-border">
             <strong className="text-foreground">Note:</strong> The app uses keyword rules, not AI — occasional mistakes are normal.
           </p>
         </div>
 
-        {/* Folders */}
+        {/* Smart Folders */}
         <div>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">Smart Folders</p>
           <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
