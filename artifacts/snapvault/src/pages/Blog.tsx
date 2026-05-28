@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Clock, Calendar, ChevronRight } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, ChevronRight, Share2, Copy, Check } from "lucide-react";
 import { useLocation } from "wouter";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -273,6 +273,27 @@ function BlogCard({ post, onClick }: { post: BlogPost; onClick: () => void }) {
 // ─── Full Article View ────────────────────────────────────────────────────────
 
 function ArticleView({ post, onBack }: { post: BlogPost; onBack: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleShare() {
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title,
+          text: post.excerpt,
+          url: shareUrl,
+        });
+      } catch {
+        // user dismissed share sheet — do nothing
+      }
+    } else {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
   return (
     <div className="flex flex-col bg-background min-h-screen">
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
@@ -282,7 +303,14 @@ function ArticleView({ post, onBack }: { post: BlogPost; onBack: () => void }) {
         >
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
-        <span className="text-sm font-semibold text-foreground line-clamp-1">{post.title}</span>
+        <span className="text-sm font-semibold text-foreground line-clamp-1 flex-1">{post.title}</span>
+        <button
+          onClick={handleShare}
+          className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center shrink-0 hover:bg-muted/80 transition-colors"
+          title="Share this article"
+        >
+          {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Share2 className="h-4 w-4 text-foreground" />}
+        </button>
       </div>
 
       <article className="px-5 py-6 pb-28 max-w-2xl mx-auto w-full flex flex-col gap-5">
