@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Moon, Sun, Download, CheckCircle, RotateCcw,
-  AlertCircle, Loader2, X,
+  AlertCircle, Loader2, X, Check,
   Upload, Cpu, FolderOpen, ShieldCheck, Zap, ScanSearch, Eye,
   Trash2, Search, FolderSymlink, ArrowLeft,
 } from "lucide-react";
@@ -716,6 +716,54 @@ function FolderDetailPage({
   );
 }
 
+// ─── Start Over Confirm Toast ─────────────────────────────────────────────────
+function StartOverConfirmToast({
+  show,
+  onConfirm,
+  onCancel,
+}: {
+  show: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <div
+      className="fixed bottom-6 left-1/2 z-50 pointer-events-none"
+      style={{ transform: "translateX(-50%)" }}
+    >
+      <div
+        className="pointer-events-auto flex items-center gap-3 bg-card border border-border shadow-2xl rounded-2xl px-5 py-3.5 transition-all duration-300 ease-out"
+        style={{
+          transform: show ? "translateY(0) scale(1)" : "translateY(120%) scale(0.92)",
+          opacity: show ? 1 : 0,
+        }}
+      >
+        <RotateCcw className="h-4 w-4 text-muted-foreground shrink-0" />
+        <span className="text-sm font-medium text-foreground whitespace-nowrap">
+          Start over?
+        </span>
+        <span className="text-xs text-muted-foreground hidden sm:inline">All data will be cleared.</span>
+        <div className="flex items-center gap-2 ml-1">
+          <button
+            onClick={onCancel}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
+            aria-label="Cancel"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onConfirm}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-150 active:scale-95 shadow-md shadow-primary/30"
+            aria-label="Confirm start over"
+          >
+            <Check className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Review Step ──────────────────────────────────────────────────────────────
 function ReviewStep({
   entries,
@@ -729,7 +777,7 @@ function ReviewStep({
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [deletedFiles, setDeletedFiles] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [showStartOverToast, setShowStartOverToast] = useState(false);
 
   // Build a preview URL map from entries
   const previewMap = useMemo(() =>
@@ -805,7 +853,7 @@ function ReviewStep({
       <div className="max-w-5xl mx-auto space-y-7">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-2 border-b border-border">
           <div>
-            <button onClick={() => setShowResetDialog(true)}
+            <button onClick={() => setShowStartOverToast(true)}
               className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors group">
               <ArrowLeft className="h-3.5 w-3.5 group-hover:-translate-x-0.5 transition-transform" />
               <span>Start over</span>
@@ -913,22 +961,11 @@ function ReviewStep({
         </div>
       </div>
 
-      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Start over?</AlertDialogTitle>
-            <AlertDialogDescription>
-              All uploaded files and categorisation results will be lost. You will return to the upload screen.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onReset}>
-              <RotateCcw className="h-4 w-4 mr-2" /> Start over
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <StartOverConfirmToast
+        show={showStartOverToast}
+        onConfirm={onReset}
+        onCancel={() => setShowStartOverToast(false)}
+      />
     </div>
   );
 }
@@ -948,6 +985,7 @@ function DoneStep({
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [zipName, setZipName] = useState("");
   const [downloading, setDownloading] = useState(false);
+  const [showStartOverToast, setShowStartOverToast] = useState(false);
 
   // Pre-build the ZIP in the background as soon as this screen mounts
   const [prebuiltBlob, setPrebuiltBlob] = useState<Blob | null>(null);
@@ -1117,7 +1155,7 @@ function DoneStep({
             )}
           </Button>
           <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground"
-            onClick={onStartOver} data-testid="button-start-over">
+            onClick={() => setShowStartOverToast(true)} data-testid="button-start-over">
             <RotateCcw className="h-4 w-4 mr-2" /> Start over
           </Button>
         </div>
@@ -1159,6 +1197,12 @@ function DoneStep({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <StartOverConfirmToast
+        show={showStartOverToast}
+        onConfirm={onStartOver}
+        onCancel={() => setShowStartOverToast(false)}
+      />
     </div>
   );
 }
