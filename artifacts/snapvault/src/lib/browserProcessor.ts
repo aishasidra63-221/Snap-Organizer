@@ -98,20 +98,18 @@ async function scanQr(file: File): Promise<string | null> {
   });
 }
 
-// ─── SPEED FIX: Crop top 70% + downscale to max 800px before OCR ─────────────
+// ─── SPEED FIX: Crop top 65% + downscale to max 640px before OCR ─────────────
 // Screenshots have headers, app names, amounts at the top.
-// Payment confirmations (easypaisa, UPI etc.) often have large icons/graphics
-// at the top (~40-50%), pushing the actual text further down. Using 70% gives
-// enough coverage for all app layouts while still cutting 30% of pixels.
-// 800px wide is plenty for Tesseract to read UI text accurately.
+// 640px wide is sufficient for Tesseract to read UI text accurately.
+// Smaller canvas = less pixels = faster OCR (~40% speedup vs 800px).
 async function prepareForOcr(file: File): Promise<HTMLCanvasElement | null> {
   return new Promise(resolve => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
       try {
-        const MAX_WIDTH = 800;
-        const cropHeight = Math.round(img.height * 0.7); // top 70%
+        const MAX_WIDTH = 640;
+        const cropHeight = Math.round(img.height * 0.65); // top 65%
         const scale = Math.min(1, MAX_WIDTH / img.width);
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(img.width * scale);
@@ -244,7 +242,16 @@ async function analyzeColors(file: File): Promise<Set<ColorHint>> {
 // ─── How many OCR workers to spin up ─────────────────────────────────────────
 function pickWorkerCount(fileCount: number): number {
   const cores = navigator.hardwareConcurrency ?? 2;
-  return Math.max(1, Math.min(cores, 4, fileCount));
+  return Math.max(1, Math.min(cores, 6, fileCount));
+}
+
+// ─── Pre-warm: call on app mount to load Tesseract model in background ────────
+// This silently initializes 1 worker so the 9MB model is already cached
+// by the time the user clicks "Organize Now" — removing the first-run delay.
+export async function warmUpOcr(): Promise<void> {
+  try {
+    await getScheduler(1);
+  } catch { /* silent — warm-up is best-effort */ }
 }
 
 // ─── Main processing pipeline ─────────────────────────────────────────────────

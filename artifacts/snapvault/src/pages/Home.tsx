@@ -30,6 +30,7 @@ import {
   buildZipBlob,
   downloadBlob,
   getCategoryCounts,
+  warmUpOcr,
   type BrowserFileEntry,
   type ProcessPhase,
   type ProcessUpdate,
@@ -1177,6 +1178,9 @@ export default function Home() {
   const [confirmedOverrides, setConfirmedOverrides] = useState<Record<string, string>>({});
   const [confirmedDeletes, setConfirmedDeletes] = useState<Set<string>>(new Set());
   const { theme, toggleTheme } = useTheme();
+
+  // Pre-warm Tesseract workers on mount so model is cached before user uploads
+  useEffect(() => { warmUpOcr(); }, []);
 
   // Start browser processing when step becomes "processing"
   useEffect(() => {
