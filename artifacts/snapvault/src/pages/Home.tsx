@@ -35,6 +35,23 @@ import {
 } from "@/lib/browserProcessor";
 import { appendToHistory } from "@/lib/jobHistory";
 
+function AppLogo({ className = "h-8" }: { className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 ${className}`}>
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-auto">
+        <rect width="32" height="32" rx="7" fill="#FF3C00"/>
+        <rect x="7" y="9" width="18" height="14" rx="2" fill="white" fillOpacity="0.25"/>
+        <rect x="9" y="11" width="14" height="10" rx="1.5" fill="white" fillOpacity="0.9"/>
+        <circle cx="16" cy="16" r="3" fill="#FF3C00"/>
+        <circle cx="16" cy="16" r="1.5" fill="white"/>
+      </svg>
+      <span className="font-semibold text-foreground" style={{ fontSize: "inherit" }}>
+        OrganizeShots
+      </span>
+    </span>
+  );
+}
+
 type Step = "upload" | "processing" | "review" | "done";
 
 interface CategoryMeta {
@@ -289,7 +306,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
       <footer className="border-t border-border px-6 py-5 mt-auto">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <div className="flex items-center">
-            <img src="/logo.png" alt="OrganizeShots" className="h-6 w-auto opacity-80 dark:invert" />
+            <AppLogo className="h-6 text-sm" />
           </div>
           <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
         </div>
@@ -1235,7 +1252,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-3 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center shrink-0">
-            <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto dark:invert" />
+            <AppLogo className="h-8 text-base" />
           </div>
 
           {step !== "upload" && (
