@@ -1066,11 +1066,50 @@ function DoneStep({
       <div className="w-full max-w-lg space-y-8">
         <div className="text-center space-y-3">
           <div className="relative inline-flex items-center justify-center w-24 h-24">
-            <div className="absolute inset-0 rounded-full bg-primary/10" />
-            <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12">
-              <circle cx="24" cy="24" r="20" fill="hsl(var(--primary) / 0.15)"/>
-              <path d="M13 24l8 9 14-15" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            {/* Outer pulse ring */}
+            <div className="absolute inset-0 rounded-full bg-primary/10"
+              style={{ animation: "successRingPulse 1.8s ease-out forwards" }} />
+            <div className="absolute inset-0 rounded-full border-2 border-primary/30"
+              style={{ animation: "successRingExpand 0.6s ease-out 0.1s both" }} />
+            <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12"
+              style={{ animation: "successIconPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both" }}>
+              <circle cx="24" cy="24" r="20" fill="hsl(var(--primary) / 0.15)"
+                style={{ animation: "successCircleFill 0.4s ease-out 0.05s both" }} />
+              <path
+                d="M13 24l8 9 14-15"
+                stroke="hsl(var(--primary))"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="32"
+                strokeDashoffset="32"
+                style={{ animation: "successCheckDraw 0.5s ease-out 0.35s forwards" }}
+              />
             </svg>
+            <style>{`
+              @keyframes successRingPulse {
+                0%   { transform: scale(0.6); opacity: 0; }
+                50%  { transform: scale(1.08); opacity: 1; }
+                100% { transform: scale(1); opacity: 1; }
+              }
+              @keyframes successRingExpand {
+                0%   { transform: scale(0.5); opacity: 0; }
+                60%  { transform: scale(1.15); opacity: 0.6; }
+                100% { transform: scale(1); opacity: 0; }
+              }
+              @keyframes successIconPop {
+                0%   { transform: scale(0.4); opacity: 0; }
+                70%  { transform: scale(1.12); }
+                100% { transform: scale(1); opacity: 1; }
+              }
+              @keyframes successCircleFill {
+                0%   { opacity: 0; }
+                100% { opacity: 1; }
+              }
+              @keyframes successCheckDraw {
+                to { stroke-dashoffset: 0; }
+              }
+            `}</style>
           </div>
           <h2 className="text-3xl font-bold">Ready to download!</h2>
           <p className="text-muted-foreground">Your screenshots are organised. Download the ZIP below.</p>
