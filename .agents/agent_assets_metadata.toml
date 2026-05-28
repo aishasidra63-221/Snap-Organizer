@@ -54,3 +54,9 @@ id = "j_qLHuD6LYPQ-eEyd3j2b"
 uri = "file://artifacts/snapvault/public/blog/blog-duplicates.png"
 type = "image"
 title = "delete duplicate screenshots"
+
+[[generated]]
+id = "dyGWa43KmXaXtd8KFHTc5"
+uri = "file://artifacts/snapvault/public/og-image.png"
+type = "image"
+title = "og social share banner"
