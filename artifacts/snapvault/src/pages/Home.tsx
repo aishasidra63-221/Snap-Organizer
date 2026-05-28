@@ -289,7 +289,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
       <footer className="border-t border-border px-6 py-5 mt-auto">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
           <div className="flex items-center">
-            <img src="/logo.png" alt="OrganizeShots" className="h-6 w-auto opacity-80" />
+            <img src="/logo.png" alt="OrganizeShots" className="h-6 w-auto opacity-80 dark:invert" />
           </div>
           <p>100% in-browser · No server · No cloud · No AI · Private by default</p>
         </div>
@@ -1235,7 +1235,7 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-border bg-background/85 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-3 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center shrink-0">
-            <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto" />
+            <img src="/logo.png" alt="OrganizeShots" className="h-12 w-auto dark:invert" />
           </div>
 
           {step !== "upload" && (
