@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import Files from "@/pages/Files";
 import Activity from "@/pages/Activity";
 import Settings from "@/pages/Settings";
+import Blog from "@/pages/Blog";
 import { BottomNav } from "@/components/BottomNav";
 
 const queryClient = new QueryClient({
@@ -22,6 +23,10 @@ const TABS = ["/", "/files", "/activity", "/settings"] as const;
 
 function Router() {
   const [location] = useLocation();
+
+  if (location === "/blog") {
+    return <Blog />;
+  }
 
   const activeTab = (() => {
     if (location === "/") return "/";

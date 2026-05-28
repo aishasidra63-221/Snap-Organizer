@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
 import {
-  Sun, Moon, Copy, Folder, ChevronRight, ChevronDown, BookOpen,
+  Sun, Moon, Copy, Folder, ChevronRight, ChevronDown, BookOpen, Newspaper,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle,
   Upload, ScanSearch, FolderOpen, Download, AlertTriangle, MoveRight,
   Lock, CreditCard, MessageCircle, Share2, GraduationCap, Camera, Smile, CircleHelp,
@@ -547,7 +547,7 @@ export default function Settings() {
       {/* Help */}
       <div>
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Help</div>
-        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
           <button
             onClick={() => setSubPage("guide")}
             className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
@@ -558,6 +558,19 @@ export default function Settings() {
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-foreground">Guide</div>
               <div className="text-xs text-muted-foreground">How to use, smart folders, privacy</div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </button>
+          <button
+            onClick={() => navigate("/blog")}
+            className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
+          >
+            <span className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
+              <Newspaper className="h-4 w-4 text-blue-500" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground">Blog</div>
+              <div className="text-xs text-muted-foreground">Tips, features & how it works</div>
             </div>
             <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
           </button>
