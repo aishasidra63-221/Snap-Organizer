@@ -152,23 +152,23 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
     },
     {
       title: "Your Content",
-      body: "You retain full ownership of all screenshots and images you upload. OrganizeShots does not claim any rights over your content. You are responsible for ensuring you have the right to process the images you upload.",
+      body: "You retain full ownership of all screenshots and images you process. OrganizeShots does not claim any rights over your content. Since nothing is uploaded to any server, your files never leave your control. You are responsible for ensuring you have the right to process the images you use.",
     },
     {
       title: "Acceptable Use",
-      body: "You agree to use OrganizeShots only for lawful purposes. You must not upload images that contain illegal content, violate third-party intellectual property rights, or attempt to exploit, crash, or reverse-engineer the application.",
+      body: "You agree to use OrganizeShots only for lawful purposes. You must not use the app to process images containing illegal content, violate third-party intellectual property rights, or attempt to exploit, crash, or reverse-engineer the application.",
     },
     {
       title: "No Warranty",
-      body: "OrganizeShots is provided 'as is' without any warranty of any kind, express or implied. We do not guarantee that categorisation will be 100% accurate, that the service will be uninterrupted, or that files will be retained beyond your current session.",
+      body: "OrganizeShots is provided 'as is' without any warranty of any kind, express or implied. We do not guarantee that categorisation will be 100% accurate or that the app will be available at all times.",
     },
     {
       title: "Limitation of Liability",
-      body: "To the maximum extent permitted by law, OrganizeShots and its developers shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app, including loss of data, loss of files, or incorrect categorisation.",
+      body: "To the maximum extent permitted by law, OrganizeShots and its developers shall not be liable for any indirect, incidental, or consequential damages arising from your use of the app, including loss of files or incorrect categorisation.",
     },
     {
       title: "Data Responsibility",
-      body: "You are responsible for downloading and backing up your organised ZIP before closing the session. OrganizeShots does not permanently store your images — session data is deleted when your session ends.",
+      body: "Since OrganizeShots runs entirely in your browser, you are responsible for downloading your organised ZIP before closing the tab. All processing is in-memory only — closing the tab permanently clears all session data. There is no server to recover files from.",
     },
     {
       title: "Modifications to the App",
@@ -194,7 +194,7 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground px-1">Last updated: May 2025 · OrganizeShots v1.0.0</p>
+        <p className="text-xs text-muted-foreground px-1">Last updated: May 2026 · OrganizeShots v1.0.0</p>
 
         {sections.map((s) => (
           <div key={s.title} className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4 flex flex-col gap-1.5">
@@ -215,48 +215,48 @@ const faqs = [
     a: "OrganizeShots supports PNG, JPG/JPEG, WebP, BMP, GIF, HEIC, and TIFF formats. Most screenshots from Android, iOS, Windows, and Mac are automatically supported.",
   },
   {
-    q: "How many screenshots can I upload at once?",
-    a: "You can upload up to 500 screenshots in a single batch. Each file can be up to 50 MB. For best results, upload screenshots from the same time period together.",
+    q: "How many screenshots can I process at once?",
+    a: "You can process up to 100 screenshots in a single batch. For best results, select screenshots from the same device or time period together.",
   },
   {
     q: "How does OrganizeShots decide which folder a screenshot goes into?",
-    a: "OrganizeShots uses a three-step rule-based system: first it checks the filename (e.g. 'IMG-20240101-WA' goes to WhatsApp), then it scans for QR codes and checks their text, then it runs OCR to read visible text. Keywords like 'OTP', 'UPI', 'receipt', 'Instagram', 'lecture' etc. determine the folder. No AI is used.",
+    a: "OrganizeShots uses a rule-based system: first it checks the filename (e.g. 'IMG-20240101-WA' goes to WhatsApp), then it runs OCR to read visible text inside your browser. Keywords like 'OTP', 'UPI', 'receipt', 'Instagram', 'lecture' etc. determine the folder. No AI or internet is used.",
   },
   {
     q: "Does OrganizeShots use AI or send my images to the internet?",
-    a: "No. OrganizeShots is 100% rule-based and uses open-source OCR (Tesseract.js). Your images are never sent to any external AI service, cloud storage, or third-party server. Everything runs locally.",
+    a: "No. OrganizeShots is 100% browser-based and uses open-source OCR (Tesseract.js running via WebAssembly). Your images are never sent to any external AI service, cloud storage, or third-party server. Everything runs locally on your device.",
   },
   {
     q: "What are the folder categories?",
-    a: "OrganizeShots organises screenshots into: OTP / Security, Payments / Receipts, WhatsApp / Chats, Social Media, Study / Notes, Photos, Memes / Entertainment, Documents, and Unknown / Others. Exact duplicates go into the Duplicates folder.",
+    a: "OrganizeShots organises screenshots into 10 smart folders: OTP / Security, Payments / Receipts, WhatsApp / Chats, Social Media, Study / Notes, Photos, Memes / Entertainment, Documents, Unknown / Others, and Duplicates.",
   },
   {
     q: "What happens to my screenshots after I download the ZIP?",
-    a: "Once your session ends or you click 'Start Over', all your uploaded screenshots and temporary files are permanently deleted from the server. OrganizeShots does not retain any copies.",
+    a: "Since everything runs in your browser, your screenshots only ever exist in your device's memory during the session. Once you close the tab, refresh, or click 'Start Over', all images are cleared from memory automatically. Nothing is stored on any server.",
   },
   {
     q: "A screenshot was put in the wrong folder. Can I move it?",
-    a: "Yes! During the Review step, tap the folder icon on any screenshot thumbnail to open the 'Move to folder' sheet. Select the correct folder and it moves instantly. You can also delete screenshots you don't want included.",
+    a: "Yes! During the Review step, tap the folder icon on any screenshot thumbnail to open the 'Move to folder' option. Select the correct folder and it moves instantly. You can also delete screenshots you don't want included.",
   },
   {
     q: "What is OCR and why does it take time?",
-    a: "OCR (Optical Character Recognition) reads the text visible in your screenshots. It runs on screenshots that couldn't be categorised by filename or QR code. Processing speed depends on image count and complexity — typically 2–5 seconds per image.",
+    a: "OCR (Optical Character Recognition) reads the text visible in your screenshots — entirely inside your browser using WebAssembly. Processing speed depends on the number and complexity of images — typically a few seconds per image.",
   },
   {
     q: "Why are some screenshots in 'Unknown / Others'?",
-    a: "If OrganizeShots can't confidently match a screenshot to a known category — because the filename is generic and the visible text doesn't contain recognised keywords — it places it in Unknown / Others. You can manually move these after processing.",
-  },
-  {
-    q: "Can I re-download a ZIP from a previous session?",
-    a: "Yes — go to the Files tab and find the Recent Batches section. Any completed batch with a ready ZIP will have a download button you can tap again.",
+    a: "If OrganizeShots can't confidently match a screenshot to a known category — because the filename is generic and the visible text doesn't match recognised keywords — it places it in Unknown / Others. You can manually move these after processing.",
   },
   {
     q: "Does OrganizeShots work offline?",
-    a: "The app requires a server connection for uploading and processing. However, once your ZIP is downloaded, it's a completely standalone file on your device and can be opened without any internet connection.",
+    a: "Yes! Once the app is loaded in your browser, it works completely offline. There is no server — all processing happens on your device. Your internet connection is only needed to initially load the app.",
+  },
+  {
+    q: "Is my data safe?",
+    a: "Absolutely. OrganizeShots never uploads your images anywhere. No server receives your files, no analytics track your behaviour, and no account is required. Your screenshots stay 100% on your device.",
   },
   {
     q: "How do I completely reset the app?",
-    a: "Go to Settings → Clear All Data. This wipes all browser storage and resets the app to its initial state. Any undownloaded processed files will be lost.",
+    a: "Go to Settings → Clear All Data. This wipes all browser storage and resets the app to its initial state.",
   },
 ];
 
