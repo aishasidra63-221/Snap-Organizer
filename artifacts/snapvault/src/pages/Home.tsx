@@ -68,6 +68,7 @@ function formatBytes(bytes: number): string {
 
 // ─── Upload Step ──────────────────────────────────────────────────────────────
 function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
+  const [, navigate] = useLocation();
   const [dragging, setDragging] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
