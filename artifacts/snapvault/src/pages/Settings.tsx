@@ -5,9 +5,6 @@ import { useTheme } from "@/hooks/use-theme";
 import {
   Sun, Moon, ScanSearch, Copy, Folder, Cpu, ChevronRight,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
-  BookOpen, Upload, FolderOpen, Download, AlertTriangle, MoveRight,
-  Lock, CreditCard, MessageCircle, Share2, GraduationCap, Image,
-  Smile, CircleHelp, Camera,
 } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel,
@@ -304,158 +301,9 @@ function FAQPage({ onBack }: { onBack: () => void }) {
   );
 }
 
-// ─── Guide Page ───────────────────────────────────────────────────────────────
-
-function GuidePage({ onBack }: { onBack: () => void }) {
-  return (
-    <div className="flex flex-col bg-background min-h-[calc(100vh-56px)]">
-      <SubPageHeader title="Guide" onBack={onBack} />
-
-      <div className="overflow-y-auto flex-1 px-4 py-4 pb-28 flex flex-col gap-4">
-
-        {/* Privacy Notice */}
-        <div className="rounded-2xl px-4 py-4 flex gap-3 items-start border" style={{ background: "rgba(16,185,129,0.08)", borderColor: "rgba(16,185,129,0.22)" }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.15)" }}>
-            <Shield className="h-5 w-5" style={{ color: "#10b981" }} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-foreground">100% Private — No Server Upload</p>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Your screenshots are never sent anywhere. Everything — OCR, categorisation, ZIP — happens inside your browser on your device only.
-            </p>
-          </div>
-        </div>
-
-        {/* Warning */}
-        <div className="rounded-2xl px-4 py-4 flex gap-3 items-start border" style={{ background: "rgba(245,158,11,0.08)", borderColor: "rgba(245,158,11,0.22)" }}>
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.15)" }}>
-            <AlertTriangle className="h-5 w-5" style={{ color: "#f59e0b" }} />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-foreground">Download ZIP Before Closing the Tab</p>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              All files are deleted the moment you close or refresh the tab. The app stores nothing permanently — always download your ZIP first.
-            </p>
-          </div>
-        </div>
-
-        {/* How to use */}
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">How to Use</p>
-          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
-
-            <div className="flex items-start gap-3 px-4 py-3.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(99,102,241,0.12)" }}>
-                <Upload className="h-4 w-4" style={{ color: "#6366f1" }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">1.</span>Upload Screenshots</p>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">Drag &amp; drop files onto the home screen, or tap <strong>Browse</strong>. Supports PNG, JPG, WebP, HEIC — up to 100 files at once.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 px-4 py-3.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(139,92,246,0.12)" }}>
-                <ScanSearch className="h-4 w-4" style={{ color: "#8b5cf6" }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">2.</span>App Processes Automatically</p>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">The app reads the filename, scans for QR codes, then runs OCR to read any text. It uses all of that to pick the best folder — no input needed from you.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 px-4 py-3.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(245,158,11,0.12)" }}>
-                <FolderOpen className="h-4 w-4" style={{ color: "#f59e0b" }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">3.</span>Fix Any Wrong Folders</p>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">Tap the <span className="inline-flex items-center gap-0.5 mx-0.5 px-1.5 py-0.5 bg-muted rounded text-xs font-medium"><Folder className="h-3 w-3 inline" /> folder</span> icon on any screenshot. Select the correct category — it moves instantly.</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 px-4 py-3.5">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5" style={{ background: "rgba(16,185,129,0.12)" }}>
-                <Download className="h-4 w-4" style={{ color: "#10b981" }} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground"><span className="text-muted-foreground text-xs mr-1">4.</span>Download ZIP</p>
-                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">Tap <strong>Download ZIP</strong>. Inside the ZIP you'll find separate folders for each category, with all your screenshots neatly sorted.</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Accuracy note */}
-        <div className="rounded-2xl border border-border bg-card shadow-sm px-4 py-4">
-          <p className="text-sm font-bold text-foreground mb-1.5">About Accuracy</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            The app uses keyword and pattern matching — not AI. It is very accurate for OTP codes, payment receipts, and WhatsApp chats. Memes and social posts can occasionally be mis-categorised. Use the folder icon to correct any mistakes before downloading.
-          </p>
-        </div>
-
-        {/* Smart Folders */}
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-1 mb-2">Smart Folders</p>
-          <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden divide-y divide-border">
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(139,92,246,0.12)" }}><Lock className="h-4 w-4" style={{ color: "#8b5cf6" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">OTP / Security</p><p className="text-xs text-muted-foreground">Login codes, 2FA, password reset</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.12)" }}><CreditCard className="h-4 w-4" style={{ color: "#10b981" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Payments / Receipts</p><p className="text-xs text-muted-foreground">UPI, bank transfers, receipts, invoices</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(34,197,94,0.12)" }}><MessageCircle className="h-4 w-4" style={{ color: "#22c55e" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">WhatsApp / Chats</p><p className="text-xs text-muted-foreground">Chat screenshots, message threads</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(59,130,246,0.12)" }}><Share2 className="h-4 w-4" style={{ color: "#3b82f6" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Social Media</p><p className="text-xs text-muted-foreground">Instagram, Twitter, TikTok, YouTube</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(245,158,11,0.12)" }}><GraduationCap className="h-4 w-4" style={{ color: "#f59e0b" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Study / Notes</p><p className="text-xs text-muted-foreground">Lectures, notes, exam results</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(236,72,153,0.12)" }}><Camera className="h-4 w-4" style={{ color: "#ec4899" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Photos</p><p className="text-xs text-muted-foreground">Camera photos, gallery screenshots</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(249,115,22,0.12)" }}><Smile className="h-4 w-4" style={{ color: "#f97316" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Memes / Entertainment</p><p className="text-xs text-muted-foreground">Memes, jokes, viral content</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(14,165,233,0.12)" }}><FileText className="h-4 w-4" style={{ color: "#0ea5e9" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Documents</p><p className="text-xs text-muted-foreground">IDs, certificates, scanned docs</p></div>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(148,163,184,0.12)" }}><CircleHelp className="h-4 w-4" style={{ color: "#94a3b8" }} /></div>
-              <div><p className="text-sm font-medium text-foreground">Unknown / Others</p><p className="text-xs text-muted-foreground">Could not identify — move manually</p></div>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
 // ─── Main Settings Page ───────────────────────────────────────────────────────
 
-type SubPage = "privacy" | "terms" | "faq" | "guide" | null;
+type SubPage = "privacy" | "terms" | "faq" | null;
 
 const processingModes = ["Balanced", "Fast", "Thorough"];
 type FolderNaming = "category" | "date" | "custom";
@@ -483,7 +331,6 @@ export default function Settings() {
   }
 
   // Sub-pages
-  if (subPage === "guide")   return <GuidePage onBack={() => setSubPage(null)} />;
   if (subPage === "privacy") return <PrivacyPolicyPage onBack={() => setSubPage(null)} />;
   if (subPage === "terms") return <TermsOfServicePage onBack={() => setSubPage(null)} />;
   if (subPage === "faq") return <FAQPage onBack={() => setSubPage(null)} />;
@@ -603,26 +450,6 @@ export default function Settings() {
               />
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Help & Guide */}
-      <div>
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2 px-1">Help</div>
-        <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-          <button
-            onClick={() => setSubPage("guide")}
-            className="flex items-center gap-3 px-4 py-3.5 w-full hover:bg-muted/40 transition-colors text-left"
-          >
-            <span className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-              <BookOpen className="h-4 w-4 text-primary" />
-            </span>
-            <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-foreground">Guide</div>
-              <div className="text-xs text-muted-foreground">How to use, folders, privacy & warnings</div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-          </button>
         </div>
       </div>
 
