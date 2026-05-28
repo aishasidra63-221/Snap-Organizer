@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/hooks/use-theme";
 import {
-  Sun, Moon, ScanSearch, Copy, Folder, Cpu, ChevronRight,
+  Sun, Moon, ScanSearch, Copy, Folder, ChevronRight,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle, ChevronDown,
 } from "lucide-react";
 import {
@@ -305,14 +305,12 @@ function FAQPage({ onBack }: { onBack: () => void }) {
 
 type SubPage = "privacy" | "terms" | "faq" | null;
 
-const processingModes = ["Balanced", "Fast", "Thorough"];
 type FolderNaming = "category" | "date" | "custom";
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const [ocrEnabled, setOcrEnabled] = useState(true);
   const [dedupEnabled, setDedupEnabled] = useState(true);
-  const [processingMode, setProcessingMode] = useState("Balanced");
   const [folderNaming, setFolderNaming] = useState<FolderNaming>(
     (localStorage.getItem("folderNaming") as FolderNaming) || "category"
   );
@@ -378,28 +376,6 @@ export default function Settings() {
             label="Duplicate Detection"
             desc="Auto-detect and group duplicates"
             right={<Toggle checked={dedupEnabled} onChange={setDedupEnabled} />}
-          />
-          <SettingsRow
-            icon={<Cpu className="h-4 w-4" />}
-            label="Processing Mode"
-            desc={processingMode}
-            right={
-              <div className="flex gap-1">
-                {processingModes.map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setProcessingMode(m)}
-                    className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors"
-                    style={{
-                      background: processingMode === m ? "hsl(var(--primary))" : "hsl(var(--muted))",
-                      color: processingMode === m ? "hsl(var(--primary-foreground))" : "hsl(var(--muted-foreground))",
-                    }}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            }
           />
         </div>
       </div>
