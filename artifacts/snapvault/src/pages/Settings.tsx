@@ -73,8 +73,8 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
       body: "When you select screenshots, they are loaded into your browser's memory only. OrganizeShots processes them in-browser to detect text and sort them into smart folders. Once you close the tab, refresh the page, or click 'Start Over', all images are immediately removed from memory.",
     },
     {
-      title: "OCR & Text Recognition",
-      body: "OrganizeShots uses Tesseract.js — an open-source OCR engine — to read text from your screenshots. This runs 100% inside your browser using WebAssembly. No text or image data is ever sent to an external server or AI service.",
+      title: "Text Recognition & Smart Detection",
+      body: "OrganizeShots uses a built-in text recognition engine to read visible content from your screenshots. This runs 100% inside your browser. No text or image data is ever sent to an external server or AI service.",
     },
     {
       title: "No Accounts, No Sign-In",
@@ -89,8 +89,8 @@ function PrivacyPolicyPage({ onBack }: { onBack: () => void }) {
       body: "Your preferences — such as dark/light mode and folder naming settings — are saved to your browser's localStorage so the app remembers your choices. This data never leaves your device and is never transmitted anywhere. You can clear it anytime from Settings → Clear All Data.",
     },
     {
-      title: "SHA-256 Deduplication",
-      body: "OrganizeShots uses SHA-256 hashing to detect duplicate screenshots. This hashing runs entirely in your browser. The hash values are never stored permanently or sent anywhere.",
+      title: "Duplicate Detection",
+      body: "OrganizeShots uses advanced fingerprint matching to identify duplicate screenshots entirely within your browser. No fingerprint or image data is ever stored permanently or sent anywhere.",
     },
     {
       title: "Children's Privacy",
@@ -143,7 +143,7 @@ function TermsOfServicePage({ onBack }: { onBack: () => void }) {
     },
     {
       title: "What OrganizeShots Is",
-      body: "OrganizeShots is a screenshot organisation tool. It analyses images you provide, categorises them using rule-based logic and OCR, and packages them into an organised ZIP archive for download. It is a tool — not a storage service.",
+      body: "OrganizeShots is a screenshot organisation tool. It analyses images you provide, intelligently categorises them using proprietary smart detection technology, and packages them into an organised ZIP archive for download. It is a tool — not a storage service.",
     },
     {
       title: "Your Content",
@@ -215,11 +215,11 @@ const faqs = [
   },
   {
     q: "How does OrganizeShots decide which folder a screenshot goes into?",
-    a: "OrganizeShots uses a rule-based system: first it checks the filename (e.g. 'IMG-20240101-WA' goes to WhatsApp), then it runs OCR to read visible text inside your browser. Keywords like 'OTP', 'UPI', 'receipt', 'Instagram', 'lecture' etc. determine the folder. No AI or internet is used.",
+    a: "OrganizeShots uses a multi-layer smart detection system to understand each screenshot. It analyses various signals — including the image name and visible content — to intelligently assign the correct folder. Everything runs privately inside your browser, no internet required.",
   },
   {
     q: "Does OrganizeShots use AI or send my images to the internet?",
-    a: "No. OrganizeShots is 100% browser-based and uses open-source OCR (Tesseract.js running via WebAssembly). Your images are never sent to any external AI service, cloud storage, or third-party server. Everything runs locally on your device.",
+    a: "No. OrganizeShots is 100% browser-based. Your images are never sent to any external AI service, cloud storage, or third-party server. All processing uses built-in browser technology — everything runs locally on your own device.",
   },
   {
     q: "What are the folder categories?",
@@ -234,12 +234,12 @@ const faqs = [
     a: "Yes! During the Review step, tap the folder icon on any screenshot thumbnail to open the 'Move to folder' option. Select the correct folder and it moves instantly. You can also delete screenshots you don't want included.",
   },
   {
-    q: "What is OCR and why does it take time?",
-    a: "OCR (Optical Character Recognition) reads the text visible in your screenshots — entirely inside your browser using WebAssembly. Processing speed depends on the number and complexity of images — typically a few seconds per image.",
+    q: "Why does processing take some time?",
+    a: "OrganizeShots does deep analysis of every screenshot entirely inside your browser — nothing is sent anywhere. Processing speed depends on the number and complexity of images — typically a few seconds per image.",
   },
   {
     q: "Why are some screenshots in 'Unknown / Others'?",
-    a: "If OrganizeShots can't confidently match a screenshot to a known category — because the filename is generic and the visible text doesn't match recognised keywords — it places it in Unknown / Others. You can manually move these after processing.",
+    a: "If OrganizeShots can't confidently match a screenshot to a known category, it places it in Unknown / Others. You can manually move these to the correct folder during the Review step.",
   },
   {
     q: "Does OrganizeShots work offline?",

@@ -2538,9 +2538,7 @@ export function categorizeByText(
     if (score >= effectiveMinScore) {
       matched.add(rule.category);
       scoreMap.set(rule.category, score);
-      console.log(`[SnapVault OCR] ✅ "${rule.category}" score=${score}/${effectiveMinScore} textLen=${text.length}`, hits);
     } else if (rule.category === "Payments / Receipts" && hits.length > 0) {
-      console.log(`[SnapVault OCR] ❌ "Payments / Receipts" score=${score}/${effectiveMinScore} textLen=${text.length} — did NOT classify`, hits);
     }
   }
 

@@ -112,8 +112,8 @@ const posts: BlogPost[] = [
         </ul>
 
         <h2 className="text-lg font-bold text-foreground mt-2">How OrganizeShots Detects Duplicates</h2>
-        <p>OrganizeShots uses <strong>SHA-256 hashing</strong> to detect exact duplicate screenshots. Every image is converted to a unique hash — if two images produce the same hash, they are identical files. Duplicates are automatically placed in a separate <strong>Duplicates</strong> folder in your ZIP.</p>
-        <p>This runs entirely in your browser — no images are uploaded anywhere. The hash is just a mathematical fingerprint, not the image itself.</p>
+        <p>OrganizeShots uses advanced fingerprint matching to detect exact duplicate screenshots. Every image is analysed for a unique digital signature — if two images match, they are identical files. Duplicates are automatically placed in a separate <strong>Duplicates</strong> folder in your ZIP.</p>
+        <p>This runs entirely in your browser — no images are uploaded anywhere.</p>
 
         <h2 className="text-lg font-bold text-foreground mt-2">Step-by-Step: Remove Duplicate Screenshots</h2>
         <ol className="list-decimal list-inside space-y-2">
@@ -152,11 +152,11 @@ const posts: BlogPost[] = [
         </ul>
 
         <h2 className="text-lg font-bold text-foreground mt-2">How OrganizeShots Handles OTP Screenshots</h2>
-        <p>OrganizeShots uses OCR to read text inside your screenshots and detect keywords like <strong>"OTP", "one-time password", "verification code", "do not share"</strong>, and similar phrases used by banks and apps.</p>
+        <p>OrganizeShots automatically reads the content of your screenshots and intelligently identifies security-related messages — OTP codes, verification prompts, login alerts, and similar sensitive content used by banks and apps.</p>
         <p>All matching screenshots go into a dedicated <strong>OTP / Security</strong> folder in your organized ZIP. You can review them all at once and decide which ones to keep or delete — before downloading.</p>
 
         <h2 className="text-lg font-bold text-foreground mt-2">Is It Safe? Yes — Here's Why</h2>
-        <p>The OCR runs entirely inside your browser. Your screenshots are never uploaded to any server. No one can see your OTP codes except you. OrganizeShots is designed specifically to handle sensitive screenshots privately.</p>
+        <p>All processing happens entirely inside your browser. Your screenshots are never uploaded to any server. No one can see your OTP codes except you. OrganizeShots is designed specifically to handle sensitive screenshots privately.</p>
       </div>
     ),
   },
@@ -174,13 +174,7 @@ const posts: BlogPost[] = [
         <p>If you use UPI, GPay, PhonePe, or Paytm, you probably screenshot every payment confirmation. Over months, that adds up to hundreds of payment screenshots scattered across your gallery — impossible to find when you actually need them for tax filing, expense tracking, or dispute resolution.</p>
 
         <h2 className="text-lg font-bold text-foreground mt-2">What Counts as a Payment Screenshot?</h2>
-        <p>OrganizeShots detects payment-related screenshots by scanning for keywords like:</p>
-        <ul className="list-disc list-inside space-y-1">
-          <li><strong>UPI, NEFT, IMPS, RTGS</strong> — transfer types</li>
-          <li><strong>₹, transaction, receipt, paid, debit, credit</strong></li>
-          <li><strong>GPay, PhonePe, Paytm, BHIM, bank name</strong></li>
-          <li><strong>"Payment successful", "Amount debited"</strong> — confirmation text</li>
-        </ul>
+        <p>OrganizeShots uses smart detection to identify payment-related screenshots. It recognises transfer confirmations, digital wallet receipts, bank notifications, and payment success screens from all major Indian payment platforms — automatically, without any manual tagging.</p>
 
         <h2 className="text-lg font-bold text-foreground mt-2">Perfect for Tax Season & Expense Reports</h2>
         <p>At the end of the year, freelancers and business owners often need to compile payment records. With OrganizeShots, you can upload a year's worth of screenshots and instantly get all payment receipts in one folder — no manual sorting required.</p>
@@ -218,16 +212,15 @@ const posts: BlogPost[] = [
           <li>Bank apps that read cheque details from a photo</li>
         </ul>
 
-        <h2 className="text-lg font-bold text-foreground mt-2">How OrganizeShots Uses OCR</h2>
-        <p>When you upload a screenshot, OrganizeShots runs it through <strong>Tesseract.js</strong> — an open-source OCR engine compiled to WebAssembly that runs entirely inside your browser.</p>
-        <p>The OCR extracts all readable text from the image. Then OrganizeShots checks that text against keyword rules for each category. If it finds "OTP" or "verification code", it goes to OTP / Security. If it finds "₹ paid", it goes to Payments.</p>
+        <h2 className="text-lg font-bold text-foreground mt-2">How OrganizeShots Reads Your Screenshots</h2>
+        <p>When you upload a screenshot, OrganizeShots uses a built-in text recognition engine that runs entirely inside your browser. It extracts readable text from the image and uses intelligent matching to determine the right category — no cloud, no server, no AI subscription needed.</p>
 
-        <h2 className="text-lg font-bold text-foreground mt-2">Why In-Browser OCR Matters for Privacy</h2>
-        <p>Most OCR services work by sending your image to a server, processing it, and returning the text. That means your screenshots — including sensitive OTPs and payment receipts — travel over the internet to someone else's computer.</p>
-        <p>OrganizeShots does OCR locally using WebAssembly. Your screenshots never leave your device. The OCR happens in the same browser tab, using your device's own CPU. No image is ever transmitted anywhere.</p>
+        <h2 className="text-lg font-bold text-foreground mt-2">Why In-Browser Processing Matters for Privacy</h2>
+        <p>Most tools work by sending your image to a server, processing it remotely, and returning the result. That means your screenshots — including sensitive OTPs and payment receipts — travel over the internet to someone else's computer.</p>
+        <p>OrganizeShots processes everything locally inside your browser tab, using your own device. Your screenshots never leave your device. No image is ever transmitted anywhere.</p>
 
         <h2 className="text-lg font-bold text-foreground mt-2">How Accurate Is It?</h2>
-        <p>Very accurate for clean, high-resolution screenshots — which most phone screenshots are. The text is sharp, the contrast is good, and Tesseract handles it well. For very low-res or blurry screenshots, accuracy can be lower, but the filename-based rules still catch most common categories.</p>
+        <p>Very accurate for clean, high-resolution screenshots — which most phone screenshots are. The text is sharp, the contrast is good, and OrganizeShots handles it well. For very low-res or blurry screenshots, accuracy can be lower, but the smart detection system still catches most common categories reliably.</p>
       </div>
     ),
   },

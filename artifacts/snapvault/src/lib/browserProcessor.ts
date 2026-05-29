@@ -226,7 +226,7 @@ async function analyzeColors(file: File): Promise<Set<ColorHint>> {
         if (paymentGreenPx > threshold && !hints.has("whatsapp_green")) hints.add("payment_green");
         if (totalLuminance / total < 70) hints.add("dark_mode");
 
-        if (hints.size) console.log("[SnapVault Color]", [...hints]);
+        
         resolve(hints);
       } catch {
         resolve(new Set());
