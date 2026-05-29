@@ -1294,14 +1294,6 @@ export default function Home() {
         if (!cancelled) {
           setEntries(result);
           setStep("review");
-          appendToHistory({
-            jobId: crypto.randomUUID(),
-            totalFiles: result.length,
-            duplicateCount: result.filter(e => e.isDuplicate).length,
-            ocrCount: result.filter(e => e.ocrText !== null && !e.isDuplicate).length,
-            createdAt: new Date().toISOString(),
-            categoryCounts: getCategoryCounts(result),
-          });
         }
       } catch (e) {
         if (!cancelled) setProcessingError(e instanceof Error ? e.message : "Processing failed");
@@ -1322,6 +1314,15 @@ export default function Home() {
     setConfirmedOverrides(overrides);
     setConfirmedDeletes(deletes);
     setStep("done");
+    // Save to history only when user actually confirms — not on review entry
+    appendToHistory({
+      jobId: crypto.randomUUID(),
+      totalFiles: entries.length,
+      duplicateCount: entries.filter(e => e.isDuplicate).length,
+      ocrCount: entries.filter(e => e.ocrText !== null && !e.isDuplicate).length,
+      createdAt: new Date().toISOString(),
+      categoryCounts: getCategoryCounts(entries),
+    });
   };
 
   const resetAll = () => {
