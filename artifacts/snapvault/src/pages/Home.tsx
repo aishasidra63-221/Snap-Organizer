@@ -736,13 +736,13 @@ function StartOverConfirmToast({
       />
       {/* Card */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-6 pt-0"
+        className="fixed inset-0 z-[100] flex items-center justify-center px-6"
         style={{ pointerEvents: show ? "auto" : "none" }}
       >
         <div
-          className="w-full max-w-sm mx-auto bg-card rounded-3xl border border-border shadow-2xl overflow-hidden transition-all duration-350 ease-out"
+          className="w-full max-w-sm bg-card rounded-3xl border border-border shadow-2xl overflow-hidden transition-all duration-300 ease-out"
           style={{
-            transform: show ? "translateY(0)" : "translateY(110%)",
+            transform: show ? "scale(1) translateY(0)" : "scale(0.88) translateY(24px)",
             opacity: show ? 1 : 0,
           }}
         >
