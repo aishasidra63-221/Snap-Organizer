@@ -727,40 +727,55 @@ function StartOverConfirmToast({
   onCancel: () => void;
 }) {
   return (
-    <div
-      className="fixed bottom-24 left-1/2 z-[100] pointer-events-none"
-      style={{ transform: "translateX(-50%)" }}
-    >
+    <>
+      {/* Dim backdrop */}
       <div
-        className="pointer-events-auto flex items-center gap-3 bg-card border border-border shadow-2xl rounded-2xl px-5 py-3.5 transition-all duration-300 ease-out"
-        style={{
-          transform: show ? "translateY(0) scale(1)" : "translateY(120%) scale(0.92)",
-          opacity: show ? 1 : 0,
-        }}
+        className="fixed inset-0 z-[99] transition-all duration-300"
+        style={{ background: "rgba(0,0,0,0.45)", opacity: show ? 1 : 0, pointerEvents: show ? "auto" : "none" }}
+        onClick={onCancel}
+      />
+      {/* Card */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-[100] px-4 pb-6 pt-0"
+        style={{ pointerEvents: show ? "auto" : "none" }}
       >
-        <RotateCcw className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium text-foreground whitespace-nowrap">
-          Start over?
-        </span>
-        <span className="text-xs text-muted-foreground hidden sm:inline">All data will be cleared.</span>
-        <div className="flex items-center gap-2 ml-1">
-          <button
-            onClick={onCancel}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-all duration-150 active:scale-95"
-            aria-label="Cancel"
-          >
-            <X className="h-4 w-4" />
-          </button>
-          <button
-            onClick={onConfirm}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-150 active:scale-95 shadow-md shadow-primary/30"
-            aria-label="Confirm start over"
-          >
-            <Check className="h-4 w-4" />
-          </button>
+        <div
+          className="w-full max-w-sm mx-auto bg-card rounded-3xl border border-border shadow-2xl overflow-hidden transition-all duration-350 ease-out"
+          style={{
+            transform: show ? "translateY(0)" : "translateY(110%)",
+            opacity: show ? 1 : 0,
+          }}
+        >
+          {/* Icon area */}
+          <div className="flex flex-col items-center pt-6 pb-4 px-6 gap-3">
+            <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center">
+              <RotateCcw className="h-6 w-6 text-destructive" />
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-base font-semibold text-foreground">Start over?</p>
+              <p className="text-sm text-muted-foreground leading-snug">
+                All uploaded files and results will be removed.
+              </p>
+            </div>
+          </div>
+          {/* Buttons */}
+          <div className="flex gap-2.5 px-5 pb-5">
+            <button
+              onClick={onCancel}
+              className="flex-1 h-11 rounded-2xl border border-border bg-muted/60 text-sm font-medium text-foreground hover:bg-muted transition-colors active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              className="flex-1 h-11 rounded-2xl bg-destructive text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 transition-colors active:scale-95 shadow-md shadow-destructive/20"
+            >
+              Yes, reset
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
