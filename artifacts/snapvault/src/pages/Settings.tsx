@@ -6,13 +6,8 @@ import {
   Sun, Moon, Copy, Folder, ChevronRight, ChevronDown, BookOpen, Newspaper,
   Trash2, ArrowLeft, Shield, FileText, HelpCircle,
   Upload, ScanSearch, FolderOpen, Download, AlertTriangle, MoveRight,
-  Lock, CreditCard, MessageCircle, Share2, GraduationCap, Camera, Smile, CircleHelp,
+  Lock, CreditCard, MessageCircle, Share2, GraduationCap, Camera, Smile, CircleHelp, X,
 } from "lucide-react";
-import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
-  AlertDialogContent, AlertDialogDescription,
-  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
@@ -649,26 +644,69 @@ export default function Settings() {
         </div>
       </div>
 
-      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Clear all data?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This removes all uploaded screenshots, processed batches, and saved settings from your browser. Any un-downloaded ZIPs will be lost permanently. This cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleClearAll}
-              className="bg-red-500 text-white hover:bg-red-600"
+      {/* Clear All Data — animated center modal */}
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-[99] transition-all duration-300"
+        style={{
+          background: "rgba(0,0,0,0.5)",
+          opacity: showClearDialog ? 1 : 0,
+          pointerEvents: showClearDialog ? "auto" : "none",
+        }}
+        onClick={() => setShowClearDialog(false)}
+      />
+      {/* Card */}
+      <div
+        className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+        style={{ pointerEvents: showClearDialog ? "auto" : "none" }}
+      >
+        <div
+          className="w-full max-w-sm bg-card rounded-3xl border border-border shadow-2xl overflow-hidden transition-all duration-300 ease-out"
+          style={{
+            transform: showClearDialog ? "scale(1) translateY(0)" : "scale(0.88) translateY(24px)",
+            opacity: showClearDialog ? 1 : 0,
+          }}
+        >
+          {/* Close button */}
+          <div className="flex justify-end px-4 pt-4">
+            <button
+              onClick={() => setShowClearDialog(false)}
+              className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Yes, Clear Everything
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+
+          {/* Icon + text */}
+          <div className="flex flex-col items-center px-6 pb-4 gap-3 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
+              <Trash2 className="h-7 w-7 text-red-500" />
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-base font-semibold text-foreground">Clear all data?</p>
+              <p className="text-sm text-muted-foreground leading-snug">
+                Saari sessions, screenshots aur settings browser se hamesha ke liye mit jayengi. Yeh wapis nahi aa sakta.
+              </p>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-2.5 px-5 pb-6">
+            <button
+              onClick={() => setShowClearDialog(false)}
+              className="flex-1 h-11 rounded-2xl border border-border bg-muted/60 text-sm font-medium text-foreground hover:bg-muted transition-colors active:scale-95"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleClearAll}
+              className="flex-1 h-11 rounded-2xl bg-red-500 text-sm font-semibold text-white hover:bg-red-600 transition-colors active:scale-95 shadow-md shadow-red-500/20"
+            >
+              Yes, clear all
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
