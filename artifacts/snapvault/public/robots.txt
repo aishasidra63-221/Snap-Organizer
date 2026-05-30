@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://organizeshots.replit.app/sitemap.xml
+Sitemap: https://www.organizeshots.com/sitemap.xml
