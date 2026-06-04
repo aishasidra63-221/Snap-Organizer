@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "SnapVault"
+version = "1.0.0"
+id = "artifacts/snapvault"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24639
+
+[services.development]
+run = "pnpm --filter @workspace/snapvault run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/snapvault", "run", "build" ]
+publicDir = "artifacts/snapvault/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24639"
+BASE_PATH = "/"

@@ -1,0 +1,239 @@
+import { Router } from "express";
+import fs from "fs";
+import path from "path";
+import JSZip from "jszip";
+import { getJob, updateJob, deleteJob, getAllJobs, type FileEntry } from "../lib/jobStore.js";
+
+const router = Router();
+
+router.get("/jobs", (_req, res) => {
+  const all = getAllJobs();
+
+  const totalCleaned = all.reduce((sum, j) => sum + (j.totalFiles - j.duplicateCount), 0);
+  const totalDuplicates = all.reduce((sum, j) => sum + j.duplicateCount, 0);
+  const totalOcr = all.reduce((sum, j) => sum + j.ocrCount, 0);
+
+  const jobs = all.map(j => {
+    const categoryCounts: Record<string, number> = {};
+    for (const file of j.files) {
+      if (file.isDuplicate) continue;
+      categoryCounts[file.category] = (categoryCounts[file.category] ?? 0) + 1;
+    }
+    return {
+      jobId: j.jobId,
+      status: j.status,
+      totalFiles: j.totalFiles,
+      processedFiles: j.processedFiles,
+      duplicateCount: j.duplicateCount,
+      ocrCount: j.ocrCount,
+      createdAt: j.createdAt,
+      errorMessage: j.errorMessage ?? null,
+      zipReady: j.zipReady,
+      categoryCounts,
+    };
+  });
+
+  // Aggregate category counts across all jobs
+  const totalCategoryCounts: Record<string, number> = {};
+  for (const j of all) {
+    for (const [cat, count] of Object.entries(j.categoryCounts ?? {})) {
+      totalCategoryCounts[cat] = (totalCategoryCounts[cat] ?? 0) + count;
+    }
+  }
+
+  res.json({
+    jobs,
+    stats: {
+      totalCleaned,
+      totalDuplicates,
+      jobsRun: all.length,
+      totalOcr,
+      totalCategoryCounts,
+    },
+  });
+});
+
+router.get("/jobs/:jobId", (req, res) => {
+  const job = getJob(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+  res.json({
+    jobId: job.jobId,
+    status: job.status,
+    totalFiles: job.totalFiles,
+    processedFiles: job.processedFiles,
+    duplicateCount: job.duplicateCount,
+    createdAt: job.createdAt,
+    zipReady: job.zipReady,
+    errorMessage: job.errorMessage ?? null,
+  });
+});
+
+router.get("/jobs/:jobId/categories", (req, res) => {
+  const job = getJob(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+
+  const grouped = new Map<string, FileEntry[]>();
+  for (const file of job.files) {
+    const cat = file.category;
+    if (!grouped.has(cat)) grouped.set(cat, []);
+    grouped.get(cat)!.push(file);
+  }
+
+  const categories = Array.from(grouped.entries()).map(([category, files]) => ({
+    category,
+    count: files.length,
+    files: files.map((f) => ({
+      filename: f.filename,
+      originalName: f.originalName,
+      category: f.category,
+      hash: f.hash,
+      isDuplicate: f.isDuplicate,
+      size: f.size,
+      ocrText: f.ocrText ?? null,
+    })),
+  }));
+
+  res.json({
+    jobId: job.jobId,
+    categories,
+    totalFiles: job.totalFiles,
+    duplicateCount: job.duplicateCount,
+  });
+});
+
+router.post("/jobs/:jobId/confirm", async (req, res) => {
+  const job = getJob(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+
+  if (job.status !== "awaiting_confirmation") {
+    res.status(400).json({ error: `Job is not ready for confirmation (status: ${job.status})` });
+    return;
+  }
+
+  const overrides: Record<string, string> = req.body?.categoryOverrides ?? {};
+  const deletedFiles: string[] = req.body?.deletedFiles ?? [];
+  const deletedSet = new Set(deletedFiles);
+
+  updateJob(job.jobId, { status: "zipping" });
+
+  setImmediate(async () => {
+    try {
+      const zip = new JSZip();
+
+      for (const file of job.files) {
+        if (!fs.existsSync(file.tempPath)) continue;
+        if (deletedSet.has(file.originalName)) continue;
+
+        const category = overrides[file.originalName] ?? file.category;
+        const folderName = category.replace(/[/\\?%*:|"<>]/g, "-");
+        const fileData = fs.readFileSync(file.tempPath);
+        zip.folder(folderName)?.file(file.originalName, fileData);
+      }
+
+      const zipBuffer = await zip.generateAsync({
+        type: "nodebuffer",
+        compression: "DEFLATE",
+        compressionOptions: { level: 6 },
+      });
+
+      const zipPath = path.join(job.uploadDir, "snapvault-organized.zip");
+      fs.writeFileSync(zipPath, zipBuffer);
+
+      updateJob(job.jobId, {
+        status: "ready",
+        zipReady: true,
+        zipPath,
+      });
+    } catch (e) {
+      updateJob(job.jobId, {
+        status: "error",
+        errorMessage: e instanceof Error ? e.message : "ZIP creation failed",
+      });
+    }
+  });
+
+  res.json({
+    jobId: job.jobId,
+    status: "zipping",
+    message: "Processing started — poll job status until ready",
+  });
+});
+
+router.get("/jobs/:jobId/download", (req, res) => {
+  const job = getJob(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+
+  if (!job.zipReady || !job.zipPath) {
+    res.status(400).json({ error: "ZIP is not ready yet" });
+    return;
+  }
+
+  if (!fs.existsSync(job.zipPath)) {
+    res.status(404).json({ error: "ZIP file not found" });
+    return;
+  }
+
+  res.download(job.zipPath, "snapvault-organized.zip");
+});
+
+router.delete("/jobs/:jobId/cleanup", (req, res) => {
+  const job = getJob(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+
+  try {
+    if (fs.existsSync(job.uploadDir)) {
+      fs.rmSync(job.uploadDir, { recursive: true, force: true });
+    }
+    deleteJob(job.jobId);
+    res.json({ jobId: job.jobId, deleted: true, message: "Cleaned up successfully" });
+  } catch (e) {
+    res.status(500).json({ error: "Cleanup failed" });
+  }
+});
+
+router.get("/jobs/:jobId/stats", (req, res) => {
+  const job = getJob(req.params.jobId);
+  if (!job) {
+    res.status(404).json({ error: "Job not found" });
+    return;
+  }
+
+  const categoryCounts: Record<string, number> = {};
+  for (const file of job.files) {
+    categoryCounts[file.category] = (categoryCounts[file.category] ?? 0) + 1;
+  }
+
+  const topCategory =
+    Object.entries(categoryCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "Unknown / Others";
+
+  let zipSizeBytes: number | null = null;
+  if (job.zipPath && fs.existsSync(job.zipPath)) {
+    zipSizeBytes = fs.statSync(job.zipPath).size;
+  }
+
+  res.json({
+    jobId: job.jobId,
+    totalFiles: job.totalFiles,
+    duplicateCount: job.duplicateCount,
+    categoryCounts,
+    topCategory,
+    zipSizeBytes,
+  });
+});
+
+export default router;
