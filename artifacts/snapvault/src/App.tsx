@@ -24,23 +24,23 @@ const TABS = ["/", "/files", "/activity", "/settings"] as const;
 
 const SEO: Record<string, { title: string; description: string }> = {
   "/": {
-    title: "OrganizeShots – Free Screenshot Organizer | Auto-Sort into Smart Folders",
-    description: "OrganizeShots sorts your screenshots into 10 smart folders automatically — OTP, Payments, WhatsApp, Social Media & more. 100% free, no account, no upload. Works in your browser.",
+    title: "OrganizeShots – Free Screenshot Organizer | Smart Folders",
+    description: "OrganizeShots sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. 100% free, no account, no upload. Works in your browser.",
   },
   "/blog": {
     title: "Screenshot Organizer Blog – Tips, Guides & Updates | OrganizeShots",
     description: "Learn how to organize screenshots, remove duplicates, and manage your gallery efficiently. Free guides and tips from OrganizeShots.",
   },
   "/blog/organize-screenshots-automatically": {
-    title: "How to Organize Screenshots Automatically (Without Any App Install) | OrganizeShots",
+    title: "Organize Screenshots Automatically – No App Needed | OrganizeShots",
     description: "Your phone has hundreds of unorganized screenshots. Sort them all into neat folders in under a minute — completely free, no app needed.",
   },
   "/blog/best-screenshot-manager-android-iphone": {
-    title: "Best Screenshot Manager for Android & iPhone in 2026 (Free) | OrganizeShots",
+    title: "Best Free Screenshot Manager for Android & iPhone | OrganizeShots",
     description: "Comparing the best free screenshot manager tools in 2026. Find the right tool to organize your gallery without cloud uploads or subscriptions.",
   },
   "/blog/how-to-delete-duplicate-screenshots": {
-    title: "How to Find and Delete Duplicate Screenshots on Your Phone | OrganizeShots",
+    title: "Find & Delete Duplicate Screenshots on Your Phone | OrganizeShots",
     description: "Duplicate screenshots waste storage and clutter your gallery. Here's the easiest way to detect and remove them automatically — free and private.",
   },
   "/blog/otp-screenshot-organizer": {
@@ -48,11 +48,11 @@ const SEO: Record<string, { title: string; description: string }> = {
     description: "OrganizeShots auto-sorts all your OTP and security screenshots into one folder — so you never waste time scrolling for them again.",
   },
   "/blog/organize-payment-receipt-screenshots": {
-    title: "How to Organize Payment & UPI Receipt Screenshots Automatically | OrganizeShots",
+    title: "Auto-Organize Payment & UPI Receipt Screenshots | OrganizeShots",
     description: "UPI receipts, bank transfers, GPay confirmations — OrganizeShots automatically groups all your payment screenshots in one folder.",
   },
   "/blog/what-is-ocr-screenshot": {
-    title: "How OrganizeShots Reads and Understands Your Screenshots | OrganizeShots",
+    title: "How OrganizeShots Reads Your Screenshots | OrganizeShots",
     description: "Discover how OrganizeShots analyses screenshots entirely inside your browser — no uploads, no cloud, fully private.",
   },
   "/settings": {
