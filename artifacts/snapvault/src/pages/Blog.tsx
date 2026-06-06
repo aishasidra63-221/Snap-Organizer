@@ -21,6 +21,88 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    id: "screenshot-organizer-free-browser-tool",
+    title: "Screenshot Organizer — Free Browser Tool, No App Install Needed",
+    excerpt: "OrganizeShots sorts your screenshots into smart folders — OTP, Payments, WhatsApp & more — entirely in your browser. No download, no account, 100% free.",
+    date: "Jun 6, 2026",
+    readTime: "5 min read",
+    category: "Guide",
+    image: blogImg("blog-organize.png"),
+    gradient: "from-violet-500/20 to-indigo-500/10",
+    content: (
+      <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
+        <p><strong>OrganizeShots</strong> is a free, browser-based screenshot organizer. It automatically sorts your screenshots into 10 smart folders — OTP, Payments, WhatsApp, Social Media, and more — without any app install, account, or cloud upload.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">What Is a Screenshot Organizer?</h2>
+        <p>A screenshot organizer is a tool that reads the content of your screenshots and automatically groups them into labelled folders. Instead of scrolling through hundreds of random images to find a payment receipt or OTP code, everything is already sorted for you.</p>
+        <p><strong>OrganizeShots</strong> does this entirely inside your web browser — no installation, no server, no account required.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">How Does OrganizeShots Work?</h2>
+        <ol className="list-decimal list-inside space-y-2">
+          <li><strong>Open the website</strong> — works in any browser on Android, iPhone, Windows, or Mac.</li>
+          <li><strong>Upload up to 100 screenshots</strong> — drag & drop or tap to browse your gallery.</li>
+          <li><strong>The app reads every screenshot</strong> using in-browser OCR (text recognition) — no files leave your device.</li>
+          <li><strong>Each screenshot is sorted</strong> into one of 10 smart categories automatically.</li>
+          <li><strong>Download a ZIP file</strong> — all your screenshots neatly organized into labelled folders.</li>
+        </ol>
+        <p>The whole process takes under 60 seconds for 100 screenshots.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">10 Smart Categories</h2>
+        <p>OrganizeShots automatically detects and sorts screenshots into these folders:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li><strong>OTP / Security</strong> — bank codes, login verifications, 2FA messages</li>
+          <li><strong>Payments / Receipts</strong> — UPI, GPay, PhonePe, bank transfer confirmations</li>
+          <li><strong>WhatsApp / Chats</strong> — conversation screenshots from any messaging app</li>
+          <li><strong>Social Media</strong> — Instagram, Twitter/X, Facebook posts and reels</li>
+          <li><strong>Study / Notes</strong> — slides, notes, educational content</li>
+          <li><strong>Photos</strong> — screenshots of photos and images</li>
+          <li><strong>Memes / Entertainment</strong> — jokes, memes, funny content</li>
+          <li><strong>Documents</strong> — invoices, forms, official text</li>
+          <li><strong>Unknown / Others</strong> — anything that doesn't fit the above</li>
+          <li><strong>Duplicates</strong> — exact copies that waste storage</li>
+        </ul>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Why No App Install Is Needed</h2>
+        <p>Most screenshot managers require you to download an app. That means storage space, permissions, and trusting a third party with your photos. OrganizeShots is different — it runs entirely inside your browser using web technologies.</p>
+        <p>Your screenshots are processed on your own device. Nothing is ever uploaded to any server. The moment you close the browser tab, no trace is left anywhere.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Is OrganizeShots Really Free?</h2>
+        <p>Yes — completely free. No trial period, no subscription, no hidden fees, no premium tier. You can organize up to 100 screenshots per batch, download the result as a ZIP, and repeat as many times as you want.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Does It Work on Android and iPhone?</h2>
+        <p>Yes. Because OrganizeShots runs in a browser, it works on any device with a modern browser — Android, iPhone, iPad, Windows laptop, Mac. No app store required.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Frequently Asked Questions</h2>
+
+        <div className="flex flex-col gap-4 border border-border rounded-xl p-4 bg-muted/30">
+          <div>
+            <p className="font-semibold text-foreground">Does OrganizeShots upload my screenshots?</p>
+            <p className="text-muted-foreground mt-1">No. All processing happens inside your browser on your device. No screenshot is ever sent to any server.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">How many screenshots can I organize at once?</p>
+            <p className="text-muted-foreground mt-1">Up to 100 screenshots per batch. Supported formats: PNG, JPG, WebP, HEIC.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Do I need to create an account?</p>
+            <p className="text-muted-foreground mt-1">No account, no sign-up, no email required. Just open the website and start organizing.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">What format is the output?</p>
+            <p className="text-muted-foreground mt-1">A ZIP file with subfolders for each category. Each folder contains the screenshots that belong to it.</p>
+          </div>
+          <div>
+            <p className="font-semibold text-foreground">Can it detect duplicate screenshots?</p>
+            <p className="text-muted-foreground mt-1">Yes. OrganizeShots automatically identifies exact duplicates and places them in a separate Duplicates folder so you can review and delete them.</p>
+          </div>
+        </div>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">The Bottom Line</h2>
+        <p>If your screenshot gallery is a mess and you want it organized in under a minute — for free, with no app install and no privacy risk — <strong>OrganizeShots</strong> is the tool you need. Open it in any browser, drop in your screenshots, and download a perfectly sorted ZIP.</p>
+      </div>
+    ),
+  },
+  {
     id: "organize-screenshots-automatically",
     title: "How to Organize Screenshots Automatically (Without Any App Install)",
     excerpt: "Your phone has hundreds of unorganized screenshots. Here's how to sort them all into neat folders in under a minute — completely free.",
