@@ -35,6 +35,10 @@ const SEO: Record<string, { title: string; description: string }> = {
     title: "Screenshot Organizer – Free Browser Tool, No App Install | OrganizeShots",
     description: "OrganizeShots sorts screenshots into 10 smart folders — OTP, Payments, WhatsApp & more. Free, no install, no account. Works in any browser.",
   },
+  "/blog/save-whatsapp-screenshots-organized": {
+    title: "Save & Organize WhatsApp Screenshots Automatically | OrganizeShots",
+    description: "WhatsApp screenshots pile up fast — chats, payments, status saves. Auto-sort all of them into folders for free. No app install, works on Android & iPhone.",
+  },
   "/blog/free-up-phone-storage-delete-duplicate-screenshots": {
     title: "Free Up Phone Storage – Delete Duplicate Screenshots | OrganizeShots",
     description: "Duplicate screenshots waste GBs of phone storage. Find and delete them free — no app install. Works on Android & iPhone using OrganizeShots.",

@@ -60,6 +60,54 @@ const posts: BlogPost[] = [
     ),
   },
   {
+    id: "save-whatsapp-screenshots-organized",
+    title: "How to Save & Organize WhatsApp Screenshots Automatically",
+    excerpt: "WhatsApp screenshots pile up fast — chats, status saves, payment proofs. Here's the fastest free way to sort all of them into one place automatically.",
+    date: "Jun 6, 2026",
+    readTime: "4 min read",
+    category: "WhatsApp",
+    image: blogImg("blog-whatsapp.png"),
+    gradient: "from-green-500/20 to-emerald-500/10",
+    content: (
+      <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
+        <p>WhatsApp is one of the biggest reasons people have hundreds of unorganized screenshots. Chat screenshots, status saves, payment confirmations, forwarded memes — they all land in the same gallery folder with no labels and no order.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Why WhatsApp Screenshots Are So Hard to Manage</h2>
+        <p>WhatsApp generates screenshots from multiple sources — and they all look the same in your gallery:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Conversation screenshots saved for reference</li>
+          <li>WhatsApp Status photos saved to gallery</li>
+          <li>Payment proof screenshots (GPay, PhonePe via WhatsApp)</li>
+          <li>Important forwarded images screenshotted before they expire</li>
+          <li>Group chat screenshots saved for sharing</li>
+        </ul>
+        <p>Without any organisation, finding one specific chat screenshot means scrolling through everything.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">How to Automatically Sort WhatsApp Screenshots</h2>
+        <p><strong>OrganizeShots</strong> uses in-browser OCR to read every screenshot and detect which ones are from WhatsApp chats. It places all matching screenshots into a dedicated <strong>WhatsApp / Chats</strong> folder in your sorted ZIP.</p>
+        <ol className="list-decimal list-inside space-y-2">
+          <li><strong>Open organizeshots.com</strong> — no app download, works in any browser.</li>
+          <li><strong>Upload your screenshots</strong> (up to 100 at a time).</li>
+          <li>OrganizeShots reads each one and detects WhatsApp chats, payment proofs, and more.</li>
+          <li><strong>Download the ZIP</strong> — WhatsApp screenshots are in their own folder, separate from OTPs, payments, and memes.</li>
+        </ol>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">What Else Gets Sorted at the Same Time?</h2>
+        <p>While OrganizeShots processes your WhatsApp screenshots, it also automatically sorts everything else — OTP codes, GPay receipts, social media posts, study notes, and duplicates — all in one batch, saving you hours of manual sorting.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Is It Safe for Private Chats?</h2>
+        <p>Yes. OrganizeShots processes everything locally inside your browser. No screenshot — including private WhatsApp conversations — is ever uploaded to any server. Your chats stay completely private.</p>
+
+        <div className="flex flex-col gap-3 border border-border rounded-xl p-4 bg-muted/30 mt-2">
+          <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Quick Answers</p>
+          <div><p className="font-medium text-foreground">Does it work for WhatsApp Business screenshots too?</p><p className="text-muted-foreground text-xs mt-0.5">Yes — WhatsApp, WhatsApp Business, and any other chat app screenshots are detected automatically.</p></div>
+          <div><p className="font-medium text-foreground">What about WhatsApp payment screenshots?</p><p className="text-muted-foreground text-xs mt-0.5">Payment screenshots (GPay, PhonePe via WhatsApp) go into the Payments / Receipts folder — separate from chat screenshots.</p></div>
+          <div><p className="font-medium text-foreground">Does it need internet to process screenshots?</p><p className="text-muted-foreground text-xs mt-0.5">Only for the initial page load. After that, everything runs offline inside your browser.</p></div>
+        </div>
+      </div>
+    ),
+  },
+  {
     id: "free-up-phone-storage-delete-duplicate-screenshots",
     title: "How to Free Up Phone Storage Fast — Delete Duplicate Screenshots",
     excerpt: "Duplicate screenshots silently eat your phone storage. Here's the fastest free way to find and delete them — no app install, works on Android and iPhone.",
