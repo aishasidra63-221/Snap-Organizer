@@ -48,7 +48,11 @@ export function useSeo(opts: {
       const script = document.createElement("script");
       script.id = "__json-ld";
       script.type = "application/ld+json";
-      script.textContent = JSON.stringify(schemas.length === 1 ? schemas[0] : schemas);
+      const output =
+        schemas.length === 1
+          ? schemas[0]
+          : { "@context": "https://schema.org", "@graph": schemas.map((s: Record<string, unknown>) => { const { "@context": _ctx, ...rest } = s as Record<string, unknown>; return rest; }) };
+      script.textContent = JSON.stringify(output);
       document.head.appendChild(script);
     }
 
