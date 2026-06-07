@@ -127,7 +127,7 @@ function UploadStep({ onReady }: { onReady: (files: File[]) => void }) {
         <div className="pointer-events-none absolute top-20 -left-20 w-64 h-64 rounded-full bg-pink-500/6 blur-3xl" />
 
         <div className="relative max-w-2xl mx-auto space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 dark:border-white text-primary text-xs font-semibold tracking-wide">
             <ShieldCheck className="h-3.5 w-3.5" />
             100% browser-based · Private
           </div>
