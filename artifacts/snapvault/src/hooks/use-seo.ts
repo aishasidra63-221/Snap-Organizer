@@ -6,6 +6,7 @@ export function useSeo(opts: {
   title: string;
   description?: string;
   path?: string;
+  jsonLd?: object | object[];
 }) {
   useEffect(() => {
     document.title = opts.title;
@@ -25,5 +26,22 @@ export function useSeo(opts: {
     if (ogUrl) {
       ogUrl.setAttribute("content", DOMAIN + (opts.path ?? window.location.pathname));
     }
-  }, [opts.title, opts.description, opts.path]);
+
+    const prev = document.getElementById("__json-ld");
+    if (prev) prev.remove();
+
+    if (opts.jsonLd) {
+      const schemas = Array.isArray(opts.jsonLd) ? opts.jsonLd : [opts.jsonLd];
+      const script = document.createElement("script");
+      script.id = "__json-ld";
+      script.type = "application/ld+json";
+      script.textContent = JSON.stringify(schemas.length === 1 ? schemas[0] : schemas);
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      const el = document.getElementById("__json-ld");
+      if (el) el.remove();
+    };
+  }, [opts.title, opts.description, opts.path, opts.jsonLd]);
 }
