@@ -40,31 +40,23 @@ const SEO: Record<string, { title: string; description: string; jsonLd?: object 
   "/": {
     title: "OrganizeShots – Free Screenshot Organizer | Smart Folders",
     description: "OrganizeShots sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. 100% free, no account, no upload. Works in your browser.",
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        name: "OrganizeShots",
-        url: DOMAIN,
-        description: "Free browser-based screenshot organizer. Sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. No upload, no account.",
-        applicationCategory: "UtilitiesApplication",
-        operatingSystem: "Any",
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-        featureList: [
-          "Screenshot organization into smart folders",
-          "Duplicate screenshot detection",
-          "In-browser OCR text reading",
-          "OTP, Payments, WhatsApp auto-sorting",
-          "No server upload — 100% private",
-        ],
-      },
-      faqSchema([
-        { q: "Is OrganizeShots free?", a: "Yes, OrganizeShots is completely free. No account, no subscription, no hidden fees." },
-        { q: "Does it upload my screenshots to a server?", a: "No. All processing happens inside your browser. Your screenshots never leave your device." },
-        { q: "What types of screenshots does it sort?", a: "OrganizeShots sorts screenshots into 10 smart folders: OTP, Payments, WhatsApp, Social Media, Shopping, Travel, Study Notes, Memes, Duplicates, and Others." },
-        { q: "Does it work on Android and iPhone?", a: "Yes. OrganizeShots works in any modern browser on Android, iPhone, iPad, or computer — no app install required." },
-      ]),
-    ],
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "OrganizeShots",
+      url: DOMAIN,
+      description: "Free browser-based screenshot organizer. Sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. No upload, no account.",
+      applicationCategory: "UtilitiesApplication",
+      operatingSystem: "Any",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      featureList: [
+        "Screenshot organization into smart folders",
+        "Duplicate screenshot detection",
+        "In-browser OCR text reading",
+        "OTP, Payments, WhatsApp auto-sorting",
+        "No server upload — 100% private",
+      ],
+    },
   },
   "/blog": {
     title: "Screenshot Organizer Blog – Tips, Guides & Updates | OrganizeShots",
