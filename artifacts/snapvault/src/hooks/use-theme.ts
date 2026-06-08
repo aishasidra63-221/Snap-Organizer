@@ -20,7 +20,14 @@ export function useTheme() {
     localStorage.setItem("snapvault-theme", theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+  const toggleTheme = () => {
+    const root = document.documentElement;
+    const style = document.createElement("style");
+    style.textContent = "*,*::before,*::after{transition:none!important}";
+    document.head.appendChild(style);
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+    requestAnimationFrame(() => requestAnimationFrame(() => style.remove()));
+  };
 
   return { theme, toggleTheme };
 }
