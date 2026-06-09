@@ -13,19 +13,49 @@
       ]
     },
     {
-      "source": "/blog/(.*\\.png)",
+      "source": "/blog/:image.png",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=2592000" }
       ]
     },
     {
-      "source": "/(.*\\.(png|jpg|jpeg|svg|webp|ico|gif))",
+      "source": "/logo.png",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=2592000" }
       ]
     },
     {
-      "source": "/(manifest\\.json|robots\\.txt|sitemap\\.xml)",
+      "source": "/og-image.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000" }
+      ]
+    },
+    {
+      "source": "/opengraph.jpg",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000" }
+      ]
+    },
+    {
+      "source": "/favicon.svg",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=2592000" }
+      ]
+    },
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
