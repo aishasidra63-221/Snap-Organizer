@@ -1,0 +1,16 @@
+{
+  "buildCommand": "pnpm --filter @workspace/snapvault run build",
+  "outputDirectory": "artifacts/snapvault/dist/public",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "index, follow" }
+      ]
+    }
+  ]
+}
