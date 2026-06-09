@@ -2,9 +2,8 @@
   "buildCommand": "pnpm --filter @workspace/snapvault run build",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
