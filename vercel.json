@@ -2,6 +2,14 @@
   "buildCommand": "pnpm --filter @workspace/snapvault run build",
   "outputDirectory": "artifacts/snapvault/dist/public",
   "installCommand": "pnpm install --no-frozen-lockfile",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "organizeshots.com" }],
+      "destination": "https://www.organizeshots.com/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],
