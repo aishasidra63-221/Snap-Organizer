@@ -13,6 +13,9 @@ const URLS = [
   "https://www.organizeshots.com/blog/otp-screenshot-organizer",
   "https://www.organizeshots.com/blog/organize-payment-receipt-screenshots",
   "https://www.organizeshots.com/blog/what-is-ocr-screenshot",
+  "https://www.organizeshots.com/blog/screenshot-organization-android",
+  "https://www.organizeshots.com/blog/screenshot-organization-ios",
+  "https://www.organizeshots.com/blog/free-screenshot-manager-online",
 ];
 
 async function ping() {

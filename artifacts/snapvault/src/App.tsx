@@ -39,25 +39,36 @@ function faqSchema(faqs: { q: string; a: string }[]) {
 
 const SEO: Record<string, { title: string; description: string; jsonLd?: object | object[] }> = {
   "/": {
-    title: "OrganizeShots – Free Screenshot Organizer | Smart Folders",
-    description: "OrganizeShots sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. 100% free, no account, no upload. Works in your browser.",
-    jsonLd: {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: "OrganizeShots",
-      url: DOMAIN,
-      description: "Free browser-based screenshot organizer. Sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. No upload, no account.",
-      applicationCategory: "UtilitiesApplication",
-      operatingSystem: "Any",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      featureList: [
-        "Screenshot organization into smart folders",
-        "Duplicate screenshot detection",
-        "In-browser OCR text reading",
-        "OTP, Payments, WhatsApp auto-sorting",
-        "No server upload — 100% private",
-      ],
-    },
+    title: "OrganizeShots – Free Screenshot Organization App & Manager | No Install",
+    description: "OrganizeShots is a free screenshot organization app for Android & iOS — sort screenshots into smart folders online. OTP, Payments, WhatsApp & more. No upload, works in browser.",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "OrganizeShots",
+        url: DOMAIN,
+        description: "Free browser-based screenshot manager. Sorts screenshots into smart folders — OTP, Payments, WhatsApp & more. No upload, no account. Works on Android, iOS, Windows, Mac.",
+        applicationCategory: "UtilitiesApplication",
+        operatingSystem: "Any",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+        featureList: [
+          "Screenshot organization into smart folders",
+          "Duplicate screenshot detection",
+          "In-browser OCR text reading",
+          "OTP, Payments, WhatsApp auto-sorting",
+          "No server upload — 100% private",
+          "Works on Android and iOS without app install",
+          "Free screenshot manager online",
+        ],
+      },
+      faqSchema([
+        { q: "How do I do screenshot organization on Android?", a: "Use OrganizeShots.com — it's a free browser-based screenshot organization tool. No app install needed. Just open the website in Chrome on your Android phone, upload your screenshots, and download a sorted ZIP." },
+        { q: "What is the best screenshot organization app?", a: "OrganizeShots is a free browser-based screenshot manager that works on Android, iOS, Windows, and Mac — without installing any app. It auto-sorts screenshots into smart folders like OTP, Payments, WhatsApp, and more." },
+        { q: "How to do screenshot organization on iOS for free?", a: "OrganizeShots.com works directly in Safari or Chrome on iPhone — no app download needed. Upload your iOS screenshots and get them sorted into labeled folders in under a minute, completely free." },
+        { q: "Is there a free screenshot organization tool online?", a: "Yes — OrganizeShots.com is 100% free, browser-based, and requires no upload to any server. Your screenshots are processed locally on your device, so everything stays private." },
+        { q: "What is a good screenshot manager?", a: "OrganizeShots is a free, private, browser-based screenshot manager. It auto-sorts screenshots into 10 smart folders — OTP, Payments, WhatsApp, Social Media, Documents, and more — using in-browser OCR." },
+      ]),
+    ],
   },
   "/blog": {
     title: "Screenshot Organizer Blog – Tips, Guides & Updates | OrganizeShots",
@@ -154,6 +165,39 @@ const SEO: Record<string, { title: string; description: string; jsonLd?: object 
       { q: "What is OCR and how does OrganizeShots use it?", a: "OCR (Optical Character Recognition) reads the text inside an image. OrganizeShots runs OCR directly in your browser to read screenshot text and automatically decide which folder it belongs to." },
       { q: "Does OCR send my screenshots to a server?", a: "No. OrganizeShots uses Tesseract.js, which runs entirely inside your browser. No image data is ever sent to a server." },
       { q: "What languages does the OCR support?", a: "OrganizeShots currently supports English text recognition. Screenshots in other languages may still be sorted based on recognizable patterns." },
+    ]),
+  },
+  "/blog/screenshot-organization-android": {
+    title: "Screenshot Organization Android — Free Tool, No App Needed | OrganizeShots",
+    description: "The easiest way to do screenshot organization on Android — free browser tool, no app install. Sort OTP, payments, WhatsApp screenshots automatically.",
+    ogImage: "/blog/blog-organized.png",
+    jsonLd: faqSchema([
+      { q: "How do I organize screenshots on Android without an app?", a: "Open OrganizeShots.com in Chrome on your Android phone. Upload your screenshots and download a sorted ZIP — no Play Store download, no account needed." },
+      { q: "Does screenshot organization on Android require an app install?", a: "No. OrganizeShots works entirely in your Android browser. Just visit the website, upload up to 100 screenshots, and get them sorted into labeled folders instantly." },
+      { q: "Which Android browsers does OrganizeShots support?", a: "OrganizeShots works on Chrome, Firefox, Samsung Internet, and any modern Android browser." },
+      { q: "Is OrganizeShots free for Android users?", a: "Yes. OrganizeShots is completely free for Android — no subscription, no account, no hidden charges." },
+    ]),
+  },
+  "/blog/screenshot-organization-ios": {
+    title: "Screenshot Organization iOS — Works in iPhone Browser | OrganizeShots",
+    description: "Screenshot organization on iOS — free, works in Safari on iPhone, no App Store download needed. Sort OTP, payments, WhatsApp screenshots automatically.",
+    ogImage: "/blog/blog-organized.png",
+    jsonLd: faqSchema([
+      { q: "How do I organize screenshots on iPhone without downloading an app?", a: "Open OrganizeShots.com in Safari on your iPhone. Upload your screenshots and download a clean sorted ZIP — no App Store download, no account required." },
+      { q: "Does screenshot organization work on iOS?", a: "Yes. OrganizeShots works on iPhone and iPad through Safari or Chrome. It's fully browser-based, so no iOS app is needed." },
+      { q: "Can I organize screenshots on iPhone for free?", a: "Yes — OrganizeShots is 100% free on iPhone. No subscription, no in-app purchases, no sign-in." },
+      { q: "Is it safe to use OrganizeShots on iPhone?", a: "Yes. All OCR processing runs inside your iPhone's browser. No screenshot is ever uploaded to any server." },
+    ]),
+  },
+  "/blog/free-screenshot-manager-online": {
+    title: "Free Screenshot Manager Online — 100% Private, No Upload | OrganizeShots",
+    description: "The best free screenshot manager online — sorts Android & iOS screenshots into smart folders in your browser. No upload, no account, completely private.",
+    ogImage: "/blog/blog-best-manager.png",
+    jsonLd: faqSchema([
+      { q: "Is there a free screenshot manager online?", a: "Yes — OrganizeShots is a free screenshot manager that runs entirely in your browser. No software to install, no account needed, no upload to any server." },
+      { q: "What makes OrganizeShots the best free screenshot manager?", a: "OrganizeShots is free, private, and works on any device — Android, iOS, Windows, Mac. It auto-sorts screenshots into 10 smart folders using in-browser OCR, with no cloud upload." },
+      { q: "Does the online screenshot manager upload my photos?", a: "No. OrganizeShots processes everything locally inside your browser tab. Your screenshots never leave your device." },
+      { q: "How many screenshots can I manage at once?", a: "You can upload and organize up to 100 screenshots per batch. PNG, JPG, WebP, and HEIC formats are all supported." },
     ]),
   },
   "/settings": {

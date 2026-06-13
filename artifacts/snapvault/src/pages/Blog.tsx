@@ -358,6 +358,158 @@ const posts: BlogPost[] = [
       </div>
     ),
   },
+  {
+    id: "screenshot-organization-android",
+    title: "Screenshot Organization Android — Free Tool, No App Needed",
+    excerpt: "The easiest way to do screenshot organization on Android — free browser tool, no Play Store install. Sort OTP, payments, WhatsApp screenshots automatically.",
+    date: "Jun 13, 2026",
+    readTime: "4 min read",
+    category: "Android",
+    image: blogImg("blog-organized.png"),
+    gradient: "from-green-500/20 to-teal-500/10",
+    content: (
+      <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
+        <p>Android phones are screenshot machines. OTP codes, GPay receipts, WhatsApp chats, memes — everything ends up in the same gallery folder with no labels and no order. <strong>Screenshot organization on Android</strong> doesn't have to mean downloading yet another app. <strong>OrganizeShots</strong> does it entirely in your browser.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Why Android Screenshot Organization Is Hard</h2>
+        <p>Android's default gallery sorts screenshots by date — nothing else. You have to scroll through everything to find a specific payment receipt or OTP. Most "screenshot organizer" apps on the Play Store either require an account, upload your photos to the cloud, or stop working after a free trial.</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>No built-in auto-sorting by content type</li>
+          <li>Play Store apps often require sign-in or cloud access</li>
+          <li>Manual folder sorting takes hours at scale</li>
+          <li>Duplicate screenshots silently eat storage</li>
+        </ul>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">How to Organize Android Screenshots — No App Install</h2>
+        <p><strong>OrganizeShots</strong> is a free, browser-based screenshot organization tool. Open it in Chrome on your Android phone, upload your screenshots, and download a sorted ZIP — no Play Store download, no account, no subscription.</p>
+        <ol className="list-decimal list-inside space-y-2">
+          <li><strong>Open organizeshots.com</strong> in Chrome, Firefox, or Samsung Internet on your Android.</li>
+          <li><strong>Tap to browse</strong> your gallery and select up to 100 screenshots.</li>
+          <li><strong>Wait ~60 seconds</strong> while the tool reads and sorts every screenshot using in-browser OCR.</li>
+          <li><strong>Review the results</strong> — see which folder each screenshot was sorted into.</li>
+          <li><strong>Download the ZIP</strong> — 10 labeled folders, organized and ready.</li>
+        </ol>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">10 Smart Folders for Android Screenshots</h2>
+        <p>OrganizeShots automatically sorts into: <strong>OTP / Security, Payments / Receipts, WhatsApp / Chats, Social Media, Study / Notes, Photos, Memes / Entertainment, Documents, Unknown / Others,</strong> and <strong>Duplicates</strong>.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Works on Any Android Phone</h2>
+        <p>No minimum Android version. No RAM requirements. If your phone can open Chrome or Firefox, OrganizeShots works. Tested on budget Android phones, mid-range devices, and flagships — the result is the same.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">100% Private — Nothing Leaves Your Device</h2>
+        <p>All OCR processing runs inside your Android browser tab. Your screenshots — including sensitive OTP codes and bank receipts — are never uploaded to any server. No data ever leaves your device.</p>
+
+        <div className="flex flex-col gap-3 border border-border rounded-xl p-4 bg-muted/30 mt-2">
+          <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Quick Answers</p>
+          <div><p className="font-medium text-foreground">Does it need a Play Store install?</p><p className="text-muted-foreground text-xs mt-0.5">No. OrganizeShots is a website — open it in any Android browser and start immediately.</p></div>
+          <div><p className="font-medium text-foreground">Does it upload my Android screenshots?</p><p className="text-muted-foreground text-xs mt-0.5">No. Everything runs locally inside your browser. Nothing is sent to any server.</p></div>
+          <div><p className="font-medium text-foreground">Is it free for Android?</p><p className="text-muted-foreground text-xs mt-0.5">100% free. No trial, no subscription, no hidden fees.</p></div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "screenshot-organization-ios",
+    title: "Screenshot Organization iOS — Works in iPhone Browser",
+    excerpt: "Screenshot organization on iOS — free, works in Safari on iPhone, no App Store download needed. Sort OTP, payments, WhatsApp screenshots automatically.",
+    date: "Jun 13, 2026",
+    readTime: "4 min read",
+    category: "iOS",
+    image: blogImg("blog-organized.png"),
+    gradient: "from-blue-500/20 to-indigo-500/10",
+    content: (
+      <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
+        <p>iPhone users take just as many screenshots as Android users — OTPs, payment confirmations, WhatsApp chats, notes, memes. But iOS gives you no native way to auto-sort them. <strong>Screenshot organization on iOS</strong> used to mean a paid App Store app or manually creating folders. Now it doesn't.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">The iPhone Screenshot Problem</h2>
+        <p>Apple's Photos app puts all your screenshots in one album, sorted by date. That's it. No folders by content type. No automatic labeling. If you have 500 screenshots on your iPhone, finding the right one means scrolling — or searching with keywords that often don't work for images.</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>No auto-categorization by content (OTP, payments, chats)</li>
+          <li>App Store screenshot managers often require iCloud or subscriptions</li>
+          <li>Manual sorting is time-consuming and doesn't scale</li>
+          <li>Duplicate screenshots waste iCloud and local storage</li>
+        </ul>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">How to Organize iPhone Screenshots — No App Download</h2>
+        <p><strong>OrganizeShots</strong> works directly in Safari or Chrome on iPhone. No App Store download, no account, no subscription. Just open the website, upload your screenshots, and get a sorted ZIP back in under a minute.</p>
+        <ol className="list-decimal list-inside space-y-2">
+          <li><strong>Open organizeshots.com</strong> in Safari or Chrome on your iPhone.</li>
+          <li><strong>Tap to browse</strong> and select up to 100 screenshots from your Photos library.</li>
+          <li><strong>Wait ~60 seconds</strong> while OrganizeShots reads and sorts everything using in-browser OCR.</li>
+          <li><strong>Review and remove</strong> any screenshots you don't want in the final ZIP.</li>
+          <li><strong>Download the ZIP</strong> — 10 labeled folders, ready to use.</li>
+        </ol>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Works on iPhone, iPad, and Mac</h2>
+        <p>OrganizeShots is browser-based, so it works across all Apple devices — iPhone, iPad, and Mac — in Safari, Chrome, or Firefox. The same tool, the same results, no matter which Apple device you use.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">10 Smart Folders for iOS Screenshots</h2>
+        <p>Every upload gets sorted into: <strong>OTP / Security, Payments / Receipts, WhatsApp / Chats, Social Media, Study / Notes, Photos, Memes / Entertainment, Documents, Unknown / Others,</strong> and <strong>Duplicates</strong>.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Private by Design — No iCloud, No Upload</h2>
+        <p>OrganizeShots processes everything locally inside your iPhone's browser tab. No screenshot is ever uploaded to any server — not even OrganizeShots' own servers. Your OTP codes, bank receipts, and private chats stay completely on your device.</p>
+
+        <div className="flex flex-col gap-3 border border-border rounded-xl p-4 bg-muted/30 mt-2">
+          <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Quick Answers</p>
+          <div><p className="font-medium text-foreground">Does it need an App Store install?</p><p className="text-muted-foreground text-xs mt-0.5">No. OrganizeShots is a website — open it in Safari on your iPhone and start immediately.</p></div>
+          <div><p className="font-medium text-foreground">Does it access my iCloud?</p><p className="text-muted-foreground text-xs mt-0.5">No. You manually select which screenshots to upload. OrganizeShots has no access to your iCloud or Photos library beyond what you choose.</p></div>
+          <div><p className="font-medium text-foreground">Is it free on iPhone?</p><p className="text-muted-foreground text-xs mt-0.5">100% free. No in-app purchases, no subscription, no trial period.</p></div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "free-screenshot-manager-online",
+    title: "Free Screenshot Manager Online — 100% Private, No Upload",
+    excerpt: "The best free screenshot manager online — sorts Android & iOS screenshots into smart folders in your browser. No upload, no account, completely private.",
+    date: "Jun 13, 2026",
+    readTime: "4 min read",
+    category: "Guide",
+    image: blogImg("blog-best-manager.png"),
+    gradient: "from-violet-500/20 to-pink-500/10",
+    content: (
+      <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
+        <p>Most online screenshot managers have a catch — they upload your photos to a server, require an account, or stop working after a free trial. <strong>OrganizeShots</strong> is a free screenshot manager online that does none of that. Everything runs in your browser. Nothing leaves your device.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">What Is an Online Screenshot Manager?</h2>
+        <p>An online screenshot manager is a web-based tool that helps you sort, label, and organize screenshots without installing software. The best ones work directly in your browser and require no account or cloud storage. OrganizeShots is exactly that — open the website, upload screenshots, download organized folders.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Why Most Free Tools Aren't Actually Free</h2>
+        <p>The most common "free" screenshot manager tools have hidden costs:</p>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Upload limits — free tier lets you organize only 10 photos</li>
+          <li>Watermarks on downloaded folders</li>
+          <li>Mandatory account creation to access results</li>
+          <li>Privacy risk — your screenshots are sent to remote servers</li>
+          <li>Subscription required for bulk processing</li>
+        </ul>
+        <p>OrganizeShots has none of these. It's free, unlimited (up to 100 per batch), no account, no watermark, and no server upload.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">How OrganizeShots Works as a Free Online Screenshot Manager</h2>
+        <ol className="list-decimal list-inside space-y-2">
+          <li><strong>Open organizeshots.com</strong> — works on Android, iPhone, Windows, Mac.</li>
+          <li><strong>Upload up to 100 screenshots</strong> — PNG, JPG, WebP, HEIC all supported.</li>
+          <li><strong>In-browser OCR reads each screenshot</strong> — no server, no upload, fully private.</li>
+          <li><strong>Review the sorted folders</strong> — remove or move anything before downloading.</li>
+          <li><strong>Download the ZIP</strong> — 10 labeled folders, perfectly organized.</li>
+        </ol>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">10 Smart Categories — Automatic, No Manual Tagging</h2>
+        <p><strong>OTP / Security · Payments / Receipts · WhatsApp / Chats · Social Media · Study / Notes · Photos · Memes / Entertainment · Documents · Unknown / Others · Duplicates</strong></p>
+        <p>Every screenshot gets automatically placed in the right folder based on what OrganizeShots reads inside it. No manual tagging. No drag-and-drop sorting.</p>
+
+        <h2 className="text-lg font-bold text-foreground mt-2">Completely Private — No Cloud, No Upload</h2>
+        <p>OrganizeShots is built differently from other online tools. Instead of sending your screenshots to a server for processing, it uses <strong>Tesseract.js</strong> — an open-source OCR engine that runs entirely inside your browser tab. Your device does all the work. OrganizeShots' servers never receive a single screenshot.</p>
+
+        <div className="flex flex-col gap-3 border border-border rounded-xl p-4 bg-muted/30 mt-2">
+          <p className="font-semibold text-foreground text-xs uppercase tracking-wider">Quick Answers</p>
+          <div><p className="font-medium text-foreground">Is it really free with no limits?</p><p className="text-muted-foreground text-xs mt-0.5">Yes — up to 100 screenshots per batch, unlimited batches, free forever. No account needed.</p></div>
+          <div><p className="font-medium text-foreground">Does it work on mobile and desktop?</p><p className="text-muted-foreground text-xs mt-0.5">Yes. OrganizeShots works on Android, iPhone, iPad, Windows, and Mac — any device with a modern browser.</p></div>
+          <div><p className="font-medium text-foreground">Are my screenshots safe?</p><p className="text-muted-foreground text-xs mt-0.5">Yes. All processing happens inside your browser. No screenshots are uploaded to any server, ever.</p></div>
+        </div>
+      </div>
+    ),
+  },
 ];
 
 // ─── Blog Card ────────────────────────────────────────────────────────────────
