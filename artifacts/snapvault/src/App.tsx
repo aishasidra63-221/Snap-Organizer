@@ -37,7 +37,7 @@ function faqSchema(faqs: { q: string; a: string }[]) {
   };
 }
 
-const SEO: Record<string, { title: string; description: string; jsonLd?: object | object[] }> = {
+const SEO: Record<string, { title: string; description: string; ogImage?: string; jsonLd?: object | object[] }> = {
   "/": {
     title: "OrganizeShots – Free Screenshot Organization App & Manager | No Install",
     description: "OrganizeShots is a free screenshot organization app for Android & iOS — sort screenshots into smart folders online. OTP, Payments, WhatsApp & more. No upload, works in browser.",

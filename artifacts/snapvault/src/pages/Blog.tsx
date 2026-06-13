@@ -552,6 +552,7 @@ function BlogCard({ post, onClick }: { post: BlogPost; onClick: () => void }) {
 // ─── Full Article View ────────────────────────────────────────────────────────
 
 function ArticleView({ post, onBack }: { post: BlogPost; onBack: () => void }) {
+  const [, navigate] = useLocation();
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
@@ -619,7 +620,7 @@ function ArticleView({ post, onBack }: { post: BlogPost; onBack: () => void }) {
           <p className="text-base font-extrabold text-primary-foreground mb-1">Try OrganizeShots Free</p>
           <p className="text-xs text-primary-foreground/80 mb-4">No sign-up. No install. Works on any device.</p>
           <button
-            onClick={onBack}
+            onClick={() => navigate("/")}
             className="bg-primary-foreground text-primary font-bold text-sm px-6 py-2.5 rounded-xl shadow"
           >
             Organize My Screenshots →
@@ -633,11 +634,19 @@ function ArticleView({ post, onBack }: { post: BlogPost; onBack: () => void }) {
 // ─── Blog Listing ─────────────────────────────────────────────────────────────
 
 export default function Blog() {
-  const [, navigate] = useLocation();
-  const [openPost, setOpenPost] = useState<BlogPost | null>(null);
+  const [location, navigate] = useLocation();
 
-  if (openPost) {
-    return <ArticleView post={openPost} onBack={() => setOpenPost(null)} />;
+  // Parse slug from URL: /blog/:slug
+  const slug = location.startsWith("/blog/") ? location.slice("/blog/".length) : null;
+  const activePost = slug ? posts.find((p) => p.id === slug) ?? null : null;
+
+  if (activePost) {
+    return (
+      <ArticleView
+        post={activePost}
+        onBack={() => navigate("/blog")}
+      />
+    );
   }
 
   return (
@@ -660,7 +669,7 @@ export default function Blog() {
       <div className="px-4 py-5 pb-28 flex flex-col gap-4 max-w-2xl mx-auto w-full">
         {/* Featured */}
         <button
-          onClick={() => setOpenPost(posts[0])}
+          onClick={() => navigate(`/blog/${posts[0].id}`)}
           className="w-full text-left rounded-2xl border border-primary/30 bg-card overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all duration-200"
         >
           <div className="w-full overflow-hidden relative" style={{ height: 200 }}>
@@ -684,7 +693,7 @@ export default function Blog() {
 
         {/* Rest of posts */}
         {posts.slice(1).map((post) => (
-          <BlogCard key={post.id} post={post} onClick={() => setOpenPost(post)} />
+          <BlogCard key={post.id} post={post} onClick={() => navigate(`/blog/${post.id}`)} />
         ))}
       </div>
     </div>
