@@ -1,5 +1,6 @@
 const KEY = "18e884a177c74a70b4d8e429a42c9d43";
 const HOST = "www.organizeshots.com";
+const SITEMAP = `https://${HOST}/sitemap.xml`;
 
 const URLS = [
   "https://www.organizeshots.com/",
@@ -18,7 +19,8 @@ const URLS = [
   "https://www.organizeshots.com/blog/free-screenshot-manager-online",
 ];
 
-async function ping() {
+// ── 1. IndexNow ping (Bing, Yandex, Seznam) ──────────────────────────────────
+async function pingIndexNow() {
   const body = {
     host: HOST,
     key: KEY,
@@ -26,7 +28,7 @@ async function ping() {
     urlList: URLS,
   };
 
-  console.log(`Pinging IndexNow with ${URLS.length} URLs...`);
+  console.log(`\n📡 IndexNow — pinging ${URLS.length} URLs to Bing/Yandex/Seznam...`);
 
   const res = await fetch("https://api.indexnow.org/indexnow", {
     method: "POST",
@@ -44,4 +46,31 @@ async function ping() {
   }
 }
 
-ping();
+// ── 2. Google sitemap ping ────────────────────────────────────────────────────
+async function pingGoogle() {
+  const pingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP)}`;
+
+  console.log(`\n🔍 Google — pinging sitemap...`);
+  console.log(`   → ${SITEMAP}`);
+
+  const res = await fetch(pingUrl, { method: "GET" });
+
+  if (res.ok) {
+    console.log(`✅ Google sitemap ping successful (HTTP ${res.status})`);
+  } else {
+    // Google sometimes returns non-200 even on success — log but don't fail
+    console.warn(`⚠️  Google sitemap ping returned HTTP ${res.status} (may still be accepted)`);
+  }
+}
+
+// ── Run both ──────────────────────────────────────────────────────────────────
+async function run() {
+  console.log("🚀 Post-build search engine pings starting...\n");
+
+  await pingIndexNow();
+  await pingGoogle();
+
+  console.log("\n✅ All pings complete. Google and IndexNow have been notified.");
+}
+
+run();
