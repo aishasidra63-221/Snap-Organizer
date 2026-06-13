@@ -365,7 +365,7 @@ const posts: BlogPost[] = [
     date: "Jun 13, 2026",
     readTime: "4 min read",
     category: "Android",
-    image: blogImg("blog-organized.png"),
+    image: blogImg("blog-android.png"),
     gradient: "from-green-500/20 to-teal-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -415,7 +415,7 @@ const posts: BlogPost[] = [
     date: "Jun 13, 2026",
     readTime: "4 min read",
     category: "iOS",
-    image: blogImg("blog-organized.png"),
+    image: blogImg("blog-ios.png"),
     gradient: "from-blue-500/20 to-indigo-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">
@@ -465,7 +465,7 @@ const posts: BlogPost[] = [
     date: "Jun 13, 2026",
     readTime: "4 min read",
     category: "Guide",
-    image: blogImg("blog-best-manager.png"),
+    image: blogImg("blog-online-manager.png"),
     gradient: "from-violet-500/20 to-pink-500/10",
     content: (
       <div className="flex flex-col gap-5 text-sm text-foreground leading-relaxed">

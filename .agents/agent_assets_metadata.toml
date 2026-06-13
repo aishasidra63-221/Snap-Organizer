@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "mnVdcXtANnqUzj7d7bP6S"
+uri = "file://artifacts/snapvault/public/blog/blog-android.png"
+type = "image"
+title = "android screenshot organization"
+
+[[generated]]
+id = "kQUBT-koe5ogN5IyzvCnP"
+uri = "file://artifacts/snapvault/public/blog/blog-ios.png"
+type = "image"
+title = "ios iphone screenshot organization"
+
+[[generated]]
+id = "cFM7H9s4dJiLhysuhmwU3"
+uri = "file://artifacts/snapvault/public/blog/blog-online-manager.png"
+type = "image"
+title = "free screenshot manager online private"

@@ -170,7 +170,7 @@ const SEO: Record<string, { title: string; description: string; jsonLd?: object 
   "/blog/screenshot-organization-android": {
     title: "Screenshot Organization Android — Free Tool, No App Needed | OrganizeShots",
     description: "The easiest way to do screenshot organization on Android — free browser tool, no app install. Sort OTP, payments, WhatsApp screenshots automatically.",
-    ogImage: "/blog/blog-organized.png",
+    ogImage: "/blog/blog-android.png",
     jsonLd: faqSchema([
       { q: "How do I organize screenshots on Android without an app?", a: "Open OrganizeShots.com in Chrome on your Android phone. Upload your screenshots and download a sorted ZIP — no Play Store download, no account needed." },
       { q: "Does screenshot organization on Android require an app install?", a: "No. OrganizeShots works entirely in your Android browser. Just visit the website, upload up to 100 screenshots, and get them sorted into labeled folders instantly." },
@@ -181,7 +181,7 @@ const SEO: Record<string, { title: string; description: string; jsonLd?: object 
   "/blog/screenshot-organization-ios": {
     title: "Screenshot Organization iOS — Works in iPhone Browser | OrganizeShots",
     description: "Screenshot organization on iOS — free, works in Safari on iPhone, no App Store download needed. Sort OTP, payments, WhatsApp screenshots automatically.",
-    ogImage: "/blog/blog-organized.png",
+    ogImage: "/blog/blog-ios.png",
     jsonLd: faqSchema([
       { q: "How do I organize screenshots on iPhone without downloading an app?", a: "Open OrganizeShots.com in Safari on your iPhone. Upload your screenshots and download a clean sorted ZIP — no App Store download, no account required." },
       { q: "Does screenshot organization work on iOS?", a: "Yes. OrganizeShots works on iPhone and iPad through Safari or Chrome. It's fully browser-based, so no iOS app is needed." },
@@ -192,7 +192,7 @@ const SEO: Record<string, { title: string; description: string; jsonLd?: object 
   "/blog/free-screenshot-manager-online": {
     title: "Free Screenshot Manager Online — 100% Private, No Upload | OrganizeShots",
     description: "The best free screenshot manager online — sorts Android & iOS screenshots into smart folders in your browser. No upload, no account, completely private.",
-    ogImage: "/blog/blog-best-manager.png",
+    ogImage: "/blog/blog-online-manager.png",
     jsonLd: faqSchema([
       { q: "Is there a free screenshot manager online?", a: "Yes — OrganizeShots is a free screenshot manager that runs entirely in your browser. No software to install, no account needed, no upload to any server." },
       { q: "What makes OrganizeShots the best free screenshot manager?", a: "OrganizeShots is free, private, and works on any device — Android, iOS, Windows, Mac. It auto-sorts screenshots into 10 smart folders using in-browser OCR, with no cloud upload." },
