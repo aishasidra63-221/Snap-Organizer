@@ -82,7 +82,7 @@ const SEO: Record<string, { title: string; description: string; ogImage?: string
       { q: "Does OrganizeShots work without installing an app?", a: "Yes. OrganizeShots runs entirely in your browser — no Play Store or App Store download required. Open organizeshots.com and start immediately." },
       { q: "What folders does OrganizeShots create?", a: "OrganizeShots sorts screenshots into 10 smart folders: OTP codes, Payments & Receipts, WhatsApp chats, Social Media, Shopping, Travel, Study Notes, Memes, Duplicates, and Others." },
       { q: "Is it free to use?", a: "Yes, completely free. No account, no subscription, no hidden charges." },
-      { q: "Does it work on Android and iPhone?", a: "Yes. It works on any modern browser — Chrome, Safari, Firefox — on Android, iPhone, iPad, or computer." },
+      { q: "How long does it take to sort 100 screenshots?", a: "Typically 1–2 minutes for 100 screenshots. All OCR processing runs locally inside your browser — no upload time, no waiting for a server." },
     ]),
   },
   "/blog/save-whatsapp-screenshots-organized": {
@@ -123,8 +123,8 @@ const SEO: Record<string, { title: string; description: string; ogImage?: string
     ogImage: "/blog/blog-best-manager.png",
     jsonLd: faqSchema([
       { q: "What is the best free screenshot manager for Android?", a: "OrganizeShots is the only fully free, browser-based screenshot manager that sorts screenshots into smart folders using OCR — no app install, no account required." },
-      { q: "Does it work on iPhone as well as Android?", a: "Yes. OrganizeShots works on both Android and iPhone — it runs in your browser so no platform-specific app is needed." },
-      { q: "Does it require cloud storage or upload?", a: "No. OrganizeShots processes everything locally in your browser. No cloud storage, no uploads, no account needed." },
+      { q: "Does OrganizeShots need an account or subscription to use?", a: "No account, no subscription, no sign-up of any kind. Open organizeshots.com and start organizing immediately — it's free forever." },
+      { q: "Can I use OrganizeShots on a Windows or Mac computer too?", a: "Yes. OrganizeShots works on any browser on any device — Android, iPhone, Windows PC, Mac, iPad. It's not a mobile-only tool." },
     ]),
   },
   "/blog/how-to-delete-duplicate-screenshots": {
@@ -144,7 +144,7 @@ const SEO: Record<string, { title: string; description: string; ogImage?: string
     jsonLd: faqSchema([
       { q: "How does OrganizeShots find OTP screenshots automatically?", a: "OrganizeShots uses in-browser OCR to read the text in every screenshot. Any screenshot containing words like OTP, verification code, one-time password, or similar phrases is sorted into the OTP folder." },
       { q: "Which apps' OTP screenshots does it recognize?", a: "It recognizes OTP screenshots from any app — banking apps, Google, WhatsApp, Instagram, Aadhaar, UPI apps, and more." },
-      { q: "Is it safe to process OTP screenshots?", a: "Yes. All processing is done locally in your browser. No OTP codes or screenshots are ever sent to any server." },
+      { q: "Can I delete my OTP screenshots after they are sorted?", a: "Yes. Once OrganizeShots sorts your OTP screenshots into the OTP folder and you download the ZIP, you can safely delete the originals from your phone gallery." },
     ]),
   },
   "/blog/organize-payment-receipt-screenshots": {
@@ -186,7 +186,7 @@ const SEO: Record<string, { title: string; description: string; ogImage?: string
       { q: "How do I organize screenshots on iPhone without downloading an app?", a: "Open OrganizeShots.com in Safari on your iPhone. Upload your screenshots and download a clean sorted ZIP — no App Store download, no account required." },
       { q: "Does screenshot organization work on iOS?", a: "Yes. OrganizeShots works on iPhone and iPad through Safari or Chrome. It's fully browser-based, so no iOS app is needed." },
       { q: "Can I organize screenshots on iPhone for free?", a: "Yes — OrganizeShots is 100% free on iPhone. No subscription, no in-app purchases, no sign-in." },
-      { q: "Is it safe to use OrganizeShots on iPhone?", a: "Yes. All OCR processing runs inside your iPhone's browser. No screenshot is ever uploaded to any server." },
+      { q: "Does OrganizeShots work on iPad as well as iPhone?", a: "Yes. OrganizeShots works on any iOS device — iPhone, iPad, and iPod touch — through Safari or Chrome. The layout adapts to the larger iPad screen automatically." },
     ]),
   },
   "/blog/free-screenshot-manager-online": {
@@ -197,7 +197,7 @@ const SEO: Record<string, { title: string; description: string; ogImage?: string
       { q: "Is there a free screenshot manager online?", a: "Yes — OrganizeShots is a free screenshot manager that runs entirely in your browser. No software to install, no account needed, no upload to any server." },
       { q: "What makes OrganizeShots the best free screenshot manager?", a: "OrganizeShots is free, private, and works on any device — Android, iOS, Windows, Mac. It auto-sorts screenshots into 10 smart folders using in-browser OCR, with no cloud upload." },
       { q: "Does the online screenshot manager upload my photos?", a: "No. OrganizeShots processes everything locally inside your browser tab. Your screenshots never leave your device." },
-      { q: "How many screenshots can I manage at once?", a: "You can upload and organize up to 100 screenshots per batch. PNG, JPG, WebP, and HEIC formats are all supported." },
+      { q: "What image formats does the online screenshot manager support?", a: "OrganizeShots supports PNG, JPG, WebP, and HEIC formats — covering screenshots from Android, iPhone, and any desktop device." },
     ]),
   },
   "/settings": {
